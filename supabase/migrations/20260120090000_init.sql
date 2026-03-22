@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS admin_users (
     email VARCHAR(255) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     name VARCHAR(255) NOT NULL,
+    role VARCHAR(32) NOT NULL DEFAULT 'editor' CHECK (role IN ('super_admin', 'content_admin', 'editor')),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -37,6 +38,8 @@ CREATE TABLE IF NOT EXISTS news_posts (
     image_url TEXT,
     published_date DATE NOT NULL,
     is_published BOOLEAN DEFAULT false,
+    tags TEXT[] DEFAULT ARRAY[]::TEXT[],
+    posted_by UUID REFERENCES admin_users(id),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

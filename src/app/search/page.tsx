@@ -23,27 +23,45 @@ interface SearchResult {
 function SearchResultsContent() {
   const searchParams = useSearchParams();
   const query = searchParams.get("q") || "";
+  const shouldSearch = query.length >= 2;
   const [results, setResults] = useState<SearchResult[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searched, setSearched] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!query || query.length < 2) {
-      setLoading(false);
+    if (!shouldSearch) {
       return;
     }
 
-    setSearched(true);
-    setLoading(true);
+    let cancelled = false;
 
-    fetch(`/api/search?q=${encodeURIComponent(query)}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setResults(data.data || []);
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, [query]);
+    async function runSearch() {
+      setLoading(true);
+
+      try {
+        const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+        const data = await res.json();
+
+        if (!cancelled) {
+          setResults(data.data || []);
+        }
+      } catch (error) {
+        console.error(error);
+        if (!cancelled) {
+          setResults([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    void runSearch();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [query, shouldSearch]);
 
   const getIcon = (type: string) => {
     switch (type) {
@@ -87,7 +105,7 @@ function SearchResultsContent() {
         <div className="container mx-auto px-4 max-w-4xl">
           <div className="mb-8">
             <p className="text-gray-600">
-              {searched ? (
+              {shouldSearch ? (
                 <>
                   {results.length > 0
                     ? `Found ${results.length} result${results.length !== 1 ? "s" : ""} for "${query}"`
@@ -160,7 +178,7 @@ function SearchResultsContent() {
                 </Link>
               ))}
             </div>
-          ) : searched ? (
+          ) : shouldSearch ? (
             <div className="text-center py-12">
               <p className="text-gray-600 mb-4">Try searching for:</p>
               <ul className="text-gray-500 text-sm space-y-1">

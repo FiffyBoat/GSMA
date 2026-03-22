@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 import path from "node:path";
 
 const LOADER = path.resolve(__dirname, 'src/visual-edits/component-tagger-loader.js');
+const enableOrchidsVisualEdit = process.env.ORCHIDS_VISUAL_EDIT === "1";
 
 const nextConfig: NextConfig = {
   images: {
@@ -17,12 +18,6 @@ const nextConfig: NextConfig = {
     ],
   },
   outputFileTracingRoot: path.resolve(__dirname, '../../'),
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   // Rewrites for local Supabase development (CORS workaround)
   async rewrites() {
     if (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('127.0.0.1')) {
@@ -37,13 +32,17 @@ const nextConfig: NextConfig = {
     }
     return {};
   },
-  turbopack: {
-      rules: {
-        "*.{jsx,tsx}": {
-          loaders: [LOADER]
-        }
+  ...(enableOrchidsVisualEdit
+    ? {
+        turbopack: {
+          rules: {
+            "*.{jsx,tsx}": {
+              loaders: [LOADER],
+            },
+          },
+        },
       }
-    }
+    : {}),
 };
 
 export default nextConfig;

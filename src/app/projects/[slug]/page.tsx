@@ -5,24 +5,31 @@ import Image from "next/image";
 import Link from "next/link";
 import { Calendar, MapPin, DollarSign, ArrowLeft } from "lucide-react";
 import { notFound } from "next/navigation";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createPublicServerSupabaseClient } from "@/lib/supabase/public-server";
+import { getSlug } from "@/lib/content-utils";
 
 export const dynamic = "force-dynamic";
 
 interface PageProps {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 export default async function ProjectDetailPage({ params }: PageProps) {
-  const supabase = await createServerSupabaseClient();
+  const { slug } = await params;
+  const supabase = createPublicServerSupabaseClient();
 
-  const { data: project, error } = await supabase
+  const { data: directMatch, error: directMatchError } = await supabase
     .from("projects")
     .select("*")
-    .eq("slug", params.slug)
-    .single();
+    .eq("slug", slug);
 
-  if (error || !project) {
+  const project =
+    directMatch?.[0] ||
+    (await supabase.from("projects").select("*")).data?.find(
+      (item) => item.id === slug || getSlug(item.title, item.slug) === slug
+    );
+
+  if ((directMatchError && !directMatch) || !project) {
     notFound();
   }
 
@@ -49,12 +56,12 @@ export default async function ProjectDetailPage({ params }: PageProps) {
 
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             {project.image_url && (
-              <div className="relative h-64 md:h-80 w-full">
+              <div className="relative h-64 md:h-80 w-full bg-gray-100 flex items-center justify-center">
                 <Image
                   src={project.image_url}
                   alt={project.title}
                   fill
-                  className="object-cover"
+                  className="object-contain"
                 />
               </div>
             )}

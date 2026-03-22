@@ -17,7 +17,13 @@ export async function GET(request: Request) {
     .order("start_date", { ascending: true });
 
   if (upcoming === "true") {
-    query = query.gte("start_date", new Date().toISOString());
+    const today = new Date();
+    const sevenDaysFromNow = new Date();
+    sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
+    
+    query = query
+      .gte("start_date", today.toISOString())
+      .lte("start_date", sevenDaysFromNow.toISOString());
   }
 
   if (limit) {

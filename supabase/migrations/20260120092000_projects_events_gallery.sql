@@ -61,7 +61,6 @@ CREATE TABLE IF NOT EXISTS gallery_items (
     image_url TEXT NOT NULL,
     video_url TEXT,
     category VARCHAR(100) DEFAULT 'general', -- photo, video, project, event
-    tags TEXT[], -- Array of tags
     is_featured BOOLEAN DEFAULT false,
     display_order INTEGER DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),

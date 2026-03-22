@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: gsma-ghana-website
+    runtime: node
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: ADMIN_BASIC_AUTH_USER
+        sync: false
+      - key: ADMIN_BASIC_AUTH_PASS
+        sync: false
+      - key: SENDGRID_API_KEY
+        sync: false
+      - key: CONTACT_NOTIFICATION_EMAIL
+        sync: false
+      - key: REFRESH_EVENTS_SECRET
+        sync: false
+      - key: ORCHIDS_VISUAL_EDIT
+        value: "0"

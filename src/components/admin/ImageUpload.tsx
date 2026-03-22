@@ -61,7 +61,8 @@ export default function ImageUpload({
         }
       } catch (error) {
         console.error("Upload error:", error);
-        toast.error("An error occurred while uploading the image");
+        const errorMessage = error instanceof Error ? error.message : "Network error. Please check your connection.";
+        toast.error(errorMessage);
         setPreview(value || null);
       } finally {
         setUploading(false);
@@ -76,7 +77,7 @@ export default function ImageUpload({
       "image/*": [".jpeg", ".jpg", ".png", ".webp", ".gif"],
     },
     maxFiles: 1,
-    maxSize: 5 * 1024 * 1024, // 5MB
+    maxSize: 15 * 1024 * 1024, // 15MB
   });
 
   const removeImage = () => {

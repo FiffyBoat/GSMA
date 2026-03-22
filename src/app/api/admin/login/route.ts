@@ -1,5 +1,6 @@
 import { createAdminSupabaseClient } from "@/lib/supabase/server";
 import { createSession, verifySession } from "@/lib/auth";
+import { normalizeAdminRole } from "@/lib/admin-roles";
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 
@@ -51,9 +52,14 @@ export async function POST(request: Request) {
       id: admin.id,
       email: admin.email,
       name: admin.name,
+      role: normalizeAdminRole(admin.role),
     });
 
-    const response = NextResponse.json({ success: true, name: admin.name });
+    const response = NextResponse.json({
+      success: true,
+      name: admin.name,
+      role: normalizeAdminRole(admin.role),
+    });
     
     response.cookies.set("admin_session", token, {
       httpOnly: true,

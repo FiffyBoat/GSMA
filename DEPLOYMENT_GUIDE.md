@@ -44,34 +44,34 @@ This guide covers deploying the GSMA Ghana website to production using Vercel fo
 # After project creation, save these variables:
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-SUPABASE_JWT_SECRET=your-jwt-secret
 ```
 
 ### 2. Create .env.production Environment Variables
 
-Create `.env.local` for production (never commit this):
+Set these in your hosting provider's production environment:
 
 ```env
 # Supabase
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-SUPABASE_JWT_SECRET=your-jwt-secret
 
-# Admin
-ADMIN_EMAIL=admin@gsma.org.gh
-ADMIN_DEFAULT_PASSWORD=ChangeMe123!
+# Optional admin basic-auth layer for /admin/*
+ADMIN_BASIC_AUTH_USER=your-admin-basic-auth-user
+ADMIN_BASIC_AUTH_PASS=your-admin-basic-auth-password
 
-# Email (if using contact form notifications)
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=your-email@gmail.com
-SMTP_PASSWORD=your-app-password
+# Optional contact form notifications
+SENDGRID_API_KEY=your-sendgrid-api-key
+CONTACT_NOTIFICATION_EMAIL=notifications@example.com
+
+# Optional scheduled event refresh secret
+REFRESH_EVENTS_SECRET=your-refresh-events-secret
 
 # Site Configuration
-NEXT_PUBLIC_SITE_URL=https://yourdomain.com
-NODE_ENV=production
+ORCHIDS_VISUAL_EDIT=0
 ```
 
 ### 3. Local Environment Variables Backup

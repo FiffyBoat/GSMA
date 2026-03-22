@@ -417,7 +417,7 @@ export default function AssemblyManagement() {
                   <Label htmlFor="member-area">Electoral Area *</Label>
                   <select
                     id="member-area"
-                    value={memberForm.electoral_area_id}
+                    value={memberForm.electoral_area_id || ""}
                     onChange={(e) => setMemberForm({ ...memberForm, electoral_area_id: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md"
                   >

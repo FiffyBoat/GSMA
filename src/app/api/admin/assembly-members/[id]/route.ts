@@ -1,19 +1,32 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createAdminSupabaseClient } from "@/lib/supabase/server";
+import { requireAdminPermission } from "@/lib/admin-route-access";
+import { normalizeSupabaseImageUrl } from "@/lib/storage-utils";
 
 // PUT - Update assembly member
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const access = await requireAdminPermission("manage_assembly");
+    if ("response" in access) {
+      return access.response;
+    }
+
+    const { id } = await params;
     const body = await request.json();
-    const supabase = await createServerSupabaseClient();
+    const supabase = await createAdminSupabaseClient();
+
+    const payload = {
+      ...body,
+      image_url: normalizeSupabaseImageUrl(body.image_url || ""),
+    };
 
     const { data, error } = await supabase
       .from("assembly_members")
-      .update(body)
-      .eq("id", params.id)
+      .update(payload)
+      .eq("id", id)
       .select();
 
     if (error) throw error;
@@ -28,15 +41,21 @@ export async function PUT(
 // DELETE - Delete assembly member
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = await createServerSupabaseClient();
+    const access = await requireAdminPermission("manage_assembly");
+    if ("response" in access) {
+      return access.response;
+    }
+
+    const { id } = await params;
+    const supabase = await createAdminSupabaseClient();
 
     const { error } = await supabase
       .from("assembly_members")
       .delete()
-      .eq("id", params.id);
+      .eq("id", id);
 
     if (error) throw error;
 

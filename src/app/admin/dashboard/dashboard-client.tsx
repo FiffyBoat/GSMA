@@ -1,152 +1,102 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import ImageUpload from "@/components/admin/ImageUpload";
-import DocumentUpload from "@/components/admin/DocumentUpload";
-import AssemblyManagement from "@/components/admin/AssemblyManagement";
+import DepartmentManagement from "./department-management";
+import DocumentManagement from "./document-management";
+import EventsManagement from "./events-management";
+import GalleryManagement from "./gallery-management";
+import LeadershipManagement from "./leadership-management";
 import {
-  LayoutDashboard,
-  Image,
-  Newspaper,
-  Settings,
+  canAccessAdminTab,
+  getAdminNavGroupsForRole,
+  getDefaultAdminTab,
+  getAdminNavOpenState,
+  getAdminTabTitle,
+  type AdminNavGroup,
+} from "./nav-items";
+import NewsManagement from "./news-management";
+import OverviewStats from "./overview-stats";
+import ProjectManagement from "./project-management";
+import SettingsManagement from "./settings-management";
+import SlidesManagement from "./slides-management";
+import { loadAdminDashboardData } from "./load-dashboard-data";
+import type {
+  AdminTabId,
+  Department,
+  DepartmentUnit,
+  Document,
+  Event,
+  GalleryItem,
+  HeroSlide,
+  Leadership,
+  NewsPost,
+  Project,
+  SiteSetting,
+  User,
+} from "./types";
+import AssemblyManagement from "@/components/admin/AssemblyManagement";
+import AdminUsersManagement from "@/components/admin/AdminUsersManagement";
+import {
+  ChevronDown,
   LogOut,
-  Plus,
-  Trash2,
-  Edit,
-  Save,
-  X,
   Menu,
-  Users,
   Loader2,
-  FolderKanban,
-  Calendar,
-  Images,
-  FileText,
 } from "lucide-react";
 
-interface User {
-  id: string;
-  email: string;
-  name: string;
-}
-
-interface HeroSlide {
-  id: string;
-  image_url: string;
-  title: string;
-  subtitle: string;
-  description: string;
-  display_order: number;
-  is_active: boolean;
-}
-
-interface NewsPost {
-  id: string;
-  slug: string;
-  title: string;
-  excerpt: string;
-  content: string;
-  image_url: string;
-  published_date: string;
-  is_published: boolean;
-}
-
-interface Leadership {
-  id: string;
-  name: string;
-  position: string;
-  title: string;
-  image_url: string;
-  bio: string;
-  department?: string;
-  display_order: number;
-  is_active: boolean;
-}
-
-interface SiteSetting {
-  id: string;
-  key: string;
-  value: string;
-  type: string;
-}
-
-interface Project {
-  id: string;
-  title: string;
-  slug: string;
-  description: string;
-  content: string;
-  image_url: string;
-  category: string;
-  status: string;
-  start_date: string;
-  end_date: string;
-  budget: number;
-  location: string;
-  contractor: string;
-  progress_percentage: number;
-  is_featured: boolean;
-  display_order: number;
-}
-
-interface Event {
-  id: string;
-  title: string;
-  slug: string;
-  description: string;
-  content: string;
-  image_url: string;
-  event_type: string;
-  start_date: string;
-  end_date: string;
-  location: string;
-  venue: string;
-  organizer: string;
-  contact_person: string;
-  contact_email: string;
-  contact_phone: string;
-  is_featured: boolean;
-  is_published: boolean;
-  display_order: number;
-}
-
-interface GalleryItem {
-  id: string;
-  title: string;
-  description: string;
-  image_url: string;
-  video_url: string;
-  category: string;
-  tags: string[];
-  is_featured: boolean;
-  display_order: number;
-}
-
-interface Document {
-  id: string;
-  title: string;
-  description: string;
-  file_url: string;
-  file_type: string;
-  category: string;
-  file_size: number;
-  is_published: boolean;
-  uploaded_date: string;
-  created_at: string;
-  updated_at: string;
-}
+const GROUP_STYLES: Record<
+  AdminNavGroup["id"],
+  {
+    border: string;
+    headerActive: string;
+    iconActive: string;
+    iconIdle: string;
+    accentBadge: string;
+  }
+> = {
+  dashboard: {
+    border: "border-amber-900/40",
+    headerActive: "bg-amber-950/60 text-white",
+    iconActive: "bg-amber-600 text-white",
+    iconIdle: "bg-slate-800 text-amber-200",
+    accentBadge: "bg-amber-500/15 text-amber-200",
+  },
+  content: {
+    border: "border-rose-900/40",
+    headerActive: "bg-rose-950/60 text-white",
+    iconActive: "bg-rose-600 text-white",
+    iconIdle: "bg-slate-800 text-rose-200",
+    accentBadge: "bg-rose-500/15 text-rose-200",
+  },
+  structure: {
+    border: "border-emerald-900/40",
+    headerActive: "bg-emerald-950/60 text-white",
+    iconActive: "bg-emerald-600 text-white",
+    iconIdle: "bg-slate-800 text-emerald-200",
+    accentBadge: "bg-emerald-500/15 text-emerald-200",
+  },
+  system: {
+    border: "border-sky-900/40",
+    headerActive: "bg-sky-950/60 text-white",
+    iconActive: "bg-sky-600 text-white",
+    iconIdle: "bg-slate-800 text-sky-200",
+    accentBadge: "bg-sky-500/15 text-sky-200",
+  },
+};
 
 export default function AdminDashboardClient({ user }: { user: User }) {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState("overview");
+  const availableNavGroups = getAdminNavGroupsForRole(user.role);
+  const allowedTabs = availableNavGroups.flatMap((group) =>
+    group.items.map((item) => item.id)
+  );
+  const defaultTab = getDefaultAdminTab(user.role);
+  const [activeTab, setActiveTab] = useState<AdminTabId>(defaultTab);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [openGroups, setOpenGroups] = useState(() =>
+    getAdminNavOpenState(defaultTab)
+  );
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -158,6 +108,7 @@ export default function AdminDashboardClient({ user }: { user: User }) {
   const [events, setEvents] = useState<Event[]>([]);
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
   const [documents, setDocuments] = useState<Document[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
 
   const [editingSlide, setEditingSlide] = useState<HeroSlide | null>(null);
   const [editingNews, setEditingNews] = useState<NewsPost | null>(null);
@@ -166,83 +117,69 @@ export default function AdminDashboardClient({ user }: { user: User }) {
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [editingGallery, setEditingGallery] = useState<GalleryItem | null>(null);
   const [editingDocument, setEditingDocument] = useState<Document | null>(null);
+  const [editingDepartment, setEditingDepartment] = useState<Department | null>(null);
+  const [editingUnit, setEditingUnit] = useState<DepartmentUnit | null>(null);
+
+  const tabCounts: Partial<Record<AdminTabId, number>> = {
+    slides: slides.length,
+    news: news.length,
+    projects: projects.length,
+    events: events.length,
+    gallery: gallery.length,
+    documents: documents.length,
+    departments: departments.length,
+    leadership: leadership.length,
+    settings: settings.length,
+  };
+  const tabAttentionCounts: Partial<Record<AdminTabId, number>> = {
+    slides: slides.filter((slide) => !slide.is_active).length,
+    news: news.filter((item) => !item.is_published).length,
+    events: events.filter((item) => !item.is_published).length,
+    documents: documents.filter((item) => !item.is_published).length,
+    departments: departments.filter((item) => !item.is_published).length,
+    leadership: leadership.filter((item) => !item.is_active).length,
+  };
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [user.role]);
+
+  useEffect(() => {
+    if (!canAccessAdminTab(user.role, activeTab)) {
+      setActiveTab(defaultTab);
+      return;
+    }
+
+    setOpenGroups((currentState) => {
+      const nextState = { ...currentState };
+      const activeGroup = availableNavGroups.find((group) =>
+        group.items.some((item) => item.id === activeTab)
+      );
+
+      if (activeGroup) {
+        nextState[activeGroup.id] = true;
+      }
+
+      return nextState;
+    });
+  }, [activeTab, defaultTab, user.role]);
 
   const loadData = async () => {
     setLoading(true);
     try {
-      const [slidesRes, newsRes, leadershipRes, settingsRes, projectsRes, eventsRes, galleryRes, documentsRes] = await Promise.all([
-        fetch("/api/admin/slides"),
-        fetch("/api/admin/news"),
-        fetch("/api/admin/leadership"),
-        fetch("/api/admin/settings"),
-        fetch("/api/admin/projects"),
-        fetch("/api/admin/events"),
-        fetch("/api/admin/gallery"),
-        fetch("/api/admin/documents"),
-      ]);
+      const { data, errors } = await loadAdminDashboardData(allowedTabs);
 
-      // Parse responses
-      let slidesData: any = { data: [] };
-      let newsData: any = { data: [] };
-      let leadershipData: any = { data: [] };
-      let settingsData: any = { data: [] };
-      let projectsData: any = { data: [] };
-      let eventsData: any = { data: [] };
-      let galleryData: any = { data: [] };
-      let documentsData: any = { data: [] };
+      errors.forEach((error) => toast.error(error));
 
-      try {
-        if (slidesRes.ok) slidesData = await slidesRes.json();
-        if (newsRes.ok) newsData = await newsRes.json();
-        if (leadershipRes.ok) leadershipData = await leadershipRes.json();
-        if (settingsRes.ok) settingsData = await settingsRes.json();
-        if (projectsRes.ok) projectsData = await projectsRes.json();
-        if (eventsRes.ok) eventsData = await eventsRes.json();
-        if (galleryRes.ok) galleryData = await galleryRes.json();
-        if (documentsRes.ok) documentsData = await documentsRes.json();
-      } catch (parseError) {
-        console.error("Error parsing JSON responses:", parseError);
-      }
-
-      // Show errors for failed requests
-      if (!slidesRes.ok) {
-        toast.error(`Failed to load slides: HTTP ${slidesRes.status}`);
-      }
-      if (!newsRes.ok) {
-        toast.error(`Failed to load news: HTTP ${newsRes.status}`);
-      }
-      if (!leadershipRes.ok) {
-        toast.error(`Failed to load leadership: HTTP ${leadershipRes.status}`);
-      }
-      if (!settingsRes.ok) {
-        toast.error(`Failed to load settings: HTTP ${settingsRes.status}`);
-      }
-      if (!projectsRes.ok) {
-        toast.error(`Failed to load projects: HTTP ${projectsRes.status}`);
-      }
-      if (!eventsRes.ok) {
-        toast.error(`Failed to load events: HTTP ${eventsRes.status}`);
-      }
-      if (!galleryRes.ok) {
-        toast.error(`Failed to load gallery: HTTP ${galleryRes.status}`);
-      }
-      if (!documentsRes.ok) {
-        toast.error(`Failed to load documents: HTTP ${documentsRes.status}`);
-      }
-
-      // Update state with data
-      setSlides(Array.isArray(slidesData?.data) ? slidesData.data : []);
-      setNews(Array.isArray(newsData?.data) ? newsData.data : []);
-      setLeadership(Array.isArray(leadershipData?.data) ? leadershipData.data : []);
-      setSettings(Array.isArray(settingsData?.data) ? settingsData.data : []);
-      setProjects(Array.isArray(projectsData?.data) ? projectsData.data : []);
-      setEvents(Array.isArray(eventsData?.data) ? eventsData.data : []);
-      setGallery(Array.isArray(galleryData?.data) ? galleryData.data : []);
-      setDocuments(Array.isArray(documentsData?.data) ? documentsData.data : []);
+      setSlides(data.slides);
+      setNews(data.news);
+      setLeadership(data.leadership);
+      setSettings(data.settings);
+      setProjects(data.projects);
+      setEvents(data.events);
+      setGallery(data.gallery);
+      setDocuments(data.documents);
+      setDepartments(data.departments);
     } catch (error) {
       console.error("Error loading data:", error);
       toast.error("Failed to load data. Please refresh the page.");
@@ -439,28 +376,39 @@ export default function AdminDashboardClient({ user }: { user: User }) {
     }
   };
 
-  const saveSetting = async (setting: SiteSetting) => {
+  const saveSettings = async (items: SiteSetting[]) => {
+    if (items.length === 0) {
+      return true;
+    }
+
     setSaving(true);
     try {
       const res = await fetch("/api/admin/settings", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(setting),
+        body: JSON.stringify({ settings: items }),
       });
       
       const data = await res.json();
       
       if (res.ok) {
-        toast.success("Setting updated successfully");
+        toast.success(
+          items.length === 1
+            ? "Setting updated successfully"
+            : "Settings updated successfully"
+        );
         await loadData();
         // Revalidate content cache
         await fetch("/api/content/settings");
+        return true;
       } else {
-        toast.error(data.error || "Failed to save setting");
+        toast.error(data.error || "Failed to save settings");
+        return false;
       }
     } catch (error) {
-      console.error("Error saving setting:", error);
-      toast.error("An error occurred while saving the setting");
+      console.error("Error saving settings:", error);
+      toast.error("An error occurred while saving the settings");
+      return false;
     } finally {
       setSaving(false);
     }
@@ -575,12 +523,34 @@ export default function AdminDashboardClient({ user }: { user: User }) {
   };
 
   const saveGallery = async (item: GalleryItem) => {
+    // Validate title
+    if (!item.title || item.title.trim() === "") {
+      toast.error("Please enter a title for the gallery item");
+      return;
+    }
+
+    // Validate that at least image or video is provided
+    const hasImages = item.images && item.images.length > 0;
+    const hasImageUrl = item.image_url && item.image_url.trim() !== "";
+    const hasVideoUrl = item.video_url && item.video_url.trim() !== "";
+
+    if (!hasImageUrl && !hasVideoUrl && !hasImages) {
+      toast.error("Please upload either an image or video for the gallery item");
+      return;
+    }
+
+    // Ensure image_url is set (use first image from images array if needed)
+    const itemToSave = { ...item };
+    if (hasImages && !hasImageUrl && item.images && item.images.length > 0) {
+      itemToSave.image_url = item.images[0];
+    }
+
     setSaving(true);
     try {
       const res = await fetch("/api/admin/gallery", {
         method: item.id ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(item),
+        body: JSON.stringify(itemToSave),
       });
       
       const data = await res.json();
@@ -672,58 +642,261 @@ export default function AdminDashboardClient({ user }: { user: User }) {
     }
   };
 
-  const navItems = [
-    { id: "overview", label: "Overview", icon: LayoutDashboard },
-    { id: "slides", label: "Hero Slides", icon: Image },
-    { id: "news", label: "News Posts", icon: Newspaper },
-    { id: "projects", label: "Projects", icon: FolderKanban },
-    { id: "events", label: "Events", icon: Calendar },
-    { id: "gallery", label: "Gallery", icon: Images },
-    { id: "documents", label: "Documents", icon: FileText },
-    { id: "leadership", label: "Leadership", icon: Users },
-    { id: "assembly", label: "Assembly Members", icon: Users },
-    { id: "settings", label: "Site Settings", icon: Settings },
-  ];
+  const saveDepartment = async (department: Department) => {
+    setSaving(true);
+    try {
+      const res = await fetch("/api/admin/departments", {
+        method: department.id ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(department),
+      });
+      
+      const data = await res.json();
+      
+      if (res.ok) {
+        toast.success(department.id ? "Department updated successfully" : "Department created successfully");
+        await loadData();
+        setEditingDepartment(null);
+      } else {
+        toast.error(data.error || "Failed to save department");
+      }
+    } catch (error) {
+      console.error("Error saving department:", error);
+      toast.error("An error occurred while saving the department");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const saveDepartmentUnit = async (unit: DepartmentUnit) => {
+    setSaving(true);
+    try {
+      const res = await fetch("/api/admin/departments", {
+        method: unit.id ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(unit),
+      });
+      
+      const data = await res.json();
+      
+      if (res.ok) {
+        toast.success(unit.id ? "Unit updated successfully" : "Unit created successfully");
+        await loadData();
+        setEditingUnit(null);
+      } else {
+        toast.error(data.error || "Failed to save unit");
+      }
+    } catch (error) {
+      console.error("Error saving unit:", error);
+      toast.error("An error occurred while saving the unit");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const deleteDepartment = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this department?")) return;
+    try {
+      const res = await fetch(`/api/admin/departments?id=${id}`, { method: "DELETE" });
+      const data = await res.json();
+      
+      if (res.ok) {
+        toast.success("Department deleted successfully");
+        await loadData();
+      } else {
+        toast.error(data.error || "Failed to delete department");
+      }
+    } catch (error) {
+      console.error("Error deleting department:", error);
+      toast.error("An error occurred while deleting the department");
+    }
+  };
+
+  const deleteUnit = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this unit?")) return;
+    try {
+      const res = await fetch(`/api/admin/departments?id=${id}&isUnit=true`, { method: "DELETE" });
+      const data = await res.json();
+      
+      if (res.ok) {
+        toast.success("Unit deleted successfully");
+        await loadData();
+      } else {
+        toast.error(data.error || "Failed to delete unit");
+      }
+    } catch (error) {
+      console.error("Error deleting unit:", error);
+      toast.error("An error occurred while deleting the unit");
+    }
+  };
+
+  const handleTabSelect = (tab: AdminTabId) => {
+    if (!canAccessAdminTab(user.role, tab)) {
+      return;
+    }
+
+    setActiveTab(tab);
+    setSidebarOpen(false);
+  };
+
+  const toggleGroup = (groupId: keyof typeof openGroups) => {
+    setOpenGroups((currentState) => ({
+      ...currentState,
+      [groupId]: !currentState[groupId],
+    }));
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-50">
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 transform transition-transform lg:translate-x-0 lg:static ${
+        className={`fixed inset-y-0 left-0 z-50 w-60 bg-slate-900 transform transition-transform lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="h-full flex flex-col">
-          <div className="p-6 border-b border-slate-700">
-            <h1 className="text-xl font-bold text-white">GSMA Admin</h1>
-            <p className="text-slate-400 text-sm mt-1">{user.name}</p>
+        <div className="flex h-full flex-col overflow-hidden">
+          <div className="border-b border-slate-700 px-4 py-4">
+            <h1 className="text-lg font-bold text-white">GSMA Admin</h1>
+            <p className="mt-1 text-xs text-slate-400">{user.name}</p>
+            <p className="mt-1 text-[11px] uppercase tracking-[0.18em] text-slate-500">
+              {user.role.replace("_", " ")}
+            </p>
           </div>
 
-          <nav className="flex-1 p-4 space-y-1">
-            {navItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => {
-                  setActiveTab(item.id);
-                  setSidebarOpen(false);
-                }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                  activeTab === item.id
-                    ? "bg-[#8B0000] text-white"
-                    : "text-slate-300 hover:bg-slate-800"
-                }`}
-              >
-                <item.icon className="w-5 h-5" />
-                {item.label}
-              </button>
-            ))}
+          <nav className="flex-1 space-y-2.5 overflow-y-auto p-3">
+            {availableNavGroups.map((group) => {
+              const groupStyle = GROUP_STYLES[group.id];
+              const groupActive = group.items.some((item) => item.id === activeTab);
+              const isOpen = openGroups[group.id];
+              const groupCount = group.items.reduce(
+                (total, item) => total + (tabCounts[item.id] ?? 0),
+                0
+              );
+              const groupAttentionCount = group.items.reduce(
+                (total, item) => total + (tabAttentionCounts[item.id] ?? 0),
+                0
+              );
+
+              return (
+                <div
+                  key={group.id}
+                  className={`overflow-hidden rounded-xl border bg-slate-950/40 ${groupStyle.border}`}
+                >
+                  <button
+                    type="button"
+                    onClick={() => toggleGroup(group.id)}
+                    className={`flex w-full items-center justify-between gap-3 px-3 py-2.5 text-left transition-colors ${
+                      groupActive
+                        ? groupStyle.headerActive
+                        : "text-slate-200 hover:bg-slate-800/60"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span
+                        className={`flex h-8 w-8 items-center justify-center rounded-lg ${
+                          groupActive
+                            ? groupStyle.iconActive
+                            : groupStyle.iconIdle
+                        }`}
+                      >
+                        <group.icon className="h-3.5 w-3.5" />
+                      </span>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <p className="text-[13px] font-semibold">{group.label}</p>
+                          {groupCount > 0 ? (
+                            <span
+                              className={`inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
+                                groupActive
+                                  ? "bg-white/15 text-white"
+                                  : groupStyle.accentBadge
+                              }`}
+                            >
+                              {groupCount}
+                            </span>
+                          ) : null}
+                          {groupAttentionCount > 0 ? (
+                            <span
+                              className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-amber-200"
+                              title={`${groupAttentionCount} item${groupAttentionCount === 1 ? "" : "s"} need attention`}
+                            >
+                              <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+                              {groupAttentionCount}
+                            </span>
+                          ) : null}
+                        </div>
+                        <p className="text-[11px] text-slate-400">
+                          {group.items.length} section
+                          {group.items.length === 1 ? "" : "s"}
+                        </p>
+                      </div>
+                    </div>
+                    <ChevronDown
+                      className={`h-3.5 w-3.5 transition-transform ${
+                        isOpen ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+
+                  {isOpen ? (
+                    <div className="space-y-1 border-t border-slate-800 px-2.5 py-2.5">
+                      {group.items.map((item) => {
+                        const attentionCount = tabAttentionCounts[item.id] ?? 0;
+
+                        return (
+                          <button
+                            key={item.id}
+                            type="button"
+                            onClick={() => handleTabSelect(item.id)}
+                            className={`flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] transition-colors ${
+                              activeTab === item.id
+                                ? "bg-[#8B0000] text-white shadow-sm"
+                                : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                            }`}
+                          >
+                            <item.icon className="h-3.5 w-3.5" />
+                            <span className="min-w-0 flex-1 truncate text-left">
+                              {item.label}
+                            </span>
+                            {attentionCount > 0 ? (
+                              <span
+                                className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
+                                  activeTab === item.id
+                                    ? "bg-amber-300/20 text-amber-50"
+                                    : "bg-amber-500/15 text-amber-200"
+                                }`}
+                                title={`${attentionCount} item${attentionCount === 1 ? "" : "s"} need attention`}
+                              >
+                                <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+                                {attentionCount}
+                              </span>
+                            ) : null}
+                            {typeof tabCounts[item.id] === "number" ? (
+                              <span
+                                className={`inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
+                                  activeTab === item.id
+                                    ? "bg-white/15 text-white"
+                                    : "bg-slate-700 text-slate-200"
+                                }`}
+                              >
+                                {tabCounts[item.id]}
+                              </span>
+                            ) : null}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ) : null}
+                </div>
+              );
+            })}
           </nav>
 
-          <div className="p-4 border-t border-slate-700">
+          <div className="border-t border-slate-700 p-3">
             <button
               onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 rounded-lg transition-colors"
+              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-[13px] text-slate-300 transition-colors hover:bg-slate-800"
             >
-              <LogOut className="w-5 h-5" />
+              <LogOut className="h-4 w-4" />
               Logout
             </button>
           </div>
@@ -737,7 +910,7 @@ export default function AdminDashboardClient({ user }: { user: User }) {
         />
       )}
 
-      <main className="flex-1 min-w-0">
+      <main className="min-w-0 lg:pl-60">
         <header className="bg-white border-b px-4 sm:px-6 py-4 flex items-center gap-4">
           <button
             onClick={() => setSidebarOpen(true)}
@@ -746,7 +919,7 @@ export default function AdminDashboardClient({ user }: { user: User }) {
             <Menu className="w-6 h-6" />
           </button>
           <h2 className="text-lg sm:text-xl font-semibold text-gray-900 capitalize">
-            {activeTab === "overview" ? "Dashboard" : activeTab.replace("-", " ")}
+            {getAdminTabTitle(activeTab)}
           </h2>
         </header>
 
@@ -758,1533 +931,125 @@ export default function AdminDashboardClient({ user }: { user: User }) {
           ) : (
             <>
               {activeTab === "overview" && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  <div className="bg-white p-6 rounded-xl shadow-sm border">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <Image className="w-6 h-6 text-blue-600" />
-                      </div>
-                      <div>
-                        <p className="text-2xl font-bold">{slides.length}</p>
-                        <p className="text-gray-500 text-sm">Hero Slides</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="bg-white p-6 rounded-xl shadow-sm border">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                        <Newspaper className="w-6 h-6 text-green-600" />
-                      </div>
-                      <div>
-                        <p className="text-2xl font-bold">{news.length}</p>
-                        <p className="text-gray-500 text-sm">News Posts</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="bg-white p-6 rounded-xl shadow-sm border">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                        <Users className="w-6 h-6 text-purple-600" />
-                      </div>
-                      <div>
-                        <p className="text-2xl font-bold">{leadership.length}</p>
-                        <p className="text-gray-500 text-sm">Leadership</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="bg-white p-6 rounded-xl shadow-sm border">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                        <Settings className="w-6 h-6 text-orange-600" />
-                      </div>
-                      <div>
-                        <p className="text-2xl font-bold">{settings.length}</p>
-                        <p className="text-gray-500 text-sm">Settings</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="bg-white p-6 rounded-xl shadow-sm border">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
-                        <FolderKanban className="w-6 h-6 text-indigo-600" />
-                      </div>
-                      <div>
-                        <p className="text-2xl font-bold">{projects.length}</p>
-                        <p className="text-gray-500 text-sm">Projects</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="bg-white p-6 rounded-xl shadow-sm border">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-pink-100 rounded-lg flex items-center justify-center">
-                        <Calendar className="w-6 h-6 text-pink-600" />
-                      </div>
-                      <div>
-                        <p className="text-2xl font-bold">{events.length}</p>
-                        <p className="text-gray-500 text-sm">Events</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="bg-white p-6 rounded-xl shadow-sm border">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center">
-                        <Images className="w-6 h-6 text-teal-600" />
-                      </div>
-                      <div>
-                        <p className="text-2xl font-bold">{gallery.length}</p>
-                        <p className="text-gray-500 text-sm">Gallery Items</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <OverviewStats
+                  slidesCount={slides.length}
+                  newsCount={news.length}
+                  leadershipCount={leadership.length}
+                  settingsCount={settings.length}
+                  projectsCount={projects.length}
+                  eventsCount={events.length}
+                  galleryCount={gallery.length}
+                />
               )}
 
               {activeTab === "slides" && (
-                <div className="space-y-6">
-                  <div className="flex justify-end">
-                    <Button
-                      onClick={() =>
-                        setEditingSlide({
-                          id: "",
-                          image_url: "",
-                          title: "",
-                          subtitle: "",
-                          description: "",
-                          display_order: slides.length + 1,
-                          is_active: true,
-                        })
-                      }
-                      className="bg-[#8B0000] hover:bg-[#6B0000]"
-                    >
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add Slide
-                    </Button>
-                  </div>
-
-                  {editingSlide && (
-                    <div className="bg-white p-6 rounded-xl shadow-sm border">
-                      <h3 className="font-semibold mb-4">
-                        {editingSlide.id ? "Edit Slide" : "New Slide"}
-                      </h3>
-                      <div className="grid gap-4">
-                        <ImageUpload
-                          value={editingSlide.image_url}
-                          onChange={(url) =>
-                            setEditingSlide({ ...editingSlide, image_url: url })
-                          }
-                          folder="hero-slides"
-                          label="Hero Image"
-                          aspectRatio="wide"
-                        />
-                        <div>
-                          <Label>Title</Label>
-                          <Input
-                            value={editingSlide.title}
-                            onChange={(e) =>
-                              setEditingSlide({ ...editingSlide, title: e.target.value })
-                            }
-                          />
-                        </div>
-                        <div>
-                          <Label>Subtitle</Label>
-                          <Input
-                            value={editingSlide.subtitle}
-                            onChange={(e) =>
-                              setEditingSlide({ ...editingSlide, subtitle: e.target.value })
-                            }
-                          />
-                        </div>
-                        <div>
-                          <Label>Description</Label>
-                          <Textarea
-                            value={editingSlide.description}
-                            onChange={(e) =>
-                              setEditingSlide({ ...editingSlide, description: e.target.value })
-                            }
-                          />
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Switch
-                            checked={editingSlide.is_active}
-                            onCheckedChange={(checked) =>
-                              setEditingSlide({ ...editingSlide, is_active: checked })
-                            }
-                          />
-                          <Label>Active</Label>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            onClick={() => saveSlide(editingSlide)}
-                            disabled={saving}
-                            className="bg-[#8B0000] hover:bg-[#6B0000]"
-                          >
-                            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-                            Save
-                          </Button>
-                          <Button variant="outline" onClick={() => setEditingSlide(null)}>
-                            <X className="w-4 h-4 mr-2" />
-                            Cancel
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="grid gap-4">
-                    {slides.map((slide) => (
-                      <div
-                        key={slide.id}
-                        className="bg-white p-4 rounded-xl shadow-sm border flex items-center gap-4"
-                      >
-                        {slide.image_url ? (
-                          <img
-                            src={slide.image_url}
-                            alt={slide.title}
-                            className="w-32 h-20 object-cover rounded-lg"
-                          />
-                        ) : (
-                          <div className="w-32 h-20 rounded-lg bg-gray-100 flex items-center justify-center text-xs text-gray-500">
-                            No image
-                          </div>
-                        )}
-                        <div className="flex-1">
-                          <h4 className="font-semibold">{slide.title}</h4>
-                          <p className="text-sm text-gray-500">{slide.subtitle}</p>
-                          <span
-                            className={`inline-block mt-1 text-xs px-2 py-1 rounded ${
-                              slide.is_active
-                                ? "bg-green-100 text-green-700"
-                                : "bg-gray-100 text-gray-500"
-                            }`}
-                          >
-                            {slide.is_active ? "Active" : "Inactive"}
-                          </span>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => setEditingSlide(slide)}
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="text-red-600 hover:bg-red-50"
-                            onClick={() => deleteSlide(slide.id)}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                <SlidesManagement
+                  slides={slides}
+                  editingSlide={editingSlide}
+                  setEditingSlide={setEditingSlide}
+                  saving={saving}
+                  onSaveSlide={saveSlide}
+                  onDeleteSlide={deleteSlide}
+                />
               )}
 
               {activeTab === "news" && (
-                <div className="space-y-6">
-                  <div className="flex justify-end">
-                    <Button
-                      onClick={() =>
-                        setEditingNews({
-                          id: "",
-                          slug: "",
-                          title: "",
-                          excerpt: "",
-                          content: "",
-                          image_url: "",
-                          published_date: new Date().toISOString().split("T")[0],
-                          is_published: false,
-                        })
-                      }
-                      className="bg-[#8B0000] hover:bg-[#6B0000]"
-                    >
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add News Post
-                    </Button>
-                  </div>
-
-                  {editingNews && (
-                    <div className="bg-white p-6 rounded-xl shadow-sm border">
-                      <h3 className="font-semibold mb-4">
-                        {editingNews.id ? "Edit News Post" : "New News Post"}
-                      </h3>
-                      <div className="grid gap-4">
-                        <div>
-                          <Label>Title</Label>
-                          <Input
-                            value={editingNews.title}
-                            onChange={(e) =>
-                              setEditingNews({ ...editingNews, title: e.target.value })
-                            }
-                          />
-                        </div>
-                        <div>
-                          <Label>Slug (URL)</Label>
-                          <Input
-                            value={editingNews.slug}
-                            onChange={(e) =>
-                              setEditingNews({ ...editingNews, slug: e.target.value })
-                            }
-                            placeholder="my-news-post"
-                          />
-                        </div>
-                        <ImageUpload
-                          value={editingNews.image_url}
-                          onChange={(url) =>
-                            setEditingNews({ ...editingNews, image_url: url })
-                          }
-                          folder="news"
-                          label="News Image"
-                          aspectRatio="wide"
-                        />
-                        <div>
-                          <Label>Excerpt</Label>
-                          <Textarea
-                            value={editingNews.excerpt}
-                            onChange={(e) =>
-                              setEditingNews({ ...editingNews, excerpt: e.target.value })
-                            }
-                            rows={2}
-                          />
-                        </div>
-                        <div>
-                          <Label>Content</Label>
-                          <Textarea
-                            value={editingNews.content}
-                            onChange={(e) =>
-                              setEditingNews({ ...editingNews, content: e.target.value })
-                            }
-                            rows={6}
-                          />
-                        </div>
-                        <div>
-                          <Label>Published Date</Label>
-                          <Input
-                            type="date"
-                            value={editingNews.published_date ? editingNews.published_date.split('T')[0] : ''}
-                            onChange={(e) =>
-                              setEditingNews({ ...editingNews, published_date: e.target.value ? new Date(e.target.value).toISOString().split('T')[0] : '' })
-                            }
-                          />
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Switch
-                            checked={editingNews.is_published}
-                            onCheckedChange={(checked) =>
-                              setEditingNews({ ...editingNews, is_published: checked })
-                            }
-                          />
-                          <Label>Published</Label>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            onClick={() => saveNews(editingNews)}
-                            disabled={saving}
-                            className="bg-[#8B0000] hover:bg-[#6B0000]"
-                          >
-                            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-                            Save
-                          </Button>
-                          <Button variant="outline" onClick={() => setEditingNews(null)}>
-                            <X className="w-4 h-4 mr-2" />
-                            Cancel
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="grid gap-4">
-                    {news.map((post) => (
-                      <div
-                        key={post.id}
-                        className="bg-white p-4 rounded-xl shadow-sm border flex items-center gap-4"
-                      >
-                        {post.image_url && (
-                          <img
-                            src={post.image_url}
-                            alt={post.title}
-                            className="w-32 h-20 object-cover rounded-lg"
-                          />
-                        )}
-                        <div className="flex-1">
-                          <h4 className="font-semibold">{post.title}</h4>
-                          <p className="text-sm text-gray-500">
-                            {new Date(post.published_date).toLocaleDateString()}
-                          </p>
-                          <span
-                            className={`inline-block mt-1 text-xs px-2 py-1 rounded ${
-                              post.is_published
-                                ? "bg-green-100 text-green-700"
-                                : "bg-yellow-100 text-yellow-700"
-                            }`}
-                          >
-                            {post.is_published ? "Published" : "Draft"}
-                          </span>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => setEditingNews(post)}
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="text-red-600 hover:bg-red-50"
-                            onClick={() => deleteNews(post.id)}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                <NewsManagement
+                  news={news}
+                  editingNews={editingNews}
+                  setEditingNews={setEditingNews}
+                  saving={saving}
+                  onSaveNews={saveNews}
+                  onDeleteNews={deleteNews}
+                />
               )}
 
               {activeTab === "projects" && (
-                <div className="space-y-6">
-                  <div className="flex justify-end">
-                    <Button
-                      onClick={() =>
-                        setEditingProject({
-                          id: "",
-                          title: "",
-                          slug: "",
-                          description: "",
-                          content: "",
-                          image_url: "",
-                          category: "ongoing",
-                          status: "in-progress",
-                          start_date: "",
-                          end_date: "",
-                          budget: 0,
-                          location: "",
-                          contractor: "",
-                          progress_percentage: 0,
-                          is_featured: false,
-                          display_order: projects.length + 1,
-                        })
-                      }
-                      className="bg-[#8B0000] hover:bg-[#6B0000]"
-                    >
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add Project
-                    </Button>
-                  </div>
-
-                  {editingProject && (
-                    <div className="bg-white p-6 rounded-xl shadow-sm border">
-                      <h3 className="font-semibold mb-4">
-                        {editingProject.id ? "Edit Project" : "New Project"}
-                      </h3>
-                      <div className="grid gap-4">
-                        <ImageUpload
-                          value={editingProject.image_url}
-                          onChange={(url) =>
-                            setEditingProject({ ...editingProject, image_url: url })
-                          }
-                          folder="projects"
-                          label="Project Image"
-                          aspectRatio="wide"
-                        />
-
-                        <div>
-                          <Label>Title</Label>
-                          <Input
-                            value={editingProject.title}
-                            onChange={(e) =>
-                              setEditingProject({ ...editingProject, title: e.target.value })
-                            }
-                          />
-                        </div>
-
-                        <div>
-                          <Label>Slug (URL)</Label>
-                          <Input
-                            value={editingProject.slug}
-                            onChange={(e) =>
-                              setEditingProject({ ...editingProject, slug: e.target.value })
-                            }
-                            placeholder="my-project-slug"
-                          />
-                        </div>
-
-                        <div>
-                          <Label>Category</Label>
-                          <Input
-                            value={editingProject.category}
-                            onChange={(e) =>
-                              setEditingProject({ ...editingProject, category: e.target.value })
-                            }
-                            placeholder="ongoing / completed / proposed"
-                          />
-                        </div>
-
-                        <div>
-                          <Label>Status</Label>
-                          <Input
-                            value={editingProject.status}
-                            onChange={(e) =>
-                              setEditingProject({ ...editingProject, status: e.target.value })
-                            }
-                            placeholder="planning / in-progress / completed / on-hold"
-                          />
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <Label>Start Date</Label>
-                            <Input
-                              type="date"
-                              value={editingProject.start_date ? editingProject.start_date.split('T')[0] : ""}
-                              onChange={(e) =>
-                                setEditingProject({
-                                  ...editingProject,
-                                  start_date: e.target.value || "",
-                                })
-                              }
-                            />
-                          </div>
-                          <div>
-                            <Label>End Date</Label>
-                            <Input
-                              type="date"
-                              value={editingProject.end_date ? editingProject.end_date.split('T')[0] : ""}
-                              onChange={(e) =>
-                                setEditingProject({
-                                  ...editingProject,
-                                  end_date: e.target.value || "",
-                                })
-                              }
-                            />
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <Label>Location</Label>
-                            <Input
-                              value={editingProject.location}
-                              onChange={(e) =>
-                                setEditingProject({
-                                  ...editingProject,
-                                  location: e.target.value,
-                                })
-                              }
-                            />
-                          </div>
-                          <div>
-                            <Label>Contractor</Label>
-                            <Input
-                              value={editingProject.contractor}
-                              onChange={(e) =>
-                                setEditingProject({
-                                  ...editingProject,
-                                  contractor: e.target.value,
-                                })
-                              }
-                            />
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <Label>Budget (GHS)</Label>
-                            <Input
-                              type="number"
-                              value={editingProject.budget || 0}
-                              onChange={(e) =>
-                                setEditingProject({
-                                  ...editingProject,
-                                  budget: Number(e.target.value),
-                                })
-                              }
-                            />
-                          </div>
-                          <div>
-                            <Label>Progress %</Label>
-                            <Input
-                              type="number"
-                              min={0}
-                              max={100}
-                              value={editingProject.progress_percentage || 0}
-                              onChange={(e) =>
-                                setEditingProject({
-                                  ...editingProject,
-                                  progress_percentage: Number(e.target.value),
-                                })
-                              }
-                            />
-                          </div>
-                        </div>
-
-                        <div>
-                          <Label>Short Description</Label>
-                          <Textarea
-                            value={editingProject.description}
-                            onChange={(e) =>
-                              setEditingProject({
-                                ...editingProject,
-                                description: e.target.value,
-                              })
-                            }
-                            rows={3}
-                          />
-                        </div>
-
-                        <div>
-                          <Label>Full Content</Label>
-                          <Textarea
-                            value={editingProject.content}
-                            onChange={(e) =>
-                              setEditingProject({
-                                ...editingProject,
-                                content: e.target.value,
-                              })
-                            }
-                            rows={6}
-                          />
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          <Switch
-                            checked={editingProject.is_featured}
-                            onCheckedChange={(checked) =>
-                              setEditingProject({ ...editingProject, is_featured: checked })
-                            }
-                          />
-                          <Label>Featured</Label>
-                        </div>
-
-                        <div className="flex gap-2">
-                          <Button
-                            onClick={() => saveProject(editingProject)}
-                            disabled={saving}
-                            className="bg-[#8B0000] hover:bg-[#6B0000]"
-                          >
-                            {saving ? (
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                            ) : (
-                              <Save className="w-4 h-4 mr-2" />
-                            )}
-                            Save
-                          </Button>
-                          <Button
-                            variant="outline"
-                            onClick={() => setEditingProject(null)}
-                          >
-                            <X className="w-4 h-4 mr-2" />
-                            Cancel
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="grid gap-4">
-                    {projects.map((project) => (
-                      <div
-                        key={project.id}
-                        className="bg-white p-4 rounded-xl shadow-sm border flex items-center gap-4"
-                      >
-                        {project.image_url ? (
-                          <img
-                            src={project.image_url}
-                            alt={project.title}
-                            className="w-32 h-20 object-cover rounded-lg"
-                          />
-                        ) : (
-                          <div className="w-32 h-20 rounded-lg bg-gray-100 flex items-center justify-center text-xs text-gray-500">
-                            No image
-                          </div>
-                        )}
-                        <div className="flex-1">
-                          <h4 className="font-semibold">{project.title}</h4>
-                          <p className="text-sm text-gray-500">
-                            {project.category} • {project.status} • {project.progress_percentage}%
-                          </p>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => setEditingProject(project)}
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="text-red-600 hover:bg-red-50"
-                            onClick={() => deleteProject(project.id)}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                <ProjectManagement
+                  projects={projects}
+                  editingProject={editingProject}
+                  setEditingProject={setEditingProject}
+                  saving={saving}
+                  onSaveProject={saveProject}
+                  onDeleteProject={deleteProject}
+                />
               )}
 
               {activeTab === "events" && (
-                <div className="space-y-6">
-                  <div className="flex justify-end">
-                    <Button
-                      onClick={() =>
-                        setEditingEvent({
-                          id: "",
-                          title: "",
-                          slug: "",
-                          description: "",
-                          content: "",
-                          image_url: "",
-                          event_type: "meeting",
-                          start_date: new Date().toISOString(),
-                          end_date: "",
-                          location: "",
-                          venue: "",
-                          organizer: "",
-                          contact_person: "",
-                          contact_email: "",
-                          contact_phone: "",
-                          is_featured: false,
-                          is_published: true,
-                          display_order: events.length + 1,
-                        })
-                      }
-                      className="bg-[#8B0000] hover:bg-[#6B0000]"
-                    >
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add Event
-                    </Button>
-                  </div>
-
-                  {editingEvent && (
-                    <div className="bg-white p-6 rounded-xl shadow-sm border">
-                      <h3 className="font-semibold mb-4">
-                        {editingEvent.id ? "Edit Event" : "New Event"}
-                      </h3>
-                      <div className="grid gap-4">
-                        <ImageUpload
-                          value={editingEvent.image_url}
-                          onChange={(url) =>
-                            setEditingEvent({ ...editingEvent, image_url: url })
-                          }
-                          folder="events"
-                          label="Event Image"
-                          aspectRatio="wide"
-                        />
-
-                        <div>
-                          <Label>Title</Label>
-                          <Input
-                            value={editingEvent.title}
-                            onChange={(e) =>
-                              setEditingEvent({ ...editingEvent, title: e.target.value })
-                            }
-                          />
-                        </div>
-
-                        <div>
-                          <Label>Slug (URL)</Label>
-                          <Input
-                            value={editingEvent.slug}
-                            onChange={(e) =>
-                              setEditingEvent({ ...editingEvent, slug: e.target.value })
-                            }
-                            placeholder="my-event-slug"
-                          />
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <Label>Start Date/Time</Label>
-                            <Input
-                              type="datetime-local"
-                              value={editingEvent.start_date ? new Date(editingEvent.start_date).toISOString().slice(0, 16) : ""}
-                              onChange={(e) =>
-                                setEditingEvent({
-                                  ...editingEvent,
-                                  start_date: e.target.value ? new Date(e.target.value).toISOString() : "",
-                                })
-                              }
-                            />
-                          </div>
-                          <div>
-                            <Label>End Date/Time (Optional)</Label>
-                            <Input
-                              type="datetime-local"
-                              value={editingEvent.end_date ? new Date(editingEvent.end_date).toISOString().slice(0, 16) : ""}
-                              onChange={(e) =>
-                                setEditingEvent({
-                                  ...editingEvent,
-                                  end_date: e.target.value ? new Date(e.target.value).toISOString() : "",
-                                })
-                              }
-                            />
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <Label>Event Type</Label>
-                            <Input
-                              value={editingEvent.event_type}
-                              onChange={(e) =>
-                                setEditingEvent({
-                                  ...editingEvent,
-                                  event_type: e.target.value,
-                                })
-                              }
-                              placeholder="meeting / durbar / hearing / workshop / outreach"
-                            />
-                          </div>
-                          <div>
-                            <Label>Venue</Label>
-                            <Input
-                              value={editingEvent.venue}
-                              onChange={(e) =>
-                                setEditingEvent({ ...editingEvent, venue: e.target.value })
-                              }
-                            />
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <Label>Location</Label>
-                            <Input
-                              value={editingEvent.location}
-                              onChange={(e) =>
-                                setEditingEvent({
-                                  ...editingEvent,
-                                  location: e.target.value,
-                                })
-                              }
-                            />
-                          </div>
-                          <div>
-                            <Label>Organizer</Label>
-                            <Input
-                              value={editingEvent.organizer}
-                              onChange={(e) =>
-                                setEditingEvent({
-                                  ...editingEvent,
-                                  organizer: e.target.value,
-                                })
-                              }
-                            />
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <Label>Contact Email</Label>
-                            <Input
-                              value={editingEvent.contact_email}
-                              onChange={(e) =>
-                                setEditingEvent({
-                                  ...editingEvent,
-                                  contact_email: e.target.value,
-                                })
-                              }
-                            />
-                          </div>
-                          <div>
-                            <Label>Contact Phone</Label>
-                            <Input
-                              value={editingEvent.contact_phone}
-                              onChange={(e) =>
-                                setEditingEvent({
-                                  ...editingEvent,
-                                  contact_phone: e.target.value,
-                                })
-                              }
-                            />
-                          </div>
-                        </div>
-
-                        <div>
-                          <Label>Short Description</Label>
-                          <Textarea
-                            value={editingEvent.description}
-                            onChange={(e) =>
-                              setEditingEvent({
-                                ...editingEvent,
-                                description: e.target.value,
-                              })
-                            }
-                            rows={3}
-                          />
-                        </div>
-
-                        <div>
-                          <Label>Full Content</Label>
-                          <Textarea
-                            value={editingEvent.content}
-                            onChange={(e) =>
-                              setEditingEvent({
-                                ...editingEvent,
-                                content: e.target.value,
-                              })
-                            }
-                            rows={6}
-                          />
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          <Switch
-                            checked={editingEvent.is_published}
-                            onCheckedChange={(checked) =>
-                              setEditingEvent({ ...editingEvent, is_published: checked })
-                            }
-                          />
-                          <Label>Published</Label>
-                        </div>
-
-                        <div className="flex gap-2">
-                          <Button
-                            onClick={() => saveEvent(editingEvent)}
-                            disabled={saving}
-                            className="bg-[#8B0000] hover:bg-[#6B0000]"
-                          >
-                            {saving ? (
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                            ) : (
-                              <Save className="w-4 h-4 mr-2" />
-                            )}
-                            Save
-                          </Button>
-                          <Button variant="outline" onClick={() => setEditingEvent(null)}>
-                            <X className="w-4 h-4 mr-2" />
-                            Cancel
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="grid gap-4">
-                    {events.map((event) => (
-                      <div
-                        key={event.id}
-                        className="bg-white p-4 rounded-xl shadow-sm border flex items-center gap-4"
-                      >
-                        {event.image_url ? (
-                          <img
-                            src={event.image_url}
-                            alt={event.title}
-                            className="w-32 h-20 object-cover rounded-lg"
-                          />
-                        ) : (
-                          <div className="w-32 h-20 rounded-lg bg-gray-100 flex items-center justify-center text-xs text-gray-500">
-                            No image
-                          </div>
-                        )}
-                        <div className="flex-1">
-                          <h4 className="font-semibold">{event.title}</h4>
-                          <p className="text-sm text-gray-500">
-                            {event.event_type} •{" "}
-                            {event.start_date ? new Date(event.start_date).toLocaleString() : ""}
-                          </p>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => setEditingEvent(event)}
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="text-red-600 hover:bg-red-50"
-                            onClick={() => deleteEvent(event.id)}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                <EventsManagement
+                  events={events}
+                  editingEvent={editingEvent}
+                  setEditingEvent={setEditingEvent}
+                  saving={saving}
+                  onSaveEvent={saveEvent}
+                  onDeleteEvent={deleteEvent}
+                />
               )}
 
               {activeTab === "gallery" && (
-                <div className="space-y-6">
-                  <div className="flex justify-end">
-                    <Button
-                      onClick={() =>
-                        setEditingGallery({
-                          id: "",
-                          title: "",
-                          description: "",
-                          image_url: "",
-                          video_url: "",
-                          category: "general",
-                          tags: [],
-                          is_featured: false,
-                          display_order: gallery.length + 1,
-                        })
-                      }
-                      className="bg-[#8B0000] hover:bg-[#6B0000]"
-                    >
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add Gallery Item
-                    </Button>
-                  </div>
-
-                  {editingGallery && (
-                    <div className="bg-white p-6 rounded-xl shadow-sm border">
-                      <h3 className="font-semibold mb-4">
-                        {editingGallery.id ? "Edit Gallery Item" : "New Gallery Item"}
-                      </h3>
-                      <div className="grid gap-4">
-                        <ImageUpload
-                          value={editingGallery.image_url}
-                          onChange={(url) =>
-                            setEditingGallery({ ...editingGallery, image_url: url })
-                          }
-                          folder="gallery"
-                          label="Gallery Image"
-                          aspectRatio="wide"
-                        />
-
-                        <div>
-                          <Label>Title</Label>
-                          <Input
-                            value={editingGallery.title}
-                            onChange={(e) =>
-                              setEditingGallery({ ...editingGallery, title: e.target.value })
-                            }
-                          />
-                        </div>
-
-                        <div>
-                          <Label>Description</Label>
-                          <Textarea
-                            value={editingGallery.description}
-                            onChange={(e) =>
-                              setEditingGallery({
-                                ...editingGallery,
-                                description: e.target.value,
-                              })
-                            }
-                            rows={3}
-                          />
-                        </div>
-
-                        <div>
-                          <Label>Video URL (optional)</Label>
-                          <Input
-                            value={editingGallery.video_url || ""}
-                            onChange={(e) =>
-                              setEditingGallery({
-                                ...editingGallery,
-                                video_url: e.target.value,
-                              })
-                            }
-                          />
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <Label>Category</Label>
-                            <Input
-                              value={editingGallery.category}
-                              onChange={(e) =>
-                                setEditingGallery({
-                                  ...editingGallery,
-                                  category: e.target.value,
-                                })
-                              }
-                              placeholder="general / photo / video / project / event"
-                            />
-                          </div>
-                          <div>
-                            <Label>Tags (comma separated)</Label>
-                            <Input
-                              value={(editingGallery.tags || []).join(", ")}
-                              onChange={(e) =>
-                                setEditingGallery({
-                                  ...editingGallery,
-                                  tags: e.target.value
-                                    .split(",")
-                                    .map((t) => t.trim())
-                                    .filter(Boolean),
-                                })
-                              }
-                              placeholder="e.g. durbar, sanitation, project"
-                            />
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          <Switch
-                            checked={editingGallery.is_featured}
-                            onCheckedChange={(checked) =>
-                              setEditingGallery({ ...editingGallery, is_featured: checked })
-                            }
-                          />
-                          <Label>Featured</Label>
-                        </div>
-
-                        <div className="flex gap-2">
-                          <Button
-                            onClick={() => saveGallery(editingGallery)}
-                            disabled={saving}
-                            className="bg-[#8B0000] hover:bg-[#6B0000]"
-                          >
-                            {saving ? (
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                            ) : (
-                              <Save className="w-4 h-4 mr-2" />
-                            )}
-                            Save
-                          </Button>
-                          <Button
-                            variant="outline"
-                            onClick={() => setEditingGallery(null)}
-                          >
-                            <X className="w-4 h-4 mr-2" />
-                            Cancel
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="grid gap-4">
-                    {gallery.map((item) => (
-                      <div
-                        key={item.id}
-                        className="bg-white p-4 rounded-xl shadow-sm border flex items-center gap-4"
-                      >
-                        {item.image_url ? (
-                          <img
-                            src={item.image_url}
-                            alt={item.title}
-                            className="w-32 h-20 object-cover rounded-lg"
-                          />
-                        ) : (
-                          <div className="w-32 h-20 rounded-lg bg-gray-100 flex items-center justify-center text-xs text-gray-500">
-                            No image
-                          </div>
-                        )}
-                        <div className="flex-1">
-                          <h4 className="font-semibold">{item.title}</h4>
-                          <p className="text-sm text-gray-500">
-                            {item.category} {item.tags?.length ? `• ${item.tags.join(", ")}` : ""}
-                          </p>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => setEditingGallery(item)}
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="text-red-600 hover:bg-red-50"
-                            onClick={() => deleteGallery(item.id)}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                <GalleryManagement
+                  gallery={gallery}
+                  editingGallery={editingGallery}
+                  setEditingGallery={setEditingGallery}
+                  saving={saving}
+                  onSaveGallery={saveGallery}
+                  onDeleteGallery={deleteGallery}
+                />
               )}
 
               {activeTab === "leadership" && (
-                <div className="space-y-6">
-                  <div className="flex justify-end">
-                    <Button
-                      onClick={() =>
-                        setEditingLeader({
-                          id: "",
-                          name: "",
-                          position: "",
-                          title: "",
-                          image_url: "",
-                          bio: "",
-                          department: undefined,
-                          display_order: leadership.length + 1,
-                          is_active: true,
-                        })
-                      }
-                      className="bg-[#8B0000] hover:bg-[#6B0000]"
-                    >
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add Leader
-                    </Button>
-                  </div>
-
-                  {editingLeader && (
-                    <div className="bg-white p-6 rounded-xl shadow-sm border">
-                      <h3 className="font-semibold mb-4">
-                        {editingLeader.id ? "Edit Leader" : "New Leader"}
-                      </h3>
-                      <div className="grid gap-4">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <Label>Title (Hon., Dr., etc.)</Label>
-                            <Input
-                              value={editingLeader.title}
-                              onChange={(e) =>
-                                setEditingLeader({ ...editingLeader, title: e.target.value })
-                              }
-                            />
-                          </div>
-                          <div>
-                            <Label>Full Name</Label>
-                            <Input
-                              value={editingLeader.name}
-                              onChange={(e) =>
-                                setEditingLeader({ ...editingLeader, name: e.target.value })
-                              }
-                            />
-                          </div>
-                        </div>
-                        <div>
-                          <Label>Position</Label>
-                          <Input
-                            value={editingLeader.position}
-                            onChange={(e) =>
-                              setEditingLeader({ ...editingLeader, position: e.target.value })
-                            }
-                          />
-                        </div>
-                        <div>
-                          <Label>Department (HOD)</Label>
-                          <select
-                            value={editingLeader.department || ""}
-                            onChange={(e) =>
-                              setEditingLeader({ ...editingLeader, department: e.target.value || undefined })
-                            }
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#8B0000]"
-                          >
-                            <option value="">No Department (Executive)</option>
-                            <option value="central-administration">Central Administration</option>
-                            <option value="finance">Finance</option>
-                            <option value="education">Education, Youth & Sports</option>
-                            <option value="health">Health</option>
-                            <option value="agriculture">Agriculture</option>
-                            <option value="social-welfare">Social Welfare</option>
-                            <option value="works">Works</option>
-                          </select>
-                        </div>
-                        <ImageUpload
-                          value={editingLeader.image_url}
-                          onChange={(url) =>
-                            setEditingLeader({ ...editingLeader, image_url: url })
-                          }
-                          folder="leadership"
-                          label="Profile Image"
-                          aspectRatio="square"
-                        />
-                        <div>
-                          <Label>Bio</Label>
-                          <Textarea
-                            value={editingLeader.bio}
-                            onChange={(e) =>
-                              setEditingLeader({ ...editingLeader, bio: e.target.value })
-                            }
-                            rows={4}
-                          />
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Switch
-                            checked={editingLeader.is_active}
-                            onCheckedChange={(checked) =>
-                              setEditingLeader({ ...editingLeader, is_active: checked })
-                            }
-                          />
-                          <Label>Active</Label>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            onClick={() => saveLeader(editingLeader)}
-                            disabled={saving}
-                            className="bg-[#8B0000] hover:bg-[#6B0000]"
-                          >
-                            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-                            Save
-                          </Button>
-                          <Button variant="outline" onClick={() => setEditingLeader(null)}>
-                            <X className="w-4 h-4 mr-2" />
-                            Cancel
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="grid gap-4">
-                    {leadership.map((leader) => (
-                      <div
-                        key={leader.id}
-                        className="bg-white p-4 rounded-xl shadow-sm border flex items-center gap-4"
-                      >
-                        <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
-                          {leader.image_url ? (
-                            <img
-                              src={leader.image_url}
-                              alt={leader.name}
-                              className="w-full h-full object-cover rounded-full"
-                            />
-                          ) : (
-                            <Users className="w-8 h-8 text-gray-400" />
-                          )}
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="font-semibold">
-                            {leader.title} {leader.name}
-                          </h4>
-                          <p className="text-sm text-gray-500">{leader.position}</p>
-                          {leader.department && (
-                            <p className="text-xs text-[#8B0000] font-medium mt-1">
-                              Department: {leader.department.replace(/-/g, " ").toUpperCase()}
-                            </p>
-                          )}
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => setEditingLeader(leader)}
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="text-red-600 hover:bg-red-50"
-                            onClick={() => deleteLeader(leader.id)}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                <LeadershipManagement
+                  leadership={leadership}
+                  departments={departments}
+                  editingLeader={editingLeader}
+                  setEditingLeader={setEditingLeader}
+                  saving={saving}
+                  onSaveLeader={saveLeader}
+                  onDeleteLeader={deleteLeader}
+                />
               )}
 
               {activeTab === "assembly" && (
                 <AssemblyManagement />
               )}
 
+              {activeTab === "admin-users" && (
+                <AdminUsersManagement currentUserId={user.id} />
+              )}
+
               {activeTab === "settings" && (
-                <div className="space-y-6">
-                  <div className="bg-white p-6 rounded-xl shadow-sm border">
-                    <h3 className="font-semibold mb-4">Site Settings</h3>
-                    <div className="space-y-6">
-                      {settings.map((setting) => (
-                        <div key={setting.id} className="space-y-2">
-                          <Label className="capitalize">
-                            {setting.key.replace(/_/g, " ")}
-                          </Label>
-                          {setting.type === "textarea" ? (
-                            <Textarea
-                              value={setting.value}
-                              onChange={(e) => {
-                                const updated = settings.map((s) =>
-                                  s.id === setting.id ? { ...s, value: e.target.value } : s
-                                );
-                                setSettings(updated);
-                              }}
-                              onBlur={() => saveSetting(setting)}
-                              rows={4}
-                            />
-                          ) : (
-                            <Input
-                              value={setting.value}
-                              onChange={(e) => {
-                                const updated = settings.map((s) =>
-                                  s.id === setting.id ? { ...s, value: e.target.value } : s
-                                );
-                                setSettings(updated);
-                              }}
-                              onBlur={() => saveSetting(setting)}
-                            />
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+                <SettingsManagement
+                  settings={settings}
+                  setSettings={setSettings}
+                  saving={saving}
+                  onSaveSettings={saveSettings}
+                />
               )}
 
               {activeTab === "documents" && (
-                <div className="space-y-6">
-                  {!editingDocument ? (
-                    <div className="bg-white p-6 rounded-xl shadow-sm border">
-                      <div className="flex items-center justify-between mb-6">
-                        <h3 className="font-semibold">Upload Document</h3>
-                        <Button
-                          size="sm"
-                          className="bg-[#8B0000] hover:bg-[#6B0000]"
-                          onClick={() => setEditingDocument({
-                            id: "",
-                            title: "",
-                            description: "",
-                            file_url: "",
-                            file_type: "",
-                            category: "General",
-                            file_size: 0,
-                            is_published: true,
-                            uploaded_date: new Date().toISOString(),
-                            created_at: new Date().toISOString(),
-                            updated_at: new Date().toISOString(),
-                          })}
-                        >
-                          <Plus className="w-4 h-4 mr-2" />
-                          New Document
-                        </Button>
-                      </div>
+                <DocumentManagement
+                  documents={documents}
+                  editingDocument={editingDocument}
+                  setEditingDocument={setEditingDocument}
+                  saving={saving}
+                  onSaveDocument={saveDocument}
+                  onDeleteDocument={deleteDocument}
+                />
+              )}
 
-                      <div className="space-y-4">
-                        {documents.map((doc) => (
-                          <div
-                            key={doc.id}
-                            className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border"
-                          >
-                            <div className="flex-1">
-                              <h4 className="font-semibold">{doc.title}</h4>
-                              <p className="text-sm text-gray-500">
-                                {doc.category} • {(doc.file_size / 1024 / 1024).toFixed(2)} MB
-                              </p>
-                              <p className="text-xs text-gray-400 mt-1">
-                                {doc.is_published ? "✓ Published" : "Draft"}
-                              </p>
-                            </div>
-                            <div className="flex gap-2">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => setEditingDocument(doc)}
-                              >
-                                <Edit className="w-4 h-4" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="text-red-600 hover:bg-red-50"
-                                onClick={() => deleteDocument(doc.id)}
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
-                        {documents.length === 0 && (
-                          <p className="text-center text-gray-500 py-8">
-                            No documents yet. Click "New Document" to get started.
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="bg-white p-6 rounded-xl shadow-sm border">
-                      <h3 className="font-semibold mb-6">
-                        {editingDocument.id ? "Edit Document" : "New Document"}
-                      </h3>
-                      <div className="space-y-4">
-                        <DocumentUpload
-                          onUpload={(fileUrl, fileType, fileSize) => {
-                            setEditingDocument({
-                              ...editingDocument,
-                              file_url: fileUrl,
-                              file_type: fileType,
-                              file_size: fileSize,
-                            });
-                          }}
-                          initialFileUrl={editingDocument.file_url}
-                        />
-                        <div>
-                          <Label>Title</Label>
-                          <Input
-                            value={editingDocument.title}
-                            onChange={(e) =>
-                              setEditingDocument({
-                                ...editingDocument,
-                                title: e.target.value,
-                              })
-                            }
-                            placeholder="Document title"
-                          />
-                        </div>
-                        <div>
-                          <Label>Description</Label>
-                          <Textarea
-                            value={editingDocument.description}
-                            onChange={(e) =>
-                              setEditingDocument({
-                                ...editingDocument,
-                                description: e.target.value,
-                              })
-                            }
-                            placeholder="Brief description of the document"
-                            rows={3}
-                          />
-                        </div>
-                        <div>
-                          <Label>Category</Label>
-                          <Input
-                            value={editingDocument.category}
-                            onChange={(e) =>
-                              setEditingDocument({
-                                ...editingDocument,
-                                category: e.target.value,
-                              })
-                            }
-                            placeholder="e.g., Reports, Policies, Guidelines"
-                          />
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Switch
-                            checked={editingDocument.is_published}
-                            onCheckedChange={(checked) =>
-                              setEditingDocument({
-                                ...editingDocument,
-                                is_published: checked,
-                              })
-                            }
-                          />
-                          <Label>Publish</Label>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            onClick={() => saveDocument(editingDocument)}
-                            disabled={saving || !editingDocument.title || !editingDocument.file_url}
-                            className="bg-[#8B0000] hover:bg-[#6B0000]"
-                          >
-                            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-                            Save Document
-                          </Button>
-                          <Button variant="outline" onClick={() => setEditingDocument(null)}>
-                            <X className="w-4 h-4 mr-2" />
-                            Cancel
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
+              {activeTab === "departments" && (
+                <DepartmentManagement
+                  departments={departments}
+                  editingDepartment={editingDepartment}
+                  setEditingDepartment={setEditingDepartment}
+                  editingUnit={editingUnit}
+                  setEditingUnit={setEditingUnit}
+                  saving={saving}
+                  onSaveDepartment={saveDepartment}
+                  onSaveDepartmentUnit={saveDepartmentUnit}
+                  onDeleteDepartment={deleteDepartment}
+                  onDeleteUnit={deleteUnit}
+                />
               )}
             </>
           )}
@@ -2293,3 +1058,4 @@ export default function AdminDashboardClient({ user }: { user: User }) {
     </div>
   );
 }
+

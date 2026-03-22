@@ -1,12 +1,12 @@
 import { createAdminSupabaseClient } from "@/lib/supabase/server";
-import { verifySession } from "@/lib/auth";
+import { requireAdminPermission } from "@/lib/admin-route-access";
 import { deleteImage } from "@/lib/storage-utils";
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  const session = await verifySession();
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const access = await requireAdminPermission("manage_slides");
+  if ("response" in access) {
+    return access.response;
   }
 
   const supabase = await createAdminSupabaseClient();
@@ -23,9 +23,9 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const session = await verifySession();
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const access = await requireAdminPermission("manage_slides");
+  if ("response" in access) {
+    return access.response;
   }
 
   const body = await request.json();
@@ -52,9 +52,9 @@ export async function POST(request: Request) {
 }
 
 export async function PUT(request: Request) {
-  const session = await verifySession();
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const access = await requireAdminPermission("manage_slides");
+  if ("response" in access) {
+    return access.response;
   }
 
   const body = await request.json();
@@ -83,9 +83,9 @@ export async function PUT(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  const session = await verifySession();
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const access = await requireAdminPermission("manage_slides");
+  if ("response" in access) {
+    return access.response;
   }
 
   const { searchParams } = new URL(request.url);

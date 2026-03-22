@@ -87,3 +87,32 @@ export function isSupabaseImageUrl(url: string): boolean {
     url.includes("website-images")
   );
 }
+
+/**
+ * Repair malformed public storage URLs that may contain duplicated base URLs
+ * or partial prefixes before the real Supabase public URL.
+ */
+export function normalizeSupabaseImageUrl(url: string): string {
+  if (!url || typeof url !== "string") {
+    return "";
+  }
+
+  const trimmed = url.trim();
+  const matches = [...trimmed.matchAll(/https?:\/\/[^\s"]+/g)];
+  if (matches.length > 1) {
+    return matches[matches.length - 1][0];
+  }
+
+  if (matches.length === 1) {
+    return matches[0][0];
+  }
+
+  const storagePathMatch = trimmed.match(/website-images\/(.+?)($|\?)/);
+  const baseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+  if (storagePathMatch && baseUrl) {
+    return `${baseUrl}/storage/v1/object/public/website-images/${storagePathMatch[1]}`;
+  }
+
+  return trimmed;
+}

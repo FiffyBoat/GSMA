@@ -1,94 +1,116 @@
 import { createAdminSupabaseClient } from "@/lib/supabase/server";
-import { verifySession } from "@/lib/auth";
+import { requireAdminPermission } from "@/lib/admin-route-access";
 import { getSlug } from "@/lib/content-utils";
 import { deleteImage } from "@/lib/storage-utils";
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  const session = await verifySession();
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const access = await requireAdminPermission("manage_news");
+  if ("response" in access) {
+    return access.response;
   }
 
-  const supabase = await createAdminSupabaseClient();
-  const { data, error } = await supabase
-    .from("news_posts")
-    .select("*")
-    .order("published_date", { ascending: false });
+  try {
+    const supabase = await createAdminSupabaseClient();
+    const { data, error } = await supabase
+      .from("news_posts")
+      .select("*")
+      .order("published_date", { ascending: false });
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) {
+      console.error("Supabase error:", error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ data });
+  } catch (err) {
+    console.error("API error:", err);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
-
-  return NextResponse.json({ data });
 }
 
 export async function POST(request: Request) {
-  const session = await verifySession();
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const access = await requireAdminPermission("manage_news");
+  if ("response" in access) {
+    return access.response;
   }
+  const session = access.session;
 
-  const body = await request.json();
-  const supabase = await createAdminSupabaseClient();
+  try {
+    const body = await request.json();
+    const supabase = await createAdminSupabaseClient();
 
-  const { data, error } = await supabase
-    .from("news_posts")
-    .insert({
-      slug: getSlug(body.title, body.slug),
-      title: body.title,
-      excerpt: body.excerpt,
-      content: body.content,
-      image_url: body.image_url,
-      published_date: body.published_date,
-      is_published: body.is_published,
-    })
-    .select()
-    .single();
+    const { data, error } = await supabase
+      .from("news_posts")
+      .insert({
+        slug: getSlug(body.title, body.slug),
+        title: body.title,
+        excerpt: body.excerpt,
+        content: body.content,
+        image_url: body.image_url,
+        published_date: body.published_date,
+        is_published: body.is_published,
+        tags: body.tags || [],
+        posted_by: session.id,
+      })
+      .select()
+      .single();
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) {
+      console.error("Insert error:", error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ data });
+  } catch (err) {
+    console.error("API error:", err);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
-
-  return NextResponse.json({ data });
 }
 
 export async function PUT(request: Request) {
-  const session = await verifySession();
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const access = await requireAdminPermission("manage_news");
+  if ("response" in access) {
+    return access.response;
   }
 
-  const body = await request.json();
-  const supabase = await createAdminSupabaseClient();
+  try {
+    const body = await request.json();
+    const supabase = await createAdminSupabaseClient();
 
-  const { data, error } = await supabase
-    .from("news_posts")
-    .update({
-      slug: getSlug(body.title, body.slug),
-      title: body.title,
-      excerpt: body.excerpt,
-      content: body.content,
-      image_url: body.image_url,
-      published_date: body.published_date,
-      is_published: body.is_published,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", body.id)
-    .select()
-    .single();
+    const { data, error } = await supabase
+      .from("news_posts")
+      .update({
+        slug: getSlug(body.title, body.slug),
+        title: body.title,
+        excerpt: body.excerpt,
+        content: body.content,
+        image_url: body.image_url,
+        published_date: body.published_date,
+        is_published: body.is_published,
+        tags: body.tags || [],
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", body.id)
+      .select()
+      .single();
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) {
+      console.error("Update error:", error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ data });
+  } catch (err) {
+    console.error("API error:", err);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
-
-  return NextResponse.json({ data });
 }
 
 export async function DELETE(request: Request) {
-  const session = await verifySession();
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const access = await requireAdminPermission("manage_news");
+  if ("response" in access) {
+    return access.response;
   }
 
   const { searchParams } = new URL(request.url);

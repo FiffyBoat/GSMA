@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createAdminSupabaseClient } from "@/lib/supabase/server";
+import { requireAdminPermission } from "@/lib/admin-route-access";
 
 // GET - Fetch all electoral areas
 export async function GET() {
   try {
-    const supabase = await createServerSupabaseClient();
+    const access = await requireAdminPermission("manage_assembly");
+    if ("response" in access) {
+      return access.response;
+    }
+
+    const supabase = await createAdminSupabaseClient();
     
     const { data, error } = await supabase
       .from("electoral_areas")
@@ -23,8 +29,13 @@ export async function GET() {
 // POST - Create new electoral area
 export async function POST(request: NextRequest) {
   try {
+    const access = await requireAdminPermission("manage_assembly");
+    if ("response" in access) {
+      return access.response;
+    }
+
     const body = await request.json();
-    const supabase = await createServerSupabaseClient();
+    const supabase = await createAdminSupabaseClient();
 
     const { data, error } = await supabase
       .from("electoral_areas")

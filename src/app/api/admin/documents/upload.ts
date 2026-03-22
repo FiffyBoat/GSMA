@@ -56,7 +56,7 @@ export async function POST(request: Request) {
       .from("documents")
       .getPublicUrl(filePath);
 
-    const file_url = urlData?.publicUrl || `documents/${filePath}`;
+    const file_url = urlData?.publicUrl;
 
     // Create document record in database
     const { data, error: dbError } = await supabase

@@ -5,26 +5,49 @@ import Image from "next/image";
 import Link from "next/link";
 import { Calendar, ArrowLeft } from "lucide-react";
 import { notFound } from "next/navigation";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createPublicServerSupabaseClient } from "@/lib/supabase/public-server";
+import { getSlug } from "@/lib/content-utils";
 
 export const dynamic = "force-dynamic";
 
 interface PageProps {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 export default async function NewsArticlePage({ params }: PageProps) {
-  const supabase = await createServerSupabaseClient();
+  const { slug } = await params;
+  const supabase = createPublicServerSupabaseClient();
 
-  const { data: article, error } = await supabase
+  const { data: directMatch, error: directMatchError } = await supabase
     .from("news_posts")
     .select("*")
-    .eq("slug", params.slug)
-    .eq("is_published", true)
-    .single();
+    .eq("slug", slug)
+    .eq("is_published", true);
 
-  if (error || !article) {
+  const article =
+    directMatch?.[0] ||
+    (
+      await supabase
+        .from("news_posts")
+        .select("*")
+        .eq("is_published", true)
+    ).data?.find(
+      (item) => item.id === slug || getSlug(item.title, item.slug) === slug
+    );
+
+  if ((directMatchError && !directMatch) || !article) {
     notFound();
+  }
+
+  // Fetch author information separately if posted_by exists
+  let author = null;
+  if (article.posted_by) {
+    const { data: authorData } = await supabase
+      .from("admin_users")
+      .select("name, email")
+      .eq("id", article.posted_by)
+      .single();
+    author = authorData;
   }
 
   const { data: relatedArticles } = await supabase
@@ -32,6 +55,7 @@ export default async function NewsArticlePage({ params }: PageProps) {
     .select("*")
     .eq("is_published", true)
     .neq("id", article.id)
+    .lt("published_date", article.published_date)
     .order("published_date", { ascending: false })
     .limit(2);
 
@@ -59,27 +83,48 @@ export default async function NewsArticlePage({ params }: PageProps) {
 
             <div className="mb-[24px] sm:mb-[28px] md:mb-[32px]">
               <span className="inline-block bg-[#8B0000] text-white text-[11px] sm:text-[12px] md:text-[13px] font-semibold px-[14px] sm:px-[16px] md:px-[18px] py-[8px] sm:py-[10px] md:py-[12px] rounded mb-[14px] sm:mb-[16px] md:mb-[18px]">
-                {article.category}
+                {article.category || "News"}
               </span>
               <h1 className="text-[22px] sm:text-[28px] md:text-[36px] lg:text-[42px] font-bold text-gray-900 mb-[14px] sm:mb-[16px] md:mb-[20px] leading-[1.2] sm:leading-[1.3] md:leading-[1.3]">
                 {article.title}
               </h1>
-              <div className="flex items-center gap-[14px] sm:gap-[16px] md:gap-[20px] text-gray-500 text-[12px] sm:text-[13px] md:text-[14px] md:text-[15px]">
-                <div className="flex items-center gap-[6px] sm:gap-[8px]">
-                  <Calendar className="w-[16px] sm:w-[17px] md:w-[18px] md:w-[20px] h-[16px] sm:h-[17px] md:h-[18px] md:h-[20px]" />
-                  <span>{article.date}</span>
+              
+              {/* Admin Details Section */}
+              <div className="mb-[20px] sm:mb-[24px] md:mb-[28px] pb-[20px] sm:pb-[24px] md:pb-[28px] border-b border-gray-200">
+                <div className="flex flex-wrap items-center gap-[16px] sm:gap-[20px] md:gap-[24px] text-gray-600 text-[12px] sm:text-[13px] md:text-[14px]">
+                  {/* Published Date */}
+                  <div className="flex items-center gap-[6px] sm:gap-[8px]">
+                    <Calendar className="w-[16px] sm:w-[17px] md:w-[18px] md:w-[20px] h-[16px] sm:h-[17px] md:h-[18px] md:h-[20px]" />
+                    <span>Published on {new Date(article.published_date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}</span>
+                  </div>
+                  
+                  {/* Author Information */}
+                  {author && (
+                    <div className="flex items-center gap-[6px] sm:gap-[8px]">
+                      <svg className="w-[16px] sm:w-[17px] md:w-[18px] md:w-[20px] h-[16px] sm:h-[17px] md:h-[18px] md:h-[20px]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span>Posted by <strong>{author.name}</strong></span>
+                    </div>
+                  )}
                 </div>
-                {/* Category can be added later when the schema supports it */}
               </div>
+              
+              {/* Excerpt if available */}
+              {article.excerpt && (
+                <p className="text-gray-700 text-[14px] sm:text-[15px] md:text-[16px] italic font-medium mb-[20px] sm:mb-[24px] md:mb-[28px] leading-[1.6] sm:leading-[1.7]">
+                  {article.excerpt}
+                </p>
+              )}
             </div>
 
             {article.image_url && (
-              <div className="relative h-[200px] sm:h-[300px] md:h-[400px] lg:h-[500px] rounded-xl overflow-hidden mb-[20px] sm:mb-[25px] md:mb-[30px] lg:mb-[40px]">
+              <div className="relative h-[200px] sm:h-[300px] md:h-[400px] lg:h-[500px] rounded-xl overflow-hidden mb-[20px] sm:mb-[25px] md:mb-[30px] lg:mb-[40px] bg-gray-100 flex items-center justify-center">
                 <Image
                   src={article.image_url}
                   alt={article.title}
                   fill
-                  className="object-cover"
+                  className="object-contain"
                   priority
                 />
               </div>
@@ -95,17 +140,18 @@ export default async function NewsArticlePage({ params }: PageProps) {
                 ))}
             </div>
 
-            <div className="mt-[30px] sm:mt-[36px] md:mt-[48px] lg:mt-[64px] pt-[20px] sm:pt-[24px] md:pt-[32px] border-t border-gray-200">
-              <div className="flex flex-wrap gap-[10px] sm:gap-[12px] md:gap-[14px]">
-                <span className="text-gray-600 font-medium text-[13px] sm:text-[14px] md:text-[15px]">Tags:</span>
-                <span className="bg-gray-100 text-gray-700 px-[12px] sm:px-[14px] md:px-[16px] py-[6px] sm:py-[8px] md:py-[10px] rounded-full text-[11px] sm:text-[12px] md:text-[13px]">
-                  Ga South
-                </span>
-                <span className="bg-gray-100 text-gray-700 px-[12px] sm:px-[14px] md:px-[16px] py-[6px] sm:py-[8px] md:py-[10px] rounded-full text-[11px] sm:text-[12px] md:text-[13px]">
-                  Municipal Assembly
-                </span>
+            {article.tags && article.tags.length > 0 && (
+              <div className="mt-[30px] sm:mt-[36px] md:mt-[48px] lg:mt-[64px] pt-[20px] sm:pt-[24px] md:pt-[32px] border-t border-gray-200">
+                <div className="flex flex-wrap gap-[10px] sm:gap-[12px] md:gap-[14px]">
+                  <span className="text-gray-600 font-medium text-[13px] sm:text-[14px] md:text-[15px]">Tags:</span>
+                  {article.tags.map((tag: string) => (
+                    <span key={tag} className="bg-[#8B0000]/10 text-[#8B0000] px-[12px] sm:px-[14px] md:px-[16px] py-[6px] sm:py-[8px] md:py-[10px] rounded-full text-[11px] sm:text-[12px] md:text-[13px] font-medium">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {relatedArticles && relatedArticles.length > 0 && (
@@ -117,7 +163,7 @@ export default async function NewsArticlePage({ params }: PageProps) {
                 {relatedArticles.map((related) => (
                   <Link
                     key={related.id}
-                    href={`/news/${related.slug}`}
+                    href={`/news/${getSlug(related.title, related.slug) || related.id}`}
                     className="group block bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
                   >
                     <div className="relative h-[150px] sm:h-[180px] md:h-[200px] lg:h-[240px] overflow-hidden bg-gray-100">

@@ -3,9 +3,12 @@ import Footer from "@/components/sections/footer";
 import PageHeader from "@/components/shared/PageHeader";
 import Sidebar from "@/components/shared/Sidebar";
 import Link from "next/link";
-import Image from "next/image";
+import LeadershipImage from "@/components/shared/LeadershipImage";
 import { ArrowRight } from "lucide-react";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createPublicServerSupabaseClient } from "@/lib/supabase/public-server";
+import { normalizeSupabaseImageUrl } from "@/lib/storage-utils";
+import { loadPublicSiteSettings } from "@/lib/public-site-settings";
+import { splitSettingParagraphs } from "@/lib/site-settings";
 
 export const dynamic = "force-dynamic";
 
@@ -17,27 +20,33 @@ const aboutLinks = [
   { label: "MCD Profile", href: "/about/mcd-profile" },
 ];
 
-const staticLeaders = [
-  {
-    title: "Municipal Chief Executive",
-    name: "Hon. Moses Kabu Kubi Ocansey",
-    role: "MCE",
-    href: "/about/mce-profile",
-    description: "The Municipal Chief Executive is the political head of the Assembly and is responsible for the day-to-day performance of the executive and administrative functions of the Assembly.",
-  },
-  {
-    title: "Municipal Coordinating Director",
-    name: "Eugenia Akporhor Agbenyegah",
-    role: "MCD",
-    href: "/about/mcd-profile",
-    description: "The Municipal Coordinating Director is the administrative head of the Assembly and is responsible for coordinating the activities of all departments of the Assembly.",
-  },
-];
-
 export default async function LeadershipPage() {
-  const supabase = await createServerSupabaseClient();
+  const supabase = createPublicServerSupabaseClient();
+  const settings = await loadPublicSiteSettings();
+  const staticLeaders = [
+    {
+      title: settings.mce_title,
+      name: settings.mce_name,
+      role: "MCE",
+      href: "/about/mce-profile",
+      image_url: settings.mce_image_url,
+      description:
+        splitSettingParagraphs(settings.mce_intro)[0] ??
+        "The Municipal Chief Executive is the political head of the Assembly and is responsible for the day-to-day performance of the executive and administrative functions of the Assembly.",
+    },
+    {
+      title: settings.mcd_title,
+      name: settings.mcd_name,
+      role: "MCD",
+      href: "/about/mcd-profile",
+      image_url: settings.mcd_image_url,
+      description:
+        splitSettingParagraphs(settings.mcd_intro)[0] ??
+        "The Municipal Coordinating Director is the administrative head of the Assembly and is responsible for coordinating the activities of all departments of the Assembly.",
+    },
+  ];
   
-  const { data: departmentHeads } = await supabase
+  const { data: membersOfParliament } = await supabase
     .from("leadership")
     .select("*")
     .eq("is_active", true)
@@ -77,8 +86,19 @@ export default async function LeadershipPage() {
                   {staticLeaders.map((leader) => (
                     <div key={leader.role} className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
                       <div className="bg-gradient-to-br from-[#8B0000] to-[#6B0000] p-[16px] sm:p-[18px] md:p-[20px] lg:p-[24px] text-center">
-                        <div className="w-[88px] sm:w-[96px] md:w-[104px] h-[88px] sm:h-[96px] md:h-[104px] bg-white/20 rounded-full mx-auto mb-[12px] sm:mb-[14px] md:mb-[16px] flex items-center justify-center">
-                          <span className="text-[26px] sm:text-[28px] md:text-[30px] font-bold text-white">{leader.role}</span>
+                        <div className="w-[104px] h-[104px] sm:w-[120px] sm:h-[120px] md:w-[140px] md:h-[140px] bg-white/20 rounded-full mx-auto mb-[12px] sm:mb-[14px] md:mb-[16px] flex items-center justify-center overflow-hidden">
+                          {leader.image_url ? (
+                            <LeadershipImage
+                              src={leader.image_url}
+                              alt={leader.name}
+                              width={140}
+                              height={140}
+                              className="w-full h-full"
+                              rounded={true}
+                            />
+                          ) : (
+                            <span className="text-[26px] sm:text-[28px] md:text-[30px] font-bold text-white">{leader.role}</span>
+                          )}
                         </div>
                         <h3 className="text-[16px] sm:text-[17px] md:text-[18px] font-bold text-white">{leader.name}</h3>
                         <p className="text-[#ffcc00] text-[12px] sm:text-[13px] md:text-[14px]">{leader.title}</p>
@@ -98,25 +118,26 @@ export default async function LeadershipPage() {
                 </div>
               </div>
 
-              {/* Department Heads */}
-              {departmentHeads && departmentHeads.length > 0 && (
+              {/* Members of Parliament */}
+              {membersOfParliament && membersOfParliament.length > 0 && (
                 <div>
                   <h3 className="text-[18px] sm:text-[20px] md:text-[22px] font-bold text-gray-900 mb-[16px] sm:mb-[18px] md:mb-[20px] pb-[12px] border-b-2 border-[#8B0000]">
-                    Department Heads
+                    Leadership
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[16px] sm:gap-[18px] md:gap-[20px]">
-                    {departmentHeads.map((leader) => (
-                      <div key={leader.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
-                        {leader.image_url && (
-                          <div className="relative w-full h-[200px] sm:h-[220px] md:h-[240px] overflow-hidden">
-                            <Image
-                              src={leader.image_url}
-                              alt={leader.name}
-                              fill
-                              className="object-cover"
-                            />
-                          </div>
-                        )}
+                    {membersOfParliament.map((leader) => (
+                      <div key={leader.id} className="bg-white border border-gray-200 rounded-[22px] overflow-hidden hover:shadow-lg transition-shadow">
+                        <div className="relative w-full h-[260px] sm:h-[300px] md:h-[320px] overflow-hidden bg-[linear-gradient(180deg,#faf7f1,#f1eadf)] flex items-center justify-center">
+                          <div className="absolute inset-x-0 top-0 h-16 bg-[radial-gradient(circle_at_top,rgba(139,0,0,0.12),transparent_70%)]" />
+                          <LeadershipImage
+                            src={normalizeSupabaseImageUrl(leader.image_url || "/logo.png")}
+                            alt={leader.name}
+                            width={420}
+                            height={320}
+                            className="w-full h-full p-4 sm:p-5 md:p-6"
+                            rounded={false}
+                          />
+                        </div>
                         <div className="p-[14px] sm:p-[16px] md:p-[18px] lg:p-[20px]">
                           <h4 className="text-[14px] sm:text-[15px] md:text-[16px] font-bold text-gray-900">
                             {leader.title && <span>{leader.title} </span>}
@@ -127,7 +148,7 @@ export default async function LeadershipPage() {
                           </p>
                           {leader.department && (
                             <p className="text-[11px] sm:text-[12px] md:text-[13px] text-gray-500 mb-[10px] px-[8px] py-[4px] bg-gray-100 rounded inline-block">
-                              {leader.department.replace(/-/g, " ").split(" ").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ")}
+                              {leader.department.replace(/-/g, " ").split(" ").map((word: string): string => word.charAt(0).toUpperCase() + word.slice(1)).join(" ")}
                             </p>
                           )}
                           {leader.bio && (

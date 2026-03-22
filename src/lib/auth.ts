@@ -1,5 +1,7 @@
 import { cookies } from "next/headers";
 import { jwtVerify, SignJWT } from "jose";
+import { normalizeAdminRole, type AdminRole } from "@/lib/admin-roles";
+import { createAdminSupabaseClient } from "@/lib/supabase/server";
 
 function getJWTSecret(): Uint8Array {
   const secret = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -15,6 +17,7 @@ export interface AdminSession {
   id: string;
   email: string;
   name: string;
+  role: AdminRole;
 }
 
 export async function createSession(admin: AdminSession): Promise<string> {
@@ -37,7 +40,29 @@ export async function verifySession(): Promise<AdminSession | null> {
   try {
     const jwtSecret = getJWTSecret();
     const { payload } = await jwtVerify(token, jwtSecret);
-    return payload as unknown as AdminSession;
+    const adminId = String(payload.id || "");
+
+    if (!adminId) {
+      return null;
+    }
+
+    const supabase = await createAdminSupabaseClient();
+    const { data: admin, error } = await supabase
+      .from("admin_users")
+      .select("id, email, name, role")
+      .eq("id", adminId)
+      .single();
+
+    if (error || !admin) {
+      return null;
+    }
+
+    return {
+      id: admin.id,
+      email: admin.email,
+      name: admin.name,
+      role: normalizeAdminRole(admin.role),
+    };
   } catch (error) {
     console.error("Session verification failed:", error instanceof Error ? error.message : String(error));
     return null;

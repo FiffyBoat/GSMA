@@ -1,10 +1,16 @@
 import { createAdminSupabaseClient } from "@/lib/supabase/server";
+import { requireAdminPermission } from "@/lib/admin-route-access";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export async function POST(request: Request) {
+  const access = await requireAdminPermission("upload_media");
+  if ("response" in access) {
+    return access.response;
+  }
+
   const supabase = await createAdminSupabaseClient();
 
   try {
@@ -66,6 +72,11 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+  const access = await requireAdminPermission("upload_media");
+  if ("response" in access) {
+    return access.response;
+  }
+
   const supabase = await createAdminSupabaseClient();
   const { searchParams } = new URL(request.url);
   const path = searchParams.get("path");

@@ -3,42 +3,40 @@
 import { useEffect, useRef } from "react";
 
 type ReporterProps = {
-  /*  ⎯⎯ props are only provided on the global-error page ⎯⎯ */
   error?: Error & { digest?: string };
-  reset?: () => void;
 };
 
-export default function ErrorReporter({ error, reset }: ReporterProps) {
-  /* ─ instrumentation shared by every route ─ */
+export default function ErrorReporter({ error }: ReporterProps) {
   const lastOverlayMsg = useRef("");
   const pollRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    const inIframe = window.parent !== window;
-    if (!inIframe) return;
+    if (window.parent === window) {
+      return;
+    }
 
     const send = (payload: unknown) => window.parent.postMessage(payload, "*");
 
-    const onError = (e: ErrorEvent) =>
+    const onError = (event: ErrorEvent) =>
       send({
         type: "ERROR_CAPTURED",
         error: {
-          message: e.message,
-          stack: e.error?.stack,
-          filename: e.filename,
-          lineno: e.lineno,
-          colno: e.colno,
+          message: event.message,
+          stack: event.error?.stack,
+          filename: event.filename,
+          lineno: event.lineno,
+          colno: event.colno,
           source: "window.onerror",
         },
         timestamp: Date.now(),
       });
 
-    const onReject = (e: PromiseRejectionEvent) =>
+    const onReject = (event: PromiseRejectionEvent) =>
       send({
         type: "ERROR_CAPTURED",
         error: {
-          message: e.reason?.message ?? String(e.reason),
-          stack: e.reason?.stack,
+          message: event.reason?.message ?? String(event.reason),
+          stack: event.reason?.stack,
           source: "unhandledrejection",
         },
         timestamp: Date.now(),
@@ -50,12 +48,13 @@ export default function ErrorReporter({ error, reset }: ReporterProps) {
         overlay?.querySelector(
           "h1, h2, .error-message, [data-nextjs-dialog-body]"
         ) ?? null;
-      const txt = node?.textContent ?? node?.innerHTML ?? "";
-      if (txt && txt !== lastOverlayMsg.current) {
-        lastOverlayMsg.current = txt;
+      const text = node?.textContent ?? node?.innerHTML ?? "";
+
+      if (text && text !== lastOverlayMsg.current) {
+        lastOverlayMsg.current = text;
         send({
           type: "ERROR_CAPTURED",
-          error: { message: txt, source: "nextjs-dev-overlay" },
+          error: { message: text, source: "nextjs-dev-overlay" },
           timestamp: Date.now(),
         });
       }
@@ -68,13 +67,18 @@ export default function ErrorReporter({ error, reset }: ReporterProps) {
     return () => {
       window.removeEventListener("error", onError);
       window.removeEventListener("unhandledrejection", onReject);
-      pollRef.current && clearInterval(pollRef.current);
+
+      if (pollRef.current) {
+        clearInterval(pollRef.current);
+      }
     };
   }, []);
 
-  /* ─ extra postMessage when on the global-error route ─ */
   useEffect(() => {
-    if (!error) return;
+    if (!error) {
+      return;
+    }
+
     window.parent.postMessage(
       {
         type: "global-error-reset",
@@ -91,44 +95,41 @@ export default function ErrorReporter({ error, reset }: ReporterProps) {
     );
   }, [error]);
 
-  /* ─ ordinary pages render nothing ─ */
-  if (!error) return null;
+  if (!error) {
+    return null;
+  }
 
-  /* ─ global-error UI ─ */
   return (
     <html>
-      <body className="min-h-screen bg-background text-foreground flex items-center justify-center p-4">
-        <div className="max-w-md w-full text-center space-y-6">
+      <body className="flex min-h-screen items-center justify-center bg-background p-4 text-foreground">
+        <div className="w-full max-w-md space-y-6 text-center">
           <div className="space-y-2">
             <h1 className="text-2xl font-bold text-destructive">
               Something went wrong!
             </h1>
             <p className="text-muted-foreground">
-              An unexpected error occurred. Please try again fixing with Orchids
+              An unexpected error occurred. Please refresh the page or try again.
             </p>
           </div>
-          <div className="space-y-2">
-            {process.env.NODE_ENV === "development" && (
-              <details className="mt-4 text-left">
-                <summary className="cursor-pointer text-sm text-muted-foreground hover:text-foreground">
-                  Error details
-                </summary>
-                <pre className="mt-2 text-xs bg-muted p-2 rounded overflow-auto">
-                  {error.message}
-                  {error.stack && (
-                    <div className="mt-2 text-muted-foreground">
-                      {error.stack}
-                    </div>
-                  )}
-                  {error.digest && (
-                    <div className="mt-2 text-muted-foreground">
-                      Digest: {error.digest}
-                    </div>
-                  )}
-                </pre>
-              </details>
-            )}
-          </div>
+
+          {process.env.NODE_ENV === "development" ? (
+            <details className="mt-4 text-left">
+              <summary className="cursor-pointer text-sm text-muted-foreground hover:text-foreground">
+                Error details
+              </summary>
+              <pre className="mt-2 overflow-auto rounded bg-muted p-2 text-xs">
+                {error.message}
+                {error.stack ? (
+                  <div className="mt-2 text-muted-foreground">{error.stack}</div>
+                ) : null}
+                {error.digest ? (
+                  <div className="mt-2 text-muted-foreground">
+                    Digest: {error.digest}
+                  </div>
+                ) : null}
+              </pre>
+            </details>
+          ) : null}
         </div>
       </body>
     </html>

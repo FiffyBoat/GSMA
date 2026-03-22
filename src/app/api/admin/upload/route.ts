@@ -1,15 +1,38 @@
 import { createAdminSupabaseClient } from "@/lib/supabase/server";
-import { verifySession } from "@/lib/auth";
+import { requireAdminPermission } from "@/lib/admin-route-access";
 import { NextResponse } from "next/server";
+
+// Allowed MIME types used for validation and bucket configuration
+const allowedImageTypes = [
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+];
+
+const allowedVideoTypes = [
+  "video/mp4",
+  "video/webm",
+  "video/ogg",
+  "video/quicktime",
+  "video/x-msvideo",
+  "video/x-ms-wmv",
+  "video/3gpp",
+  "video/3gpp2",
+  "video/x-m4v",
+];
+
+const allowedMimeTypes = [...allowedImageTypes, ...allowedVideoTypes];
 
 async function ensureWebsiteImagesBucket(supabase: Awaited<ReturnType<typeof createAdminSupabaseClient>>) {
   // Try to create the bucket if it's missing. If it already exists, Supabase will return an error
   // like "Bucket already exists", which we can safely ignore.
-  const { error } = await supabase.storage.createBucket("website-images", {
-    public: true,
-    fileSizeLimit: 5 * 1024 * 1024,
-    allowedMimeTypes: ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"],
-  });
+    const { error } = await supabase.storage.createBucket("website-images", {
+      public: true,
+      fileSizeLimit: 500 * 1024 * 1024, // 500MB for videos and images
+      allowedMimeTypes,
+    });
 
   if (error) {
     const msg = (error as any)?.message || String(error);
@@ -21,9 +44,9 @@ async function ensureWebsiteImagesBucket(supabase: Awaited<ReturnType<typeof cre
 }
 
 export async function POST(request: Request) {
-  const session = await verifySession();
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const access = await requireAdminPermission("upload_media");
+  if ("response" in access) {
+    return access.response;
   }
 
   try {
@@ -35,20 +58,24 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
-    // Validate file type
-    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"];
-    if (!allowedTypes.includes(file.type)) {
+    // Validate file type (images and videos). Accept any image/* or video/* MIME type.
+    if (!file.type || (!file.type.startsWith("image/") && !file.type.startsWith("video/"))) {
       return NextResponse.json(
-        { error: "Invalid file type. Only images are allowed." },
+        { error: "Invalid file type. Only image or video files are allowed." },
         { status: 400 }
       );
     }
 
-    // Validate file size (max 5MB)
-    const maxSize = 5 * 1024 * 1024; // 5MB
+    // Validate file size (max 5MB for images, 500MB for videos)
+    const maxImageSize = 5 * 1024 * 1024; // 5MB
+    const maxVideoSize = 500 * 1024 * 1024; // 500MB
+    const isImage = allowedImageTypes.includes(file.type);
+    const maxSize = isImage ? maxImageSize : maxVideoSize;
+
     if (file.size > maxSize) {
+      const maxSizeMB = Math.floor(maxSize / (1024 * 1024));
       return NextResponse.json(
-        { error: "File size exceeds 5MB limit." },
+        { error: `File size exceeds ${maxSizeMB}MB limit.` },
         { status: 400 }
       );
     }
@@ -108,7 +135,7 @@ export async function POST(request: Request) {
           {
             error:
               (error as any)?.message ||
-              "Failed to upload image. Confirm `.env.local` points to the same Supabase instance where the bucket exists.",
+              "Failed to upload file. Confirm `.env.local` points to the same Supabase instance where the bucket exists.",
           },
           { status: 500 }
         );
@@ -127,16 +154,16 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Upload error:", error);
     return NextResponse.json(
-      { error: "An error occurred while uploading the image" },
+      { error: "An error occurred while uploading the file" },
       { status: 500 }
     );
   }
 }
 
 export async function DELETE(request: Request) {
-  const session = await verifySession();
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const access = await requireAdminPermission("upload_media");
+  if ("response" in access) {
+    return access.response;
   }
 
   try {

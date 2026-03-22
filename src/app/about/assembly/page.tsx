@@ -2,9 +2,10 @@ import Navbar from "@/components/sections/navbar";
 import Footer from "@/components/sections/footer";
 import PageHeader from "@/components/shared/PageHeader";
 import Sidebar from "@/components/shared/Sidebar";
-import Image from "next/image";
+import LeadershipImage from "@/components/shared/LeadershipImage";
 import { Users, Building, Scale, FileText, User } from "lucide-react";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createPublicServerSupabaseClient } from "@/lib/supabase/public-server";
+import { normalizeSupabaseImageUrl } from "@/lib/storage-utils";
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +18,7 @@ const aboutLinks = [
 ];
 
 export default async function AssemblyPage() {
-  const supabase = await createServerSupabaseClient();
+  const supabase = createPublicServerSupabaseClient();
 
   const { data: electoralAreas } = await supabase
     .from("electoral_areas")
@@ -147,18 +148,21 @@ export default async function AssemblyPage() {
                         .filter((member: any) => member.is_active)
                         .sort((a: any, b: any) => (a.display_order || 0) - (b.display_order || 0))
                         .map((member: any) => (
-                          <div key={member.id} className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-gray-200">
+                          <div key={member.id} className="bg-white rounded-[22px] overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-gray-200">
                             {member.image_url ? (
-                              <div className="relative h-[200px] sm:h-[220px] md:h-[240px] overflow-hidden">
-                                <Image
-                                  src={member.image_url}
+                              <div className="relative h-[260px] sm:h-[300px] md:h-[320px] overflow-hidden bg-[linear-gradient(180deg,#faf7f1,#f1eadf)]">
+                                <div className="absolute inset-x-0 top-0 h-16 bg-[radial-gradient(circle_at_top,rgba(139,0,0,0.12),transparent_70%)]" />
+                                <LeadershipImage
+                                  src={normalizeSupabaseImageUrl(member.image_url)}
                                   alt={member.name}
-                                  fill
-                                  className="object-cover"
+                                  width={420}
+                                  height={320}
+                                  rounded={false}
+                                  className="h-full w-full p-4 sm:p-5 md:p-6"
                                 />
                               </div>
                             ) : (
-                              <div className="h-[200px] sm:h-[220px] md:h-[240px] bg-gradient-to-br from-[#8B0000] to-[#6B0000] flex items-center justify-center">
+                              <div className="h-[260px] sm:h-[300px] md:h-[320px] bg-gradient-to-br from-[#8B0000] to-[#6B0000] flex items-center justify-center">
                                 <User className="w-[60px] sm:w-[70px] md:w-[80px] h-[60px] sm:h-[70px] md:h-[80px] text-white/30" />
                               </div>
                             )}

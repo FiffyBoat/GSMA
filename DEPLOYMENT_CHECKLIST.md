@@ -31,22 +31,25 @@ This checklist covers all steps needed to deploy the project to production.
 ## Environment Configuration
 
 ### 1. Production Environment Variables
-Create or update `.env.production.local` with:
+Create the production environment in your host using these keys:
 
 ```env
 # Supabase
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
-
-# Database (if needed for server-side operations)
+SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 
-# Admin credentials (if using basic auth)
-ADMIN_USERNAME=your-admin-username
-ADMIN_PASSWORD=your-admin-password
+# Optional admin basic-auth layer for /admin/*
+ADMIN_BASIC_AUTH_USER=your-admin-username
+ADMIN_BASIC_AUTH_PASS=your-admin-password
 
-# Optional: Analytics, Monitoring, etc.
-NEXT_PUBLIC_ANALYTICS_ID=your-analytics-id
+# Optional scheduled event refresh secret
+REFRESH_EVENTS_SECRET=your-refresh-events-secret
+
+# Optional contact form email notifications
+SENDGRID_API_KEY=your-sendgrid-api-key
+CONTACT_NOTIFICATION_EMAIL=notifications@example.com
 ```
 
 **Getting these values:**
@@ -58,7 +61,11 @@ NEXT_PUBLIC_ANALYTICS_ID=your-analytics-id
 
 - [ ] `NEXT_PUBLIC_SUPABASE_URL` configured
 - [ ] `NEXT_PUBLIC_SUPABASE_ANON_KEY` configured
+- [ ] `SUPABASE_URL` configured
 - [ ] `SUPABASE_SERVICE_ROLE_KEY` configured
+- [ ] `ADMIN_BASIC_AUTH_USER` and `ADMIN_BASIC_AUTH_PASS` configured if using the extra admin gate
+- [ ] `REFRESH_EVENTS_SECRET` configured if using the event refresh endpoint from cron
+- [ ] `SENDGRID_API_KEY` and `CONTACT_NOTIFICATION_EMAIL` configured if contact emails should send notifications
 - [ ] All secrets stored securely (never in git)
 
 ### 2. Supabase Security

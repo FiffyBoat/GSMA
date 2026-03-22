@@ -1,5 +1,6 @@
 import { createAdminSupabaseClient } from "@/lib/supabase/server";
-import { verifySession } from "@/lib/auth";
+import { normalizeAdminRole } from "@/lib/admin-roles";
+import { requireAdminPermission } from "@/lib/admin-route-access";
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 
@@ -13,18 +14,15 @@ import bcrypt from "bcryptjs";
 
 export async function GET() {
   try {
-    const session = await verifySession();
-    if (!session) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+    const access = await requireAdminPermission("manage_admin_users");
+    if ("response" in access) {
+      return access.response;
     }
 
     const supabase = await createAdminSupabaseClient();
     const { data, error } = await supabase
       .from("admin_users")
-      .select("id, email, name, created_at, updated_at")
+      .select("id, email, name, role, created_at, updated_at")
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -34,7 +32,12 @@ export async function GET() {
       );
     }
 
-    return NextResponse.json({ data });
+    return NextResponse.json({
+      data: (data || []).map((admin) => ({
+        ...admin,
+        role: normalizeAdminRole(admin.role),
+      })),
+    });
   } catch (error) {
     console.error("Get admins error:", error);
     return NextResponse.json(
@@ -46,15 +49,14 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const session = await verifySession();
-    if (!session) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+    const access = await requireAdminPermission("manage_admin_users");
+    if ("response" in access) {
+      return access.response;
     }
 
-    const { email, password, name } = await request.json();
+    const { email, password, name, role } = await request.json();
+    const normalizedRole =
+      typeof role === "string" ? normalizeAdminRole(role) : "editor";
 
     // Validate input
     if (!email || !password || !name) {
@@ -107,8 +109,9 @@ export async function POST(request: Request) {
         email: email.toLowerCase(),
         password_hash: passwordHash,
         name,
+        role: normalizedRole,
       })
-      .select("id, email, name, created_at")
+      .select("id, email, name, role, created_at")
       .single();
 
     if (error) {
@@ -120,7 +123,13 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json(
-      { data, message: "Admin user created successfully" },
+      {
+        data: {
+          ...data,
+          role: normalizeAdminRole(data?.role),
+        },
+        message: "Admin user created successfully",
+      },
       { status: 201 }
     );
   } catch (error) {
@@ -134,15 +143,14 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
   try {
-    const session = await verifySession();
-    if (!session) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+    const access = await requireAdminPermission("manage_admin_users");
+    if ("response" in access) {
+      return access.response;
     }
 
-    const { id, name, email } = await request.json();
+    const session = access.session;
+    const { id, name, email, role } = await request.json();
+    const normalizedRole = role ? normalizeAdminRole(role) : undefined;
 
     if (!id) {
       return NextResponse.json(
@@ -152,6 +160,13 @@ export async function PUT(request: Request) {
     }
 
     const supabase = await createAdminSupabaseClient();
+
+    if (id === session.id && normalizedRole && normalizedRole !== session.role) {
+      return NextResponse.json(
+        { error: "You cannot change your own role" },
+        { status: 400 }
+      );
+    }
 
     // Check if email is being changed and if new email exists
     if (email) {
@@ -178,16 +193,43 @@ export async function PUT(request: Request) {
       }
     }
 
+    if (normalizedRole) {
+      const { data: targetAdmin } = await supabase
+        .from("admin_users")
+        .select("id, role")
+        .eq("id", id)
+        .single();
+
+      if (
+        targetAdmin &&
+        normalizeAdminRole(targetAdmin.role) === "super_admin" &&
+        normalizedRole !== "super_admin"
+      ) {
+        const { count } = await supabase
+          .from("admin_users")
+          .select("id", { count: "exact", head: true })
+          .eq("role", "super_admin");
+
+        if ((count || 0) <= 1) {
+          return NextResponse.json(
+            { error: "At least one super admin must remain" },
+            { status: 400 }
+          );
+        }
+      }
+    }
+
     // Update admin user
     const { data, error } = await supabase
       .from("admin_users")
       .update({
         ...(name && { name }),
         ...(email && { email: email.toLowerCase() }),
+        ...(normalizedRole && { role: normalizedRole }),
         updated_at: new Date().toISOString(),
       })
       .eq("id", id)
-      .select("id, email, name, created_at, updated_at")
+      .select("id, email, name, role, created_at, updated_at")
       .single();
 
     if (error) {
@@ -199,7 +241,10 @@ export async function PUT(request: Request) {
     }
 
     return NextResponse.json({
-      data,
+      data: {
+        ...data,
+        role: normalizeAdminRole(data?.role),
+      },
       message: "Admin user updated successfully",
     });
   } catch (error) {
@@ -213,13 +258,11 @@ export async function PUT(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-    const session = await verifySession();
-    if (!session) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+    const access = await requireAdminPermission("manage_admin_users");
+    if ("response" in access) {
+      return access.response;
     }
+    const session = access.session;
 
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
@@ -244,13 +287,28 @@ export async function DELETE(request: Request) {
     // Check if this is the last admin
     const { data: admins } = await supabase
       .from("admin_users")
-      .select("id");
+      .select("id, role");
 
     if (admins && admins.length <= 1) {
       return NextResponse.json(
         { error: "Cannot delete the last admin user" },
         { status: 400 }
       );
+    }
+
+    const currentAdmins = admins || [];
+    const targetAdmin = currentAdmins.find((admin) => admin.id === id);
+    if (targetAdmin && normalizeAdminRole(targetAdmin.role) === "super_admin") {
+      const superAdminCount = currentAdmins.filter(
+        (admin) => normalizeAdminRole(admin.role) === "super_admin"
+      ).length;
+
+      if (superAdminCount <= 1) {
+        return NextResponse.json(
+          { error: "Cannot delete the last super admin" },
+          { status: 400 }
+        );
+      }
     }
 
     // Delete admin user

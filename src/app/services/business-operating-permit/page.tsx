@@ -1,63 +1,53 @@
-"use client";
-
-import Navbar from "@/components/sections/navbar";
 import Footer from "@/components/sections/footer";
+import Navbar from "@/components/sections/navbar";
 import PageHeader from "@/components/shared/PageHeader";
-import { FileText, Clock, CheckCircle, AlertCircle, Phone, MapPin } from "lucide-react";
+import { loadPublicSiteSettings } from "@/lib/public-site-settings";
+import { createPublicServerSupabaseClient } from "@/lib/supabase/public-server";
+import { includesLooseText } from "@/lib/text-match";
+import { splitSettingLines, splitSettingRows } from "@/lib/site-settings";
+import {
+  AlertCircle,
+  CheckCircle,
+  Clock,
+  FileText,
+  MapPin,
+  Phone,
+} from "lucide-react";
 import Link from "next/link";
 
-export default function BusinessOperatingPermitPage() {
-  const requirements = [
-    "Completed application form",
-    "Valid National ID (Ghana Card)",
-    "Passport-sized photographs (2)",
-    "Business registration certificate from Registrar General's Department",
-    "Tax Identification Number (TIN)",
-    "Proof of business location (tenancy agreement or property documents)",
-    "Environmental and Health Permit (for applicable businesses)",
-    "Fire Safety Certificate (for applicable businesses)",
-    "Site plan of business premises",
-  ];
+export const dynamic = "force-dynamic";
 
-  const steps = [
-    {
-      step: 1,
-      title: "Obtain Application Form",
-      description: "Visit the Ga South Municipal Assembly office or download the application form online.",
-    },
-    {
-      step: 2,
-      title: "Complete the Form",
-      description: "Fill out all required sections accurately and attach necessary documents.",
-    },
-    {
-      step: 3,
-      title: "Submit Application",
-      description: "Submit your completed application with all supporting documents to the Revenue Unit.",
-    },
-    {
-      step: 4,
-      title: "Inspection",
-      description: "An inspection team will visit your business premises to verify the information provided.",
-    },
-    {
-      step: 5,
-      title: "Payment",
-      description: "Upon approval, pay the required fees at the Finance Department.",
-    },
-    {
-      step: 6,
-      title: "Collect Permit",
-      description: "Collect your Business Operating Permit from the Revenue Unit.",
-    },
-  ];
+function matchesFeeFixingDocument(value?: string | null) {
+  return includesLooseText(value, "fee fixing");
+}
 
-  const fees = [
-    { category: "Small Scale Business", amount: "GHS 100 - 300" },
-    { category: "Medium Scale Business", amount: "GHS 300 - 800" },
-    { category: "Large Scale Business", amount: "GHS 800 - 2,000" },
-    { category: "Industrial/Manufacturing", amount: "GHS 2,000+" },
-  ];
+export default async function BusinessOperatingPermitPage() {
+  const settings = await loadPublicSiteSettings();
+  const supabase = createPublicServerSupabaseClient();
+  const { data: documents } = await supabase
+    .from("documents")
+    .select(
+      "id, title, description, file_url, file_type, category, file_size, is_published, uploaded_date"
+    )
+    .eq("is_published", true)
+    .order("uploaded_date", { ascending: false });
+  const feeFixingDocs = (documents || []).filter(
+    (doc) =>
+      matchesFeeFixingDocument(doc.category) ||
+      matchesFeeFixingDocument(doc.title) ||
+      matchesFeeFixingDocument(doc.description)
+  );
+
+  const overviewParagraphs = settings.business_permit_overview
+    .split("\n\n")
+    .map((item) => item.trim())
+    .filter(Boolean);
+  const processSteps = splitSettingLines(settings.business_permit_process);
+  const paymentModes = splitSettingLines(settings.business_permit_payment_modes);
+  const requirements = splitSettingLines(settings.business_permit_requirements);
+  const fees = splitSettingRows(settings.business_permit_fees);
+  const whereToApply = splitSettingLines(settings.business_permit_where_to_apply);
+  const officeHours = splitSettingLines(settings.business_permit_office_hours);
 
   return (
     <main className="min-h-screen bg-white">
@@ -75,60 +65,110 @@ export default function BusinessOperatingPermitPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
             <div className="lg:col-span-2">
               <div className="prose max-w-none">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">Overview</h2>
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                  General Information
+                </h2>
+                {overviewParagraphs.map((paragraph, index) => (
+                  <p
+                    key={`${paragraph}-${index}`}
+                    className="text-gray-600 mb-6 leading-relaxed"
+                  >
+                    {paragraph}
+                  </p>
+                ))}
+
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                  Processes to Obtain a Business Operating Permit
+                </h2>
+                <div className="bg-gray-50 rounded-lg p-6 mb-8">
+                  <ol className="space-y-3 list-decimal list-inside">
+                    {processSteps.map((step) => (
+                      <li key={step} className="text-gray-700">
+                        {step}
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                  Apply for a Business License
+                </h2>
                 <p className="text-gray-600 mb-6 leading-relaxed">
-                  A Business Operating Permit is a mandatory document required for all businesses 
-                  operating within the Ga South Municipality. This permit ensures that your business 
-                  complies with local regulations and standards, and contributes to the development 
-                  of the municipality through the payment of applicable fees.
-                </p>
-                <p className="text-gray-600 mb-8 leading-relaxed">
-                  The permit is valid for one calendar year (January to December) and must be renewed 
-                  annually. Operating a business without a valid permit is an offense and may result 
-                  in penalties or closure of the business.
+                  {settings.business_permit_apply}
                 </p>
 
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">Requirements</h2>
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                  Business Changes & Closures
+                </h2>
+                <p className="text-gray-600 mb-6 leading-relaxed">
+                  {settings.business_permit_changes}
+                </p>
+
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                  Business License Renewals
+                </h2>
+                <p className="text-gray-600 mb-6 leading-relaxed">
+                  {settings.business_permit_renewals}
+                </p>
+
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                  Mode of Payment
+                </h2>
                 <div className="bg-gray-50 rounded-lg p-6 mb-8">
-                  <ul className="space-y-3">
-                    {requirements.map((req, index) => (
-                      <li key={index} className="flex items-start gap-3">
-                        <CheckCircle className="w-5 h-5 text-[#8B0000] shrink-0 mt-0.5" />
-                        <span className="text-gray-700">{req}</span>
+                  <ul className="space-y-2">
+                    {paymentModes.map((mode) => (
+                      <li
+                        key={mode}
+                        className="flex items-center gap-2 text-gray-700"
+                      >
+                        <span className="w-2 h-2 bg-[#8B0000] rounded-full"></span>
+                        {mode}
                       </li>
                     ))}
                   </ul>
                 </div>
 
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">Application Process</h2>
-                <div className="space-y-6 mb-8">
-                  {steps.map((item) => (
-                    <div key={item.step} className="flex gap-4">
-                      <div className="w-10 h-10 bg-[#8B0000] rounded-full flex items-center justify-center text-white font-bold shrink-0">
-                        {item.step}
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-gray-900 mb-1">{item.title}</h3>
-                        <p className="text-gray-600">{item.description}</p>
-                      </div>
-                    </div>
-                  ))}
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                  Requirements
+                </h2>
+                <div className="bg-gray-50 rounded-lg p-6 mb-8">
+                  <ul className="space-y-3">
+                    {requirements.map((requirement) => (
+                      <li key={requirement} className="flex items-start gap-3">
+                        <CheckCircle className="w-5 h-5 text-[#8B0000] shrink-0 mt-0.5" />
+                        <span className="text-gray-700">{requirement}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
 
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">Fee Structure</h2>
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                  Fee Structure
+                </h2>
                 <div className="overflow-x-auto mb-8">
                   <table className="w-full border-collapse">
                     <thead>
                       <tr className="bg-[#8B0000] text-white">
-                        <th className="px-4 py-3 text-left font-semibold">Business Category</th>
-                        <th className="px-4 py-3 text-left font-semibold">Fee Range</th>
+                        <th className="px-4 py-3 text-left font-semibold">
+                          Business Category
+                        </th>
+                        <th className="px-4 py-3 text-left font-semibold">
+                          Fee Range
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
-                      {fees.map((fee, index) => (
-                        <tr key={index} className={index % 2 === 0 ? "bg-gray-50" : "bg-white"}>
-                          <td className="px-4 py-3 border-b border-gray-200">{fee.category}</td>
-                          <td className="px-4 py-3 border-b border-gray-200 font-semibold text-[#8B0000]">{fee.amount}</td>
+                      {fees.map(([category, amount], index) => (
+                        <tr
+                          key={`${category}-${index}`}
+                          className={index % 2 === 0 ? "bg-gray-50" : "bg-white"}
+                        >
+                          <td className="px-4 py-3 border-b border-gray-200">
+                            {category}
+                          </td>
+                          <td className="px-4 py-3 border-b border-gray-200 font-semibold text-[#8B0000]">
+                            {amount}
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -139,14 +179,72 @@ export default function BusinessOperatingPermitPage() {
                   <div className="flex items-start gap-3">
                     <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
                     <div>
-                      <h4 className="font-bold text-amber-800 mb-1">Important Notice</h4>
+                      <h4 className="font-bold text-amber-800 mb-1">
+                        Important Notice
+                      </h4>
                       <p className="text-amber-700 text-sm">
-                        Fees may vary based on the nature, size, and location of your business. 
-                        Please visit our office for an accurate assessment of your permit fees.
+                        {settings.business_permit_notice}
                       </p>
                     </div>
                   </div>
                 </div>
+
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                  Fee Fixing
+                </h2>
+                {feeFixingDocs && feeFixingDocs.length > 0 ? (
+                  <div className="space-y-4 mb-8">
+                    {feeFixingDocs.map((doc) => (
+                      <div
+                        key={doc.id}
+                        className="bg-white border border-gray-200 rounded-lg p-6"
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <h3 className="font-bold text-gray-900 mb-2">
+                              {doc.title}
+                            </h3>
+                            <p className="text-gray-600 text-sm mb-4">
+                              {doc.description}
+                            </p>
+                            <div className="flex items-center gap-2 text-xs text-gray-500">
+                              <FileText className="w-4 h-4" />
+                              <span>{doc.file_type.toUpperCase()}</span>
+                              <span>•</span>
+                              <span>
+                                {(doc.file_size / 1024 / 1024).toFixed(2)} MB
+                              </span>
+                            </div>
+                          </div>
+                          <a
+                            href={doc.file_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="ml-4 px-4 py-2 bg-[#8B0000] text-white rounded font-semibold hover:bg-[#6B0000] transition-colors whitespace-nowrap"
+                          >
+                            Download
+                          </a>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 mb-8">
+                    <div className="flex items-start gap-3">
+                      <AlertCircle className="w-5 h-5 text-yellow-600 shrink-0 mt-0.5" />
+                      <div>
+                        <h4 className="font-bold text-yellow-800 mb-1">
+                          Fee Document Coming Soon
+                        </h4>
+                        <p className="text-yellow-700 text-sm">
+                          The detailed fee fixing document is being prepared and
+                          will be available shortly. Please check back soon or
+                          contact the Revenue Unit for more information.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -161,36 +259,75 @@ export default function BusinessOperatingPermitPage() {
                   <div className="flex items-start gap-3">
                     <Clock className="w-5 h-5 text-[#8B0000] shrink-0 mt-1" />
                     <div>
-                      <p className="font-semibold text-gray-900 text-sm">Processing Time</p>
-                      <p className="text-gray-600 text-sm">5-10 working days</p>
+                      <p className="font-semibold text-gray-900 text-sm">
+                        Processing Time
+                      </p>
+                      <p className="text-gray-600 text-sm">
+                        {settings.business_permit_processing_time}
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
                     <MapPin className="w-5 h-5 text-[#8B0000] shrink-0 mt-1" />
                     <div>
-                      <p className="font-semibold text-gray-900 text-sm">Where to Apply</p>
-                      <p className="text-gray-600 text-sm">Revenue Unit, GSMA Office<br />Ngleshie Amanfro</p>
+                      <p className="font-semibold text-gray-900 text-sm">
+                        Where to Apply
+                      </p>
+                      <p className="text-gray-600 text-sm">
+                        {whereToApply.map((line) => (
+                          <span key={line}>
+                            {line}
+                            <br />
+                          </span>
+                        ))}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Clock className="w-5 h-5 text-[#8B0000] shrink-0 mt-1" />
+                    <div>
+                      <p className="font-semibold text-gray-900 text-sm">
+                        Office Hours
+                      </p>
+                      <p className="text-gray-600 text-sm">
+                        {officeHours.map((line) => (
+                          <span key={line}>
+                            {line}
+                            <br />
+                          </span>
+                        ))}
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
                     <Phone className="w-5 h-5 text-[#8B0000] shrink-0 mt-1" />
                     <div>
                       <p className="font-semibold text-gray-900 text-sm">Contact</p>
-                      <p className="text-gray-600 text-sm">+233 (0)30 290 8466/7</p>
+                      <p className="text-gray-600 text-sm">
+                        {settings.business_permit_contact}
+                      </p>
                     </div>
                   </div>
                 </div>
 
                 <div className="border-t border-gray-200 pt-4">
-                  <h4 className="font-semibold text-gray-900 mb-3 text-sm">Related Services</h4>
+                  <h4 className="font-semibold text-gray-900 mb-3 text-sm">
+                    Related Services
+                  </h4>
                   <ul className="space-y-2">
                     <li>
-                      <Link href="/services/building-permit" className="text-[#8B0000] hover:underline text-sm">
+                      <Link
+                        href="/services/building-permit"
+                        className="text-[#8B0000] hover:underline text-sm"
+                      >
                         Building Permit
                       </Link>
                     </li>
                     <li>
-                      <Link href="/services/marriage-license" className="text-[#8B0000] hover:underline text-sm">
+                      <Link
+                        href="/services/marriage-license"
+                        className="text-[#8B0000] hover:underline text-sm"
+                      >
                         Marriage License
                       </Link>
                     </li>

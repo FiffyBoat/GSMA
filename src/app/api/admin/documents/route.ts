@@ -1,17 +1,31 @@
 import { createAdminSupabaseClient } from "@/lib/supabase/server";
+import { requireAdminPermission } from "@/lib/admin-route-access";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export async function GET(request: Request) {
+  const access = await requireAdminPermission("manage_documents");
+  if ("response" in access) {
+    return access.response;
+  }
+
   const supabase = await createAdminSupabaseClient();
+  const url = new URL(request.url);
+  const category = url.searchParams.get("category");
 
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from("documents")
       .select("*")
       .order("uploaded_date", { ascending: false });
+
+    if (category) {
+      query = query.eq("category", category);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
@@ -27,6 +41,11 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const access = await requireAdminPermission("manage_documents");
+  if ("response" in access) {
+    return access.response;
+  }
+
   const supabase = await createAdminSupabaseClient();
 
   try {
@@ -70,6 +89,11 @@ export async function POST(request: Request) {
 }
 
 export async function PUT(request: Request) {
+  const access = await requireAdminPermission("manage_documents");
+  if ("response" in access) {
+    return access.response;
+  }
+
   const supabase = await createAdminSupabaseClient();
 
   try {
@@ -109,6 +133,11 @@ export async function PUT(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+  const access = await requireAdminPermission("manage_documents");
+  if ("response" in access) {
+    return access.response;
+  }
+
   const supabase = await createAdminSupabaseClient();
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");

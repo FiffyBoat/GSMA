@@ -5,25 +5,37 @@ import Image from "next/image";
 import Link from "next/link";
 import { Calendar, MapPin, Phone, Mail, ArrowLeft, Clock, User, Building2, Tag } from "lucide-react";
 import { notFound } from "next/navigation";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createPublicServerSupabaseClient } from "@/lib/supabase/public-server";
+import { getSlug } from "@/lib/content-utils";
 
 export const dynamic = "force-dynamic";
 
 interface PageProps {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 export default async function EventDetailPage({ params }: PageProps) {
-  const supabase = await createServerSupabaseClient();
+  const { slug } = await params;
+  const supabase = createPublicServerSupabaseClient();
 
-  const { data: event, error } = await supabase
+  const { data: directMatch, error: directMatchError } = await supabase
     .from("events")
     .select("*")
-    .eq("slug", params.slug)
-    .eq("is_published", true)
-    .single();
+    .eq("slug", slug)
+    .eq("is_published", true);
 
-  if (error || !event) {
+  const event =
+    directMatch?.[0] ||
+    (
+      await supabase
+        .from("events")
+        .select("*")
+        .eq("is_published", true)
+    ).data?.find(
+      (item) => item.id === slug || getSlug(item.title, item.slug) === slug
+    );
+
+  if ((directMatchError && !directMatch) || !event) {
     notFound();
   }
 
@@ -63,6 +75,30 @@ export default async function EventDetailPage({ params }: PageProps) {
           </Link>
 
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+            {/* Show a notice if the event is in the past (use end_date if present) or a "Happening now" badge when ongoing */}
+            {(() => {
+              const refDate = event.end_date || event.start_date;
+              if (refDate) {
+                const end = new Date(refDate);
+                const start = new Date(event.start_date);
+                const now = new Date();
+                if (end < now) {
+                  return (
+                    <div className="p-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-700">
+                      <strong>Note:</strong> This event has passed on {formatDateTime(refDate)}.
+                    </div>
+                  );
+                }
+                if (start <= now && end >= now) {
+                  return (
+                    <div className="p-4 bg-green-50 border-l-4 border-green-400 text-green-700">
+                      <strong>Happening now:</strong> This event is currently in progress.
+                    </div>
+                  );
+                }
+              }
+              return null;
+            })()}
             {event.image_url && (
               <div className="relative h-[250px] sm:h-[320px] md:h-[400px] lg:h-[500px] w-full overflow-hidden">
                 <Image
