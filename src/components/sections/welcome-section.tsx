@@ -16,8 +16,9 @@ interface WelcomeSectionProps {
   vision: string;
   mission: string;
   coreValues: Array<{ title: string; description: string }>;
-  mceName: string;
-  mceImageUrl: string;
+  mceName?: string;
+  mceImageUrl?: string;
+  showMceCard?: boolean;
 }
 
 const valueIcons = [Star, Zap, ArrowRight, Heart, Users];
@@ -29,6 +30,7 @@ export default function WelcomeSection({
   coreValues,
   mceName,
   mceImageUrl,
+  showMceCard = true,
 }: WelcomeSectionProps) {
   return (
     <section className="bg-white py-[44px] sm:py-[64px] md:py-[88px]">
@@ -108,6 +110,7 @@ export default function WelcomeSection({
             </div>
           </div>
 
+          {showMceCard && mceName && mceImageUrl ? (
           <div className="w-full lg:w-[350px] xl:w-[400px]">
             <div className="relative border-[6px] sm:border-[8px] border-[#f8f9fa] shadow-card group">
               <div className="relative h-[300px] sm:h-[350px] md:h-[400px] lg:h-[450px] w-full overflow-hidden">
@@ -137,6 +140,7 @@ export default function WelcomeSection({
               Read MCE&apos;s Message
             </Link>
           </div>
+          ) : null}
         </div>
       </div>
     </section>

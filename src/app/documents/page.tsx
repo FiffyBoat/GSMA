@@ -3,6 +3,7 @@ import Footer from "@/components/sections/footer";
 import PageHeader from "@/components/shared/PageHeader";
 import PaginationNav from "@/components/shared/PaginationNav";
 import { FileText, Download, Calendar, BarChart3 } from "lucide-react";
+import { formatLooseLabel, normalizeLooseText } from "@/lib/text-match";
 import { createPublicServerSupabaseClient } from "@/lib/supabase/public-server";
 
 export const dynamic = "force-dynamic";
@@ -50,19 +51,25 @@ export default async function DocumentsPage({
   const docs = documents as Document[] | null;
   const totalPages = Math.max(1, Math.ceil((count || 0) / DOCUMENTS_PER_PAGE));
 
-  const grouped =
-    docs?.reduce(
-      (accumulator, document) => {
-        if (!accumulator[document.category]) {
-          accumulator[document.category] = [];
-        }
-        accumulator[document.category].push(document);
-        return accumulator;
-      },
-      {} as Record<string, Document[]>
-    ) || {};
+  const groupedEntries =
+    docs?.reduce((accumulator, document) => {
+      const normalizedCategory =
+        normalizeLooseText(document.category) || "general";
 
-  const categories = Object.keys(grouped).sort();
+      if (!accumulator[normalizedCategory]) {
+        accumulator[normalizedCategory] = {
+          label: formatLooseLabel(normalizedCategory),
+          documents: [],
+        };
+      }
+
+      accumulator[normalizedCategory].documents.push(document);
+      return accumulator;
+    }, {} as Record<string, { label: string; documents: Document[] }>) || {};
+
+  const categories = Object.entries(groupedEntries).sort(([, left], [, right]) =>
+    left.label.localeCompare(right.label)
+  );
 
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return "0 Bytes";
@@ -105,14 +112,14 @@ export default async function DocumentsPage({
           ) : (
             <>
               <div className="space-y-[30px] sm:space-y-[36px] md:space-y-[48px]">
-                {categories.map((category) => (
-                  <div key={category}>
+                {categories.map(([categoryKey, category]) => (
+                  <div key={categoryKey}>
                     <h2 className="mb-[18px] border-b-2 border-[#8B0000] pb-[12px] text-[22px] font-bold text-gray-900 sm:mb-[20px] sm:pb-[14px] sm:text-[26px] md:mb-[24px] md:pb-[16px] md:text-[28px] lg:text-[32px]">
-                      {category}
+                      {category.label}
                     </h2>
 
                     <div className="grid grid-cols-1 gap-[16px] sm:grid-cols-2 sm:gap-[18px] md:gap-[20px] lg:grid-cols-3 lg:gap-[24px]">
-                      {grouped[category].map((doc) => (
+                      {category.documents.map((doc) => (
                         <div
                           key={doc.id}
                           className="surface-card flex flex-col rounded-2xl p-[16px] transition-all hover:-translate-y-1 hover:shadow-[0_20px_45px_rgba(16,24,40,0.14)] sm:p-[18px] md:p-[20px] lg:p-[24px]"

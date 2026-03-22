@@ -14,6 +14,7 @@ import {
   X,
 } from "lucide-react";
 import { toast } from "sonner";
+import { formatLooseLabel } from "@/lib/text-match";
 
 interface GalleryItem {
   id: string;
@@ -51,7 +52,7 @@ function prepareGalleryItems(items: GalleryItem[]): PreparedGalleryItem[] {
 
       return {
         ...item,
-        categoryLabel: item.category?.trim() || "General",
+        categoryLabel: formatLooseLabel(item.category),
         media,
         coverImage: media[0] || null,
         photoCount: media.length,

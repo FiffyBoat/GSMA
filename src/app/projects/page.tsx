@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Calendar, MapPin, DollarSign, FileText } from "lucide-react";
 import { getSlug } from "@/lib/content-utils";
+import { formatLooseLabel } from "@/lib/text-match";
 import { createPublicServerSupabaseClient } from "@/lib/supabase/public-server";
 
 export const dynamic = "force-dynamic";
@@ -174,7 +175,7 @@ export default async function ProjectsPage({
                       )}
                       <div className="absolute left-[12px] top-[12px] sm:left-[14px] sm:top-[14px] md:left-[16px] md:top-[16px]">
                         <span className={`rounded-full px-[10px] py-[6px] text-[10px] font-semibold sm:px-[12px] sm:py-[8px] sm:text-[11px] md:px-[14px] md:py-[10px] md:text-[12px] ${getStatusColor(project.status)}`}>
-                          {project.status || project.category}
+                          {formatLooseLabel(project.status || project.category, "Project")}
                         </span>
                       </div>
                     </div>

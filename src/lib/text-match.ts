@@ -6,6 +6,16 @@ export function normalizeLooseText(value?: string | null) {
     .replace(/\s+/g, " ");
 }
 
+export function formatLooseLabel(value?: string | null, fallback = "General") {
+  const normalizedValue = normalizeLooseText(value);
+
+  if (!normalizedValue) {
+    return fallback;
+  }
+
+  return normalizedValue.replace(/\b\w/g, (character) => character.toUpperCase());
+}
+
 export function equalsLooseText(
   left?: string | null,
   right?: string | null

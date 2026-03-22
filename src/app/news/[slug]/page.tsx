@@ -7,6 +7,7 @@ import { Calendar, ArrowLeft } from "lucide-react";
 import { notFound } from "next/navigation";
 import { createPublicServerSupabaseClient } from "@/lib/supabase/public-server";
 import { getSlug } from "@/lib/content-utils";
+import { formatLooseLabel } from "@/lib/text-match";
 
 export const dynamic = "force-dynamic";
 
@@ -83,7 +84,7 @@ export default async function NewsArticlePage({ params }: PageProps) {
 
             <div className="mb-[24px] sm:mb-[28px] md:mb-[32px]">
               <span className="inline-block bg-[#8B0000] text-white text-[11px] sm:text-[12px] md:text-[13px] font-semibold px-[14px] sm:px-[16px] md:px-[18px] py-[8px] sm:py-[10px] md:py-[12px] rounded mb-[14px] sm:mb-[16px] md:mb-[18px]">
-                {article.category || "News"}
+                {formatLooseLabel(article.category, "News")}
               </span>
               <h1 className="text-[22px] sm:text-[28px] md:text-[36px] lg:text-[42px] font-bold text-gray-900 mb-[14px] sm:mb-[16px] md:mb-[20px] leading-[1.2] sm:leading-[1.3] md:leading-[1.3]">
                 {article.title}
