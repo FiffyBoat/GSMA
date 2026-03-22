@@ -126,7 +126,11 @@ const Navbar = () => {
         </div>
       </div>
 
-      <nav className="relative w-full border-b border-gray-100/80 bg-white/95 py-2 shadow-[0_10px_35px_rgba(15,23,42,0.06)] backdrop-blur">
+      <nav
+        className={`relative w-full border-b border-gray-100/80 py-2 shadow-[0_10px_35px_rgba(15,23,42,0.06)] transition-colors ${
+          mobileMenuOpen ? "bg-white/85 backdrop-blur-xl" : "bg-white lg:bg-white/95 lg:backdrop-blur"
+        }`}
+      >
         <div className="container mx-auto px-4 flex justify-between items-center">
           <div className="flex-shrink-0">
             <Link href="/" className="inline-flex items-center gap-2 sm:gap-3 py-2">
@@ -206,11 +210,11 @@ const Navbar = () => {
         </div>
 
         <div
-          className={`fixed inset-0 bg-white z-[1100] transform transition-transform duration-300 lg:hidden ${
+          className={`fixed inset-0 z-[1100] bg-[#fcfaf6]/85 shadow-2xl backdrop-blur-xl transform transition-transform duration-300 lg:hidden ${
             mobileMenuOpen ? "translate-x-0" : "translate-x-full"
           }`}
         >
-          <div className="p-3 sm:p-4 flex justify-between items-center border-b">
+          <div className="bg-white/85 p-3 sm:p-4 flex justify-between items-center border-b border-gray-200">
             <div className="flex items-center gap-2">
               <Image
                 src="/logo.png"
@@ -228,7 +232,7 @@ const Navbar = () => {
               <X className="w-6 h-6 text-gray-700" />
             </button>
           </div>
-          <div className="overflow-y-auto h-[calc(100vh-60px)] pb-20">
+          <div className="overflow-y-auto h-[calc(100vh-60px)] bg-[#fcfaf6]/85 pb-20">
             <ul className="py-1">
               {navLinks.map((link) => (
                 <li key={link.name} className="border-b border-gray-100 last:border-0">
@@ -242,7 +246,7 @@ const Navbar = () => {
                         <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${openDropdown === link.name ? 'rotate-180' : ''}`} />
                       </button>
                       {openDropdown === link.name && (
-                        <ul className="bg-gray-50 py-1">
+                        <ul className="bg-white/85 py-1">
                           {link.dropdown.map((subItem) => (
                             <li key={subItem.href}>
                               <Link
@@ -269,7 +273,7 @@ const Navbar = () => {
                 </li>
               ))}
             </ul>
-            <div className="px-4 sm:px-6 py-6 sm:py-8 bg-gray-50 border-t flex flex-col gap-4">
+            <div className="px-4 sm:px-6 py-6 sm:py-8 bg-white/85 border-t border-gray-200 flex flex-col gap-4">
               <h3 className="font-bold text-sm uppercase text-gray-700">Contact</h3>
               <div className="flex items-center gap-3 text-sm">
                 <Phone className="w-4 h-4 text-[#8B0000] flex-shrink-0" />
