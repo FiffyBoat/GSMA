@@ -39,6 +39,18 @@ const Navbar = () => {
     fetchDepartments();
   }, []);
 
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+
+    if (mobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    }
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [mobileMenuOpen]);
+
   const getNavLinks = (): NavLink[] => [
     { name: "Home", href: "/" },
     {
@@ -131,9 +143,9 @@ const Navbar = () => {
           mobileMenuOpen ? "bg-white/85 backdrop-blur-xl" : "bg-white lg:bg-white/95 lg:backdrop-blur"
         }`}
       >
-        <div className="container mx-auto px-4 flex justify-between items-center">
+        <div className="container mx-auto px-4 flex items-center justify-between gap-3">
           <div className="flex-shrink-0">
-            <Link href="/" className="inline-flex items-center gap-2 sm:gap-3 py-2">
+            <Link href="/" className="inline-flex min-w-0 items-center gap-2 sm:gap-3 py-2">
               <Image
                 src="/logo.png"
                 alt="Ga South Municipal Assembly Logo"
@@ -141,9 +153,9 @@ const Navbar = () => {
                 height={50}
                 className="object-contain sm:w-[60px] sm:h-[60px]"
               />
-              <div className="flex flex-col">
-                <span className="text-[#8B0000] font-bold text-xs sm:text-sm leading-tight tracking-[0.2em]">GA SOUTH</span>
-                <span className="text-[#1a1a1a] text-[10px] sm:text-xs leading-tight">Municipal Assembly</span>
+              <div className="min-w-0 flex flex-col">
+                <span className="truncate text-[#8B0000] font-bold text-xs sm:text-sm leading-tight tracking-[0.16em] sm:tracking-[0.2em]">GA SOUTH</span>
+                <span className="truncate text-[#1a1a1a] text-[10px] sm:text-xs leading-tight">Municipal Assembly</span>
               </div>
             </Link>
           </div>
@@ -191,16 +203,16 @@ const Navbar = () => {
             </Link>
           </div>
 
-          <div className="lg:hidden flex items-center space-x-3">
+          <div className="lg:hidden flex shrink-0 items-center space-x-1">
             <Link
               href="/search"
-              className="p-2 text-[#333333] hover:text-[#8B0000] transition-colors"
+              className="rounded-full p-2 text-[#333333] hover:bg-[#fff5f0] hover:text-[#8B0000] transition-colors"
               aria-label="Search"
             >
               <Search className="w-5 h-5" />
             </Link>
             <button 
-              className="p-2 text-[#333333] hover:text-[#8B0000] transition-colors"
+              className="rounded-full p-2 text-[#333333] hover:bg-[#fff5f0] hover:text-[#8B0000] transition-colors"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle Menu"
             >
@@ -232,7 +244,7 @@ const Navbar = () => {
               <X className="w-6 h-6 text-gray-700" />
             </button>
           </div>
-          <div className="overflow-y-auto h-[calc(100vh-60px)] bg-[#fcfaf6]/85 pb-20">
+          <div className="overflow-y-auto h-[calc(100vh-60px)] bg-[#fcfaf6]/85 pb-12">
             <ul className="py-1">
               {navLinks.map((link) => (
                 <li key={link.name} className="border-b border-gray-100 last:border-0">

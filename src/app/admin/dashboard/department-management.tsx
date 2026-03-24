@@ -54,12 +54,12 @@ export default function DepartmentManagement({
   return (
     <div className="space-y-6">
       {!editingDepartment ? (
-        <div className="bg-white p-6 rounded-xl shadow-sm border">
-          <div className="flex items-center justify-between mb-6">
+        <div className="rounded-xl border bg-white p-4 shadow-sm sm:p-6">
+          <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <h3 className="font-semibold">Departments</h3>
             <Button
               onClick={() => setEditingDepartment(createEmptyDepartment())}
-              className="bg-[#8B0000] hover:bg-[#6B0000]"
+              className="w-full bg-[#8B0000] hover:bg-[#6B0000] sm:w-auto"
             >
               <Plus className="w-4 h-4 mr-2" />
               New Department
@@ -68,8 +68,8 @@ export default function DepartmentManagement({
           <div className="space-y-4">
             {departments.map((dept) => (
               <div key={dept.id} className="border rounded-lg p-4 hover:bg-gray-50">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0 flex-1">
                     <h4 className="font-semibold text-gray-900">{dept.name}</h4>
                     <p className="text-sm text-gray-600">
                       {dept.head_name} - {dept.head_title}
@@ -82,10 +82,11 @@ export default function DepartmentManagement({
                       ))}
                     </div>
                   </div>
-                  <div className="flex gap-2 ml-4">
+                  <div className="flex gap-2 sm:ml-4">
                     <Button
                       variant="outline"
                       size="sm"
+                      className="flex-1 sm:flex-none"
                       onClick={() => setEditingDepartment(dept)}
                     >
                       <Edit className="w-4 h-4" />
@@ -93,6 +94,7 @@ export default function DepartmentManagement({
                     <Button
                       variant="outline"
                       size="sm"
+                      className="flex-1 sm:flex-none"
                       onClick={() => onDeleteDepartment(dept.id)}
                     >
                       <Trash2 className="w-4 h-4" />
@@ -104,7 +106,7 @@ export default function DepartmentManagement({
           </div>
         </div>
       ) : (
-        <div className="bg-white p-6 rounded-xl shadow-sm border">
+        <div className="rounded-xl border bg-white p-4 shadow-sm sm:p-6">
           <h3 className="font-semibold mb-4">
             {editingDepartment.id ? "Edit Department" : "New Department"}
           </h3>
@@ -205,7 +207,7 @@ export default function DepartmentManagement({
               />
             </div>
             <div className="border-t pt-4 mt-4">
-              <div className="flex items-center justify-between mb-4">
+              <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <h4 className="font-semibold">Department Sections</h4>
                 <Button
                   onClick={() => {
@@ -219,7 +221,7 @@ export default function DepartmentManagement({
                     });
                   }}
                   size="sm"
-                  className="bg-[#8B0000] hover:bg-[#6B0000]"
+                  className="w-full bg-[#8B0000] hover:bg-[#6B0000] sm:w-auto"
                 >
                   <Plus className="w-4 h-4 mr-1" />
                   Add Section
@@ -228,7 +230,7 @@ export default function DepartmentManagement({
               <div className="space-y-3">
                 {(editingDepartment.sections || []).map((section, idx) => (
                   <div key={idx} className="border rounded-lg p-4 bg-gray-50 space-y-2">
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="mb-2 flex items-center justify-between gap-3">
                       <p className="text-sm font-medium text-gray-700">
                         Section {idx + 1}
                       </p>
@@ -308,7 +310,7 @@ export default function DepartmentManagement({
             </div>
             {editingDepartment.id && (
               <div className="border-t pt-4 mt-4">
-                <div className="flex items-center justify-between mb-4">
+                <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <h4 className="font-semibold">Units/Sections</h4>
                   <Button
                     onClick={() =>
@@ -322,7 +324,7 @@ export default function DepartmentManagement({
                       })
                     }
                     size="sm"
-                    className="bg-[#8B0000] hover:bg-[#6B0000]"
+                    className="w-full bg-[#8B0000] hover:bg-[#6B0000] sm:w-auto"
                   >
                     <Plus className="w-4 h-4 mr-1" />
                     Add Unit
@@ -331,18 +333,17 @@ export default function DepartmentManagement({
                 {!editingUnit ? (
                   <div className="space-y-2">
                     {editingDepartment.units?.map((unit) => (
-                      <div
-                        key={unit.id}
-                        className="flex items-start justify-between bg-gray-50 p-3 rounded"
-                      >
-                        <div>
-                          <p className="font-semibold text-sm">{unit.title}</p>
-                          <p className="text-xs text-gray-600">{unit.name}</p>
-                        </div>
-                        <div className="flex gap-2">
+                      <div key={unit.id} className="rounded bg-gray-50 p-3">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                          <div className="min-w-0">
+                            <p className="font-semibold text-sm">{unit.title}</p>
+                            <p className="text-xs text-gray-600">{unit.name}</p>
+                          </div>
+                          <div className="flex gap-2">
                           <Button
                             variant="outline"
                             size="sm"
+                            className="flex-1 sm:flex-none"
                             onClick={() => setEditingUnit(unit)}
                           >
                             <Edit className="w-3 h-3" />
@@ -350,10 +351,12 @@ export default function DepartmentManagement({
                           <Button
                             variant="outline"
                             size="sm"
+                            className="flex-1 sm:flex-none"
                             onClick={() => onDeleteUnit(unit.id)}
                           >
                             <Trash2 className="w-3 h-3" />
                           </Button>
+                          </div>
                         </div>
                       </div>
                     ))}

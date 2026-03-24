@@ -247,7 +247,7 @@ export default function AssemblyManagement() {
 
   return (
     <div className="space-y-6">
-      <div className="flex gap-2 border-b">
+      <div className="grid grid-cols-2 gap-2 border-b pb-2">
         <button
           onClick={() => setActiveTab("areas")}
           className={`px-4 py-2 font-medium ${
@@ -298,7 +298,7 @@ export default function AssemblyManagement() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <Label htmlFor="area-order">Display Order</Label>
                   <Input
@@ -318,7 +318,7 @@ export default function AssemblyManagement() {
                 </div>
               </div>
 
-              <div className="flex gap-2 pt-4">
+              <div className="flex flex-col gap-2 pt-4 sm:flex-row">
                 <Button
                   onClick={handleSaveArea}
                   disabled={loading}
@@ -347,7 +347,41 @@ export default function AssemblyManagement() {
             ) : electoralAreas.length === 0 ? (
               <div className="p-6 text-center text-gray-500">No electoral areas yet</div>
             ) : (
-              <div className="overflow-x-auto">
+              <>
+              <div className="space-y-3 p-4 md:hidden">
+                {electoralAreas.map((area) => (
+                  <div key={area.id} className="rounded-lg border bg-gray-50 p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-gray-900">{area.name}</p>
+                        <p className="mt-1 text-xs text-gray-500">Order: {area.display_order}</p>
+                        <p className="mt-2 text-xs">
+                          {area.is_active ? (
+                            <span className="text-green-600">Active</span>
+                          ) : (
+                            <span className="text-gray-400">Inactive</span>
+                          )}
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleEditArea(area)}
+                          className="rounded p-2 text-blue-600 hover:bg-blue-50"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteArea(area.id)}
+                          className="rounded p-2 text-red-600 hover:bg-red-50"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="hidden overflow-x-auto md:block">
                 <table className="w-full">
                   <thead className="bg-gray-50">
                     <tr>
@@ -390,6 +424,7 @@ export default function AssemblyManagement() {
                   </tbody>
                 </table>
               </div>
+              </>
             )}
           </div>
         </div>
@@ -403,7 +438,7 @@ export default function AssemblyManagement() {
               {editingId ? "Edit Assembly Member" : "Add New Assembly Member"}
             </h3>
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <Label htmlFor="member-name">Full Name *</Label>
                   <Input
@@ -431,7 +466,7 @@ export default function AssemblyManagement() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <Label htmlFor="member-position">Position</Label>
                   <Input
@@ -453,7 +488,7 @@ export default function AssemblyManagement() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <Label htmlFor="member-phone">Phone</Label>
                   <Input
@@ -503,7 +538,7 @@ export default function AssemblyManagement() {
                 />
               </div>
 
-              <div className="flex gap-2 pt-4">
+              <div className="flex flex-col gap-2 pt-4 sm:flex-row">
                 <Button
                   onClick={handleSaveMember}
                   disabled={loading}
@@ -532,7 +567,45 @@ export default function AssemblyManagement() {
             ) : assemblyMembers.length === 0 ? (
               <div className="p-6 text-center text-gray-500">No members yet</div>
             ) : (
-              <div className="overflow-x-auto">
+              <>
+              <div className="space-y-3 p-4 md:hidden">
+                {assemblyMembers.map((member) => {
+                  const area = electoralAreas.find((a) => a.id === member.electoral_area_id);
+                  return (
+                    <div key={member.id} className="rounded-lg border bg-gray-50 p-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold text-gray-900">{member.name}</p>
+                          <p className="mt-1 text-sm text-gray-600">{member.position}</p>
+                          <p className="mt-1 text-xs text-gray-500">{area?.name || "No area assigned"}</p>
+                          <p className="mt-2 text-xs">
+                            {member.is_active ? (
+                              <span className="text-green-600">Active</span>
+                            ) : (
+                              <span className="text-gray-400">Inactive</span>
+                            )}
+                          </p>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleEditMember(member)}
+                            className="rounded p-2 text-blue-600 hover:bg-blue-50"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteMember(member.id)}
+                            className="rounded p-2 text-red-600 hover:bg-red-50"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="hidden overflow-x-auto md:block">
                 <table className="w-full">
                   <thead className="bg-gray-50">
                     <tr>
@@ -580,6 +653,7 @@ export default function AssemblyManagement() {
                   </tbody>
                 </table>
               </div>
+              </>
             )}
           </div>
         </div>

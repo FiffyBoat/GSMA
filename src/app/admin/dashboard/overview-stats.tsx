@@ -85,18 +85,18 @@ export default function OverviewStats({
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 lg:gap-6">
       {STAT_CARDS.map(({ label, colorClassName, Icon, countKey }) => (
-        <div key={label} className="bg-white p-6 rounded-xl shadow-sm border">
-          <div className="flex items-center gap-4">
+        <div key={label} className="rounded-xl border bg-white p-4 shadow-sm sm:p-5">
+          <div className="flex items-center gap-3 sm:gap-4">
             <div
-              className={`w-12 h-12 rounded-lg flex items-center justify-center ${colorClassName}`}
+              className={`flex h-10 w-10 items-center justify-center rounded-lg sm:h-12 sm:w-12 ${colorClassName}`}
             >
-              <Icon className="w-6 h-6" />
+              <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
             </div>
-            <div>
-              <p className="text-2xl font-bold">{counts[countKey]}</p>
-              <p className="text-gray-500 text-sm">{label}</p>
+            <div className="min-w-0">
+              <p className="text-xl font-bold sm:text-2xl">{counts[countKey]}</p>
+              <p className="text-xs text-gray-500 sm:text-sm">{label}</p>
             </div>
           </div>
         </div>

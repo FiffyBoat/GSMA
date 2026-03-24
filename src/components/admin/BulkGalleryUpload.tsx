@@ -255,7 +255,7 @@ export default function BulkGalleryUpload({
 
       {files.length > 0 && (
         <div className="bg-white p-6 rounded-xl shadow-sm border space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <h3 className="font-semibold text-lg">
               Selected Images ({files.length})
             </h3>
@@ -389,7 +389,7 @@ export default function BulkGalleryUpload({
           </div>
 
           {/* Upload Button */}
-          <div className="flex gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row">
             <Button
               onClick={uploadFiles}
               disabled={uploading || files.length === 0}

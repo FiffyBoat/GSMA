@@ -749,7 +749,7 @@ export default function AdminDashboardClient({ user }: { user: User }) {
   return (
     <div className="min-h-screen bg-gray-50">
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-60 bg-slate-900 transform transition-transform lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-[86vw] max-w-72 bg-slate-900 shadow-2xl transform transition-transform lg:w-60 lg:max-w-none lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -911,19 +911,19 @@ export default function AdminDashboardClient({ user }: { user: User }) {
       )}
 
       <main className="min-w-0 lg:pl-60">
-        <header className="bg-white border-b px-4 sm:px-6 py-4 flex items-center gap-4">
+        <header className="sticky top-0 z-30 flex items-center gap-3 border-b bg-white/95 px-3 py-3 backdrop-blur sm:px-6 sm:py-4">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="lg:hidden p-2 hover:bg-gray-100 rounded-lg"
+            className="rounded-lg p-2 hover:bg-gray-100 lg:hidden"
           >
             <Menu className="w-6 h-6" />
           </button>
-          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 capitalize">
+          <h2 className="min-w-0 text-base font-semibold text-gray-900 capitalize sm:text-xl">
             {getAdminTabTitle(activeTab)}
           </h2>
         </header>
 
-        <div className="p-4 sm:p-6">
+        <div className="p-3 sm:p-6">
           {loading ? (
             <div className="flex items-center justify-center py-20">
               <Loader2 className="w-8 h-8 animate-spin text-[#8B0000]" />

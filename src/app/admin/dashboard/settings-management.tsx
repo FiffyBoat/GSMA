@@ -148,13 +148,13 @@ export default function SettingsManagement({
     ).length;
 
     return (
-      <div className="bg-white p-6 rounded-xl shadow-sm border">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-6">
+      <div className="rounded-xl border bg-white p-4 shadow-sm sm:p-6">
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <h3 className="font-semibold text-gray-900">{title}</h3>
             <p className="text-sm text-gray-500 mt-1">{description}</p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col gap-3 sm:items-end">
             <span
               className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
                 dirtyCount > 0
@@ -168,7 +168,7 @@ export default function SettingsManagement({
             </span>
             <Button
               type="button"
-              className="bg-[#8B0000] hover:bg-[#6B0000]"
+              className="w-full bg-[#8B0000] hover:bg-[#6B0000] sm:w-auto"
               disabled={dirtyCount === 0 || saving}
               onClick={() => void saveSettingsGroup(sectionSettings)}
             >

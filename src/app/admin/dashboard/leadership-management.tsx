@@ -45,10 +45,10 @@ export default function LeadershipManagement({
 }: LeadershipManagementProps) {
   return (
     <div className="space-y-6">
-      <div className="flex justify-end">
+      <div className="flex justify-stretch sm:justify-end">
         <Button
           onClick={() => setEditingLeader(createEmptyLeader(leadership.length + 1))}
-          className="bg-[#8B0000] hover:bg-[#6B0000]"
+          className="w-full bg-[#8B0000] hover:bg-[#6B0000] sm:w-auto"
         >
           <Plus className="w-4 h-4 mr-2" />
           Add Leader
@@ -61,7 +61,7 @@ export default function LeadershipManagement({
             {editingLeader.id ? "Edit Leader" : "New Leader"}
           </h3>
           <div className="grid gap-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <Label>Title (Hon., Dr., etc.)</Label>
                 <Input
@@ -150,7 +150,7 @@ export default function LeadershipManagement({
               />
               <Label>Active</Label>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-col gap-2 sm:flex-row">
               <Button
                 onClick={() => onSaveLeader(editingLeader)}
                 disabled={saving}
@@ -176,7 +176,7 @@ export default function LeadershipManagement({
         {leadership.map((leader) => (
           <div
             key={leader.id}
-            className="bg-white p-4 rounded-xl shadow-sm border flex items-center gap-4"
+            className="bg-white p-4 rounded-xl shadow-sm border flex flex-col items-start gap-4 sm:flex-row sm:items-center"
           >
             <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
               {leader.image_url ? (
@@ -205,10 +205,11 @@ export default function LeadershipManagement({
                 </p>
               )}
             </div>
-            <div className="flex gap-2">
+            <div className="flex w-full gap-2 sm:w-auto">
               <Button
                 size="sm"
                 variant="outline"
+                className="flex-1 sm:flex-none"
                 onClick={() => setEditingLeader(leader)}
               >
                 <Edit className="w-4 h-4" />
@@ -216,7 +217,7 @@ export default function LeadershipManagement({
               <Button
                 size="sm"
                 variant="outline"
-                className="text-red-600 hover:bg-red-50"
+                className="flex-1 text-red-600 hover:bg-red-50 sm:flex-none"
                 onClick={() => onDeleteLeader(leader.id)}
               >
                 <Trash2 className="w-4 h-4" />

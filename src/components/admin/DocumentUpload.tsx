@@ -45,7 +45,9 @@ export default function DocumentUpload({
     if (!file) return;
 
     if (!ALLOWED_TYPES.includes(file.type)) {
-      toast.error("Invalid file type. Only PDF, Word, Excel, and PowerPoint allowed.");
+      toast.error(
+        "Invalid file type. Only PDF, Word, Excel, and PowerPoint allowed."
+      );
       return;
     }
 
@@ -75,13 +77,16 @@ export default function DocumentUpload({
       setFileName(file.name);
       setSelectedFile(file);
 
-      // Call the onUpload callback if provided (for dashboard integration)
       if (onUpload) {
         onUpload(url, getFileType(file), file.size);
         toast.success("File uploaded successfully");
       }
+
+      onSuccess?.();
     } catch (error) {
-      toast.error(`Error: ${error instanceof Error ? error.message : "Upload failed"}`);
+      toast.error(
+        `Error: ${error instanceof Error ? error.message : "Upload failed"}`
+      );
     } finally {
       setUploading(false);
     }
@@ -91,9 +96,12 @@ export default function DocumentUpload({
     if (!fileUrl) return;
 
     try {
-      await fetch(`/api/admin/storage/upload?path=${encodeURIComponent(fileUrl)}`, {
-        method: "DELETE",
-      });
+      await fetch(
+        `/api/admin/storage/upload?path=${encodeURIComponent(fileUrl)}`,
+        {
+          method: "DELETE",
+        }
+      );
     } catch (error) {
       console.error("Error deleting file:", error);
     }
@@ -112,7 +120,7 @@ export default function DocumentUpload({
         <Label>Document File</Label>
         <div className="mt-2">
           {!fileUrl ? (
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
+            <div className="rounded-lg border-2 border-dashed border-gray-300 p-6 text-center transition-colors hover:border-gray-400">
               <input
                 ref={fileInputRef}
                 type="file"
@@ -121,44 +129,51 @@ export default function DocumentUpload({
                 accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
                 className="hidden"
               />
-              <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-              <p className="text-sm text-gray-600 mb-2">Click to select or drag and drop</p>
-              <p className="text-xs text-gray-500 mb-4">
+              <Upload className="mx-auto mb-2 h-8 w-8 text-gray-400" />
+              <p className="mb-2 text-sm text-gray-600">
+                Click to select or drag and drop
+              </p>
+              <p className="mb-4 text-xs text-gray-500">
                 Supported: PDF, Word, Excel, PowerPoint (Max 50MB)
               </p>
               <Button
                 type="button"
                 variant="outline"
+                className="w-full sm:w-auto"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploading}
               >
                 {uploading ? (
                   <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Uploading...
                   </>
                 ) : (
                   <>
-                    <Upload className="w-4 h-4 mr-2" />
+                    <Upload className="mr-2 h-4 w-4" />
                     Select File
                   </>
                 )}
               </Button>
             </div>
           ) : (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center justify-between">
-              <div className="flex-1">
-                <p className="text-sm font-medium text-green-900">{fileName}</p>
-                <p className="text-xs text-green-700 mt-1">✓ File uploaded successfully</p>
+            <div className="flex flex-col gap-3 rounded-lg border border-green-200 bg-green-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0 flex-1">
+                <p className="break-words text-sm font-medium text-green-900">
+                  {fileName}
+                </p>
+                <p className="mt-1 text-xs text-green-700">
+                  ✓ File uploaded successfully
+                </p>
               </div>
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
                 onClick={handleRemoveFile}
-                className="text-red-600 hover:bg-red-50"
+                className="w-full text-red-600 hover:bg-red-50 sm:w-auto"
               >
-                <X className="w-4 h-4" />
+                <X className="h-4 w-4" />
               </Button>
             </div>
           )}

@@ -183,14 +183,14 @@ export default function AdminUsersManagement({
     <div className="space-y-6">
       {!editingAdmin ? (
         <div className="bg-white p-6 rounded-xl shadow-sm border">
-          <div className="flex items-center justify-between mb-6">
+          <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h3 className="font-semibold">Admin Users</h3>
               <p className="text-sm text-gray-500 mt-1">
                 Create admin accounts and assign the right role for their responsibilities.
               </p>
             </div>
-            <Button onClick={startCreate} className="bg-[#8B0000] hover:bg-[#6B0000]">
+            <Button onClick={startCreate} className="w-full bg-[#8B0000] hover:bg-[#6B0000] sm:w-auto">
               <Plus className="w-4 h-4 mr-2" />
               New Admin
             </Button>
@@ -203,7 +203,7 @@ export default function AdminUsersManagement({
               admins.map((admin) => (
                 <div
                   key={admin.id}
-                  className="flex items-start justify-between gap-4 rounded-lg border bg-gray-50 p-4"
+                  className="flex flex-col gap-4 rounded-lg border bg-gray-50 p-4 sm:flex-row sm:items-start sm:justify-between"
                 >
                   <div className="min-w-0 flex-1">
                     <h4 className="font-semibold text-gray-900">{admin.name}</h4>
@@ -219,14 +219,14 @@ export default function AdminUsersManagement({
                       </p>
                     )}
                   </div>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => startEdit(admin)}>
+                  <div className="flex w-full gap-2 sm:w-auto">
+                    <Button variant="outline" size="sm" className="flex-1 sm:flex-none" onClick={() => startEdit(admin)}>
                       <Edit className="w-4 h-4" />
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
-                      className="text-red-600 hover:bg-red-50"
+                      className="flex-1 text-red-600 hover:bg-red-50 sm:flex-none"
                       onClick={() => deleteAdmin(admin.id)}
                       disabled={saving || admin.id === currentUserId}
                     >
@@ -317,7 +317,7 @@ export default function AdminUsersManagement({
               </p>
             )}
 
-            <div className="flex gap-2 pt-2">
+            <div className="flex flex-col gap-2 pt-2 sm:flex-row">
               <Button
                 onClick={saveAdmin}
                 disabled={saving}
