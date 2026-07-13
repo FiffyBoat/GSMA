@@ -1,0 +1,2 @@
+id,title,slug,description,content,image_url,event_type,start_date,end_date,location,venue,organizer,contact_person,contact_email,contact_phone,is_featured,is_published,display_order,created_at,updated_at
+5a6507c4-1e3f-4e34-bb70-cbe5296901ab,Ga South General Meeting,ga-south-general-meeting,,,https://kgadsaibqofxpzyehkpi.supabase.co/storage/v1/object/public/website-images/events/1769291627934-iwfb3ys6fq.jpg,meeting,2026-01-24 21:53:22.948+00,2026-01-24 22:59:00+00,ga south municipal,GSMA Compound,GSMA,,,,false,true,2,2026-01-24 21:56:34.692886+00,2026-01-24 21:56:34.692886+00

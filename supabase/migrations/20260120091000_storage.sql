@@ -1,8 +1,8 @@
 -- Enable Supabase Storage for image uploads
 
 -- Create storage bucket for website images (public)
-INSERT INTO storage.buckets (id, name, public)
-VALUES ('website-images', 'website-images', true)
+INSERT INTO storage.buckets (id, name, public, file_size_limit)
+VALUES ('website-images', 'website-images', true, 52428800)
 ON CONFLICT (id) DO NOTHING;
 
 -- RLS policies for the bucket

@@ -23,9 +23,14 @@ export const dynamic = "force-dynamic";
 const aboutLinks = [
   { label: "Overview", href: "/about/overview" },
   { label: "The Assembly", href: "/about/assembly" },
-  { label: "Leadership", href: "/about/leadership" },
-  { label: "MCE Profile", href: "/about/mce-profile" },
-  { label: "MCD Profile", href: "/about/mcd-profile" },
+  {
+    label: "Management",
+    href: "/about/leadership",
+    children: [
+      { label: "MCE Profile", href: "/about/mce-profile" },
+      { label: "MCD Profile", href: "/about/mcd-profile" },
+    ],
+  },
 ];
 
 const valueIcons = [Star, Zap, ArrowRight, Heart, Users];
@@ -40,7 +45,7 @@ export default async function OverviewPage() {
   const keyFacts = splitSettingRows(settings.about_overview_key_facts);
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-[#f7f8fa]">
       <Navbar />
       <PageHeader
         title="Overview"
@@ -50,7 +55,7 @@ export default async function OverviewPage() {
         ]}
       />
 
-      <section className="py-[40px] sm:py-[60px] md:py-[80px]">
+      <section className="py-[44px] sm:py-[64px] md:py-[88px]">
         <div className="container mx-auto px-[15px]">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-[24px] sm:gap-[28px] md:gap-[32px]">
             <div className="lg:col-span-1">
@@ -58,7 +63,8 @@ export default async function OverviewPage() {
             </div>
 
             <div className="lg:col-span-3">
-              <div className="prose max-w-none">
+              <div className="max-w-none">
+                <div className="bg-white border border-gray-200 rounded-[8px] shadow-sm p-[18px] sm:p-[22px] md:p-[28px] mb-[18px] sm:mb-[22px] md:mb-[26px]">
                 <h2 className="text-[22px] sm:text-[26px] md:text-[28px] lg:text-[32px] font-bold text-gray-900 mb-[20px] sm:mb-[24px] md:mb-[28px]">
                   About Ga South Municipal Assembly
                 </h2>
@@ -80,9 +86,10 @@ export default async function OverviewPage() {
                     {paragraph}
                   </p>
                 ))}
+                </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-[16px] sm:gap-[18px] md:gap-[20px] lg:gap-[24px] mb-[24px] sm:mb-[28px] md:mb-[32px]">
-                  <div className="bg-[#8B0000]/5 p-[16px] sm:p-[20px] md:p-[24px] rounded-lg border-l-4 border-[#8B0000]">
+                  <div className="bg-white p-[16px] sm:p-[20px] md:p-[24px] rounded-[8px] border border-gray-200 border-l-4 border-l-[#8B0000] shadow-sm">
                     <div className="flex items-center gap-[12px] sm:gap-[14px] mb-[12px] sm:mb-[14px]">
                       <Eye className="w-[32px] sm:w-[36px] h-[32px] sm:h-[36px] text-[#8B0000]" />
                       <h3 className="text-[18px] sm:text-[20px] md:text-[22px] font-bold text-gray-900">
@@ -94,7 +101,7 @@ export default async function OverviewPage() {
                     </p>
                   </div>
 
-                  <div className="bg-[#ffcc00]/10 p-[16px] sm:p-[20px] md:p-[24px] rounded-lg border-l-4 border-[#ffcc00]">
+                  <div className="bg-white p-[16px] sm:p-[20px] md:p-[24px] rounded-[8px] border border-gray-200 border-l-4 border-l-[#ffcc00] shadow-sm">
                     <div className="flex items-center gap-[12px] sm:gap-[14px] mb-[12px] sm:mb-[14px]">
                       <Target className="w-[32px] sm:w-[36px] h-[32px] sm:h-[36px] text-[#8B0000]" />
                       <h3 className="text-[18px] sm:text-[20px] md:text-[22px] font-bold text-gray-900">
@@ -107,7 +114,7 @@ export default async function OverviewPage() {
                   </div>
                 </div>
 
-                <div className="bg-[#ffcc00]/10 p-[16px] sm:p-[20px] md:p-[24px] rounded-lg border-l-4 border-[#ffcc00] mb-[24px] sm:mb-[28px] md:mb-[32px]">
+                <div className="bg-white p-[16px] sm:p-[20px] md:p-[24px] rounded-[8px] border border-gray-200 border-l-4 border-l-[#ffcc00] shadow-sm mb-[24px] sm:mb-[28px] md:mb-[32px]">
                   <h3 className="text-[18px] sm:text-[20px] md:text-[22px] font-bold text-gray-900 mb-[16px] sm:mb-[18px]">
                     Core Values
                   </h3>
@@ -116,7 +123,7 @@ export default async function OverviewPage() {
                       const Icon = valueIcons[index] ?? Star;
                       return (
                         <div key={`${title}-${index}`} className="flex items-start gap-3">
-                          <div className="flex-shrink-0 w-10 h-10 rounded-full border border-[#8B0000] flex items-center justify-center">
+                          <div className="flex-shrink-0 w-10 h-10 rounded-[8px] border border-[#8B0000]/30 bg-[#8B0000]/5 flex items-center justify-center">
                             <Icon className="w-5 h-5 text-[#8B0000]" />
                           </div>
                           <div>
@@ -133,33 +140,37 @@ export default async function OverviewPage() {
                   </div>
                 </div>
 
-                <h3 className="text-[18px] sm:text-[20px] md:text-[22px] font-bold text-gray-900 mb-[16px] sm:mb-[18px] md:mb-[20px]">
-                  Key Facts
-                </h3>
+                <div className="bg-white border border-gray-200 rounded-[8px] shadow-sm p-[16px] sm:p-[20px] md:p-[24px] mb-[24px] sm:mb-[28px] md:mb-[32px]">
+                  <h3 className="text-[18px] sm:text-[20px] md:text-[22px] font-bold text-gray-900 mb-[16px] sm:mb-[18px] md:mb-[20px]">
+                    Key Facts
+                  </h3>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[12px] sm:gap-[14px] md:gap-[16px] lg:gap-[18px] mb-[24px] sm:mb-[28px] md:mb-[32px]">
-                  {keyFacts.map(([value, label], index) => (
-                    <div
-                      key={`${label}-${index}`}
-                      className="bg-white border border-gray-200 p-[14px] sm:p-[16px] md:p-[18px] lg:p-[20px] rounded-lg text-center"
-                    >
-                      <MapPin className="w-[32px] sm:w-[36px] h-[32px] sm:h-[36px] text-[#8B0000] mx-auto mb-[8px] sm:mb-[10px]" />
-                      <p className="text-[20px] sm:text-[24px] md:text-[28px] font-bold text-[#8B0000]">
-                        {value}
-                      </p>
-                      <p className="text-gray-500 text-[11px] sm:text-[12px] md:text-[13px]">
-                        {label}
-                      </p>
-                    </div>
-                  ))}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[12px] sm:gap-[14px] md:gap-[16px] lg:gap-[18px]">
+                    {keyFacts.map(([value, label], index) => (
+                      <div
+                        key={`${label}-${index}`}
+                        className="bg-[#f7f8fa] border border-gray-200 p-[14px] sm:p-[16px] md:p-[18px] lg:p-[20px] rounded-[8px] text-center"
+                      >
+                        <MapPin className="w-[32px] sm:w-[36px] h-[32px] sm:h-[36px] text-[#8B0000] mx-auto mb-[8px] sm:mb-[10px]" />
+                        <p className="text-[20px] sm:text-[24px] md:text-[28px] font-bold text-[#8B0000]">
+                          {value}
+                        </p>
+                        <p className="text-gray-500 text-[11px] sm:text-[12px] md:text-[13px]">
+                          {label}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
-                <h3 className="text-[18px] sm:text-[20px] md:text-[22px] font-bold text-gray-900 mb-[16px] sm:mb-[18px] md:mb-[20px]">
-                  Location & Boundaries
-                </h3>
-                <p className="text-gray-600 leading-[1.6] sm:leading-[1.7] md:leading-[1.8] text-[13px] sm:text-[14px] md:text-[15px]">
-                  {settings.about_overview_boundaries}
-                </p>
+                <div className="bg-white border border-gray-200 rounded-[8px] shadow-sm p-[16px] sm:p-[20px] md:p-[24px]">
+                  <h3 className="text-[18px] sm:text-[20px] md:text-[22px] font-bold text-gray-900 mb-[16px] sm:mb-[18px] md:mb-[20px]">
+                    Location & Boundaries
+                  </h3>
+                  <p className="text-gray-600 leading-[1.6] sm:leading-[1.7] md:leading-[1.8] text-[13px] sm:text-[14px] md:text-[15px]">
+                    {settings.about_overview_boundaries}
+                  </p>
+                </div>
               </div>
             </div>
           </div>

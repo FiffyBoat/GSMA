@@ -14,6 +14,7 @@ interface ElectoralArea {
   id: string;
   name: string;
   description: string;
+  constituency?: string;
   display_order: number;
   is_active: boolean;
 }
@@ -32,6 +33,11 @@ interface AssemblyMember {
 }
 
 export default function AssemblyManagement() {
+  const constituencies = [
+    { value: "ngleshie-amanfro-bortianor", label: "Bortianor-Ngleshie-Amanfro Constituency" },
+    { value: "obom-domeabra", label: "Domeabra-Obom Constituency" },
+  ];
+
   const [activeTab, setActiveTab] = useState<"areas" | "members">("areas");
   const [electoralAreas, setElectoralAreas] = useState<ElectoralArea[]>([]);
   const [assemblyMembers, setAssemblyMembers] = useState<AssemblyMember[]>([]);
@@ -42,6 +48,7 @@ export default function AssemblyManagement() {
   const [areaForm, setAreaForm] = useState({
     name: "",
     description: "",
+    constituency: "",
     display_order: 0,
     is_active: true,
   });
@@ -115,7 +122,7 @@ export default function AssemblyManagement() {
 
       if (response.ok) {
         toast.success(editingId ? "Electoral area updated" : "Electoral area created");
-        setAreaForm({ name: "", description: "", display_order: 0, is_active: true });
+        setAreaForm({ name: "", description: "", constituency: "", display_order: 0, is_active: true });
         setEditingId(null);
         loadElectoralAreas();
       } else {
@@ -129,7 +136,7 @@ export default function AssemblyManagement() {
   };
 
   const handleEditArea = (area: ElectoralArea) => {
-    setAreaForm(area);
+    setAreaForm({ ...area, constituency: area.constituency || "" });
     setEditingId(area.id);
   };
 
@@ -230,7 +237,7 @@ export default function AssemblyManagement() {
   };
 
   const resetForms = () => {
-    setAreaForm({ name: "", description: "", display_order: 0, is_active: true });
+    setAreaForm({ name: "", description: "", constituency: "", display_order: 0, is_active: true });
     setMemberForm({
       name: "",
       electoral_area_id: "",
@@ -247,12 +254,24 @@ export default function AssemblyManagement() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-2 border-b pb-2">
+      <div className="rounded-[8px] border border-gray-200 bg-white p-5 shadow-sm">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#8B0000]">
+          Assembly Structure
+        </p>
+        <h3 className="mt-1 text-lg font-bold text-gray-900">
+          Assembly Members
+        </h3>
+        <p className="mt-1 text-sm text-gray-600">
+          Maintain electoral areas, constituencies, and public assembly member records.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2 rounded-[8px] border border-gray-200 bg-white p-2 shadow-sm">
         <button
           onClick={() => setActiveTab("areas")}
-          className={`px-4 py-2 font-medium ${
+          className={`rounded-[8px] px-4 py-2 text-sm font-semibold ${
             activeTab === "areas"
-              ? "border-b-2 border-[#8B0000] text-[#8B0000]"
+              ? "bg-[#8B0000] text-white"
               : "text-gray-600 hover:text-gray-900"
           }`}
         >
@@ -260,9 +279,9 @@ export default function AssemblyManagement() {
         </button>
         <button
           onClick={() => setActiveTab("members")}
-          className={`px-4 py-2 font-medium ${
+          className={`rounded-[8px] px-4 py-2 text-sm font-semibold ${
             activeTab === "members"
-              ? "border-b-2 border-[#8B0000] text-[#8B0000]"
+              ? "bg-[#8B0000] text-white"
               : "text-gray-600 hover:text-gray-900"
           }`}
         >
@@ -273,7 +292,7 @@ export default function AssemblyManagement() {
       {/* Electoral Areas Tab */}
       {activeTab === "areas" && (
         <div className="space-y-6">
-          <div className="bg-white p-6 rounded-lg border border-gray-200">
+          <div className="bg-white p-6 rounded-[8px] border border-gray-200 shadow-sm">
             <h3 className="text-lg font-semibold mb-4">
               {editingId ? "Edit Electoral Area" : "Add New Electoral Area"}
             </h3>
@@ -296,6 +315,23 @@ export default function AssemblyManagement() {
                   onChange={(e) => setAreaForm({ ...areaForm, description: e.target.value })}
                   placeholder="Brief description of the area"
                 />
+              </div>
+
+              <div>
+                <Label htmlFor="area-constituency">Constituency</Label>
+                <select
+                  id="area-constituency"
+                  value={areaForm.constituency || ""}
+                  onChange={(e) => setAreaForm({ ...areaForm, constituency: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-[8px]"
+                >
+                  <option value="">Select a constituency</option>
+                  {constituencies.map((constituency) => (
+                    <option key={constituency.value} value={constituency.value}>
+                      {constituency.label}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -322,7 +358,7 @@ export default function AssemblyManagement() {
                 <Button
                   onClick={handleSaveArea}
                   disabled={loading}
-                  className="bg-[#8B0000] hover:bg-[#6B0000]"
+                  className="rounded-[8px] bg-[#8B0000] hover:bg-[#6B0000]"
                 >
                   {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
                   {editingId ? "Update" : "Create"}
@@ -338,7 +374,7 @@ export default function AssemblyManagement() {
           </div>
 
           {/* Electoral Areas List */}
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <div className="bg-white rounded-[8px] border border-gray-200 overflow-hidden shadow-sm">
             <div className="p-6 border-b">
               <h3 className="text-lg font-semibold">Electoral Areas</h3>
             </div>
@@ -350,10 +386,13 @@ export default function AssemblyManagement() {
               <>
               <div className="space-y-3 p-4 md:hidden">
                 {electoralAreas.map((area) => (
-                  <div key={area.id} className="rounded-lg border bg-gray-50 p-4">
+                  <div key={area.id} className="rounded-[8px] border bg-gray-50 p-4">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <p className="text-sm font-semibold text-gray-900">{area.name}</p>
+                        <p className="mt-1 text-xs text-gray-500">
+                          {constituencies.find((constituency) => constituency.value === area.constituency)?.label || "No constituency assigned"}
+                        </p>
                         <p className="mt-1 text-xs text-gray-500">Order: {area.display_order}</p>
                         <p className="mt-2 text-xs">
                           {area.is_active ? (
@@ -386,6 +425,7 @@ export default function AssemblyManagement() {
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Name</th>
+                      <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Constituency</th>
                       <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Order</th>
                       <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Active</th>
                       <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Actions</th>
@@ -395,10 +435,13 @@ export default function AssemblyManagement() {
                     {electoralAreas.map((area) => (
                       <tr key={area.id} className="border-t hover:bg-gray-50">
                         <td className="px-6 py-4 text-sm">{area.name}</td>
+                        <td className="px-6 py-4 text-sm">
+                          {constituencies.find((constituency) => constituency.value === area.constituency)?.label || "Not assigned"}
+                        </td>
                         <td className="px-6 py-4 text-sm">{area.display_order}</td>
                         <td className="px-6 py-4 text-sm">
                           {area.is_active ? (
-                            <span className="text-green-600">✓ Active</span>
+                            <span className="text-green-600">Active</span>
                           ) : (
                             <span className="text-gray-400">Inactive</span>
                           )}
@@ -433,7 +476,7 @@ export default function AssemblyManagement() {
       {/* Assembly Members Tab */}
       {activeTab === "members" && (
         <div className="space-y-6">
-          <div className="bg-white p-6 rounded-lg border border-gray-200">
+          <div className="bg-white p-6 rounded-[8px] border border-gray-200 shadow-sm">
             <h3 className="text-lg font-semibold mb-4">
               {editingId ? "Edit Assembly Member" : "Add New Assembly Member"}
             </h3>
@@ -454,7 +497,7 @@ export default function AssemblyManagement() {
                     id="member-area"
                     value={memberForm.electoral_area_id || ""}
                     onChange={(e) => setMemberForm({ ...memberForm, electoral_area_id: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-[8px]"
                   >
                     <option value="">Select an area</option>
                     {electoralAreas.map((area) => (
@@ -542,7 +585,7 @@ export default function AssemblyManagement() {
                 <Button
                   onClick={handleSaveMember}
                   disabled={loading}
-                  className="bg-[#8B0000] hover:bg-[#6B0000]"
+                  className="rounded-[8px] bg-[#8B0000] hover:bg-[#6B0000]"
                 >
                   {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
                   {editingId ? "Update" : "Create"}
@@ -558,7 +601,7 @@ export default function AssemblyManagement() {
           </div>
 
           {/* Assembly Members List */}
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <div className="bg-white rounded-[8px] border border-gray-200 overflow-hidden shadow-sm">
             <div className="p-6 border-b">
               <h3 className="text-lg font-semibold">Assembly Members</h3>
             </div>
@@ -572,7 +615,7 @@ export default function AssemblyManagement() {
                 {assemblyMembers.map((member) => {
                   const area = electoralAreas.find((a) => a.id === member.electoral_area_id);
                   return (
-                    <div key={member.id} className="rounded-lg border bg-gray-50 p-4">
+                    <div key={member.id} className="rounded-[8px] border bg-gray-50 p-4">
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
                           <p className="text-sm font-semibold text-gray-900">{member.name}</p>
@@ -626,7 +669,7 @@ export default function AssemblyManagement() {
                           <td className="px-6 py-4 text-sm">{area?.name}</td>
                           <td className="px-6 py-4 text-sm">
                             {member.is_active ? (
-                              <span className="text-green-600">✓ Active</span>
+                              <span className="text-green-600">Active</span>
                             ) : (
                               <span className="text-gray-400">Inactive</span>
                             )}

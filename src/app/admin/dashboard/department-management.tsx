@@ -54,12 +54,20 @@ export default function DepartmentManagement({
   return (
     <div className="space-y-6">
       {!editingDepartment ? (
-        <div className="rounded-xl border bg-white p-4 shadow-sm sm:p-6">
+        <div className="rounded-[8px] border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
           <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <h3 className="font-semibold">Departments</h3>
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#8B0000]">
+                Assembly Structure
+              </p>
+              <h3 className="mt-1 text-lg font-bold text-gray-900">Departments</h3>
+              <p className="mt-1 text-sm text-gray-600">
+                Manage department profiles, heads, sections, units, and publication status.
+              </p>
+            </div>
             <Button
               onClick={() => setEditingDepartment(createEmptyDepartment())}
-              className="w-full bg-[#8B0000] hover:bg-[#6B0000] sm:w-auto"
+              className="w-full rounded-[8px] bg-[#8B0000] hover:bg-[#6B0000] sm:w-auto"
             >
               <Plus className="w-4 h-4 mr-2" />
               New Department
@@ -67,7 +75,7 @@ export default function DepartmentManagement({
           </div>
           <div className="space-y-4">
             {departments.map((dept) => (
-              <div key={dept.id} className="border rounded-lg p-4 hover:bg-gray-50">
+              <div key={dept.id} className="border border-gray-200 rounded-[8px] p-4 hover:bg-gray-50">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                   <div className="min-w-0 flex-1">
                     <h4 className="font-semibold text-gray-900">{dept.name}</h4>
@@ -77,7 +85,7 @@ export default function DepartmentManagement({
                     <div className="mt-3 space-y-1">
                       {dept.units?.map((unit) => (
                         <p key={unit.id} className="text-xs text-gray-500 pl-4">
-                          • {unit.title}
+                          {unit.title}
                         </p>
                       ))}
                     </div>
@@ -106,7 +114,7 @@ export default function DepartmentManagement({
           </div>
         </div>
       ) : (
-        <div className="rounded-xl border bg-white p-4 shadow-sm sm:p-6">
+        <div className="rounded-[8px] border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
           <h3 className="font-semibold mb-4">
             {editingDepartment.id ? "Edit Department" : "New Department"}
           </h3>
@@ -221,7 +229,7 @@ export default function DepartmentManagement({
                     });
                   }}
                   size="sm"
-                  className="w-full bg-[#8B0000] hover:bg-[#6B0000] sm:w-auto"
+                  className="w-full rounded-[8px] bg-[#8B0000] hover:bg-[#6B0000] sm:w-auto"
                 >
                   <Plus className="w-4 h-4 mr-1" />
                   Add Section
@@ -229,7 +237,7 @@ export default function DepartmentManagement({
               </div>
               <div className="space-y-3">
                 {(editingDepartment.sections || []).map((section, idx) => (
-                  <div key={idx} className="border rounded-lg p-4 bg-gray-50 space-y-2">
+                  <div key={idx} className="border border-gray-200 rounded-[8px] p-4 bg-gray-50 space-y-2">
                     <div className="mb-2 flex items-center justify-between gap-3">
                       <p className="text-sm font-medium text-gray-700">
                         Section {idx + 1}
@@ -273,7 +281,7 @@ export default function DepartmentManagement({
                           sections: newSections,
                         });
                       }}
-                      placeholder="Section content (use bullet points with • for lists)"
+                    placeholder="Section content (use bullet points for lists)"
                       rows={4}
                       className="bg-white"
                     />
@@ -320,11 +328,13 @@ export default function DepartmentManagement({
                         name: "",
                         title: "",
                         description: "",
+                        head_name: "",
+                        head_image_url: "",
                         order: 0,
                       })
                     }
                     size="sm"
-                    className="w-full bg-[#8B0000] hover:bg-[#6B0000] sm:w-auto"
+                    className="w-full rounded-[8px] bg-[#8B0000] hover:bg-[#6B0000] sm:w-auto"
                   >
                     <Plus className="w-4 h-4 mr-1" />
                     Add Unit
@@ -364,6 +374,33 @@ export default function DepartmentManagement({
                 ) : (
                   <div className="bg-gray-50 p-4 rounded space-y-3 mb-4">
                     <div>
+                      <Label>Unit Head Name</Label>
+                      <Input
+                        value={editingUnit.head_name || ""}
+                        onChange={(e) =>
+                          setEditingUnit({
+                            ...editingUnit,
+                            head_name: e.target.value,
+                          })
+                        }
+                        placeholder="e.g. Name of the unit head"
+                      />
+                    </div>
+                    <div>
+                      <Label>Unit Head Image</Label>
+                      <ImageUpload
+                        value={editingUnit.head_image_url || ""}
+                        onChange={(url) =>
+                          setEditingUnit({
+                            ...editingUnit,
+                            head_image_url: url,
+                          })
+                        }
+                        folder="department-units"
+                        label="Unit Head Image"
+                      />
+                    </div>
+                    <div>
                       <Label>Unit Name</Label>
                       <Input
                         value={editingUnit.name}
@@ -401,7 +438,7 @@ export default function DepartmentManagement({
                       <Button
                         onClick={() => onSaveDepartmentUnit(editingUnit)}
                         disabled={saving || !editingUnit.name}
-                        className="bg-[#8B0000] hover:bg-[#6B0000]"
+                        className="rounded-[8px] bg-[#8B0000] hover:bg-[#6B0000]"
                       >
                         {saving ? (
                           <Loader2 className="w-4 h-4 animate-spin" />
@@ -427,7 +464,7 @@ export default function DepartmentManagement({
                   !editingDepartment.name ||
                   !editingDepartment.head_name
                 }
-                className="bg-[#8B0000] hover:bg-[#6B0000]"
+                className="rounded-[8px] bg-[#8B0000] hover:bg-[#6B0000]"
               >
                 {saving ? (
                   <Loader2 className="w-4 h-4 animate-spin" />

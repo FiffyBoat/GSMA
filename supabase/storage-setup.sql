@@ -2,8 +2,8 @@
 -- Run this in Supabase SQL Editor after creating the storage bucket
 
 -- Create storage bucket for website images
-INSERT INTO storage.buckets (id, name, public)
-VALUES ('website-images', 'website-images', true)
+INSERT INTO storage.buckets (id, name, public, file_size_limit)
+VALUES ('website-images', 'website-images', true, 52428800)
 ON CONFLICT (id) DO NOTHING;
 
 -- Set up storage policies for public read access

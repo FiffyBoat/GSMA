@@ -86,6 +86,8 @@ export async function POST(req: NextRequest) {
           name: body.name,
           title: body.title,
           description: body.description,
+          head_name: body.head_name || null,
+          head_image_url: body.head_image_url || null,
           order: body.order || 0,
         })
         .select()
@@ -155,6 +157,8 @@ export async function PUT(req: NextRequest) {
           name: body.name,
           title: body.title,
           description: body.description,
+          head_name: body.head_name || null,
+          head_image_url: body.head_image_url || null,
           order: body.order || 0,
         })
         .eq("id", body.id)

@@ -32,9 +32,11 @@ function createEmptyEvent(displayOrder: number): Event {
     description: "",
     content: "",
     image_url: "",
+    image_caption: "",
+    credit_note: "",
     event_type: "meeting",
     start_date: new Date().toISOString(),
-    end_date: "",
+    end_date: null,
     location: "",
     venue: "",
     organizer: "",
@@ -47,7 +49,7 @@ function createEmptyEvent(displayOrder: number): Event {
   };
 }
 
-function toDateTimeLocalValue(value: string): string {
+function toDateTimeLocalValue(value: string | null | undefined): string {
   return value ? new Date(value).toISOString().slice(0, 16) : "";
 }
 
@@ -68,10 +70,19 @@ export default function EventsManagement({
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-end">
+      <div className="flex flex-col gap-4 rounded-[8px] border border-gray-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#8B0000]">
+            Programmes
+          </p>
+          <h3 className="mt-1 text-lg font-bold text-gray-900">Events</h3>
+          <p className="mt-1 text-sm text-gray-600">
+            Manage meetings, durbars, hearings, workshops, and public events.
+          </p>
+        </div>
         <Button
           onClick={() => setEditingEvent(createEmptyEvent(events.length + 1))}
-          className="bg-[#8B0000] hover:bg-[#6B0000]"
+          className="rounded-[8px] bg-[#8B0000] hover:bg-[#6B0000]"
         >
           <Plus className="w-4 h-4 mr-2" />
           Add Event
@@ -79,7 +90,7 @@ export default function EventsManagement({
       </div>
 
       {editingEvent && (
-        <div className="bg-white p-6 rounded-xl shadow-sm border">
+        <div className="bg-white p-6 rounded-[8px] shadow-sm border border-gray-200">
           <h3 className="font-semibold mb-4">
             {editingEvent.id ? "Edit Event" : "New Event"}
           </h3>
@@ -93,6 +104,30 @@ export default function EventsManagement({
               label="Event Image"
               aspectRatio="wide"
             />
+
+            <div>
+              <Label>Image Caption</Label>
+              <Textarea
+                value={editingEvent.image_caption || ""}
+                onChange={(e) =>
+                  setEditingEvent({ ...editingEvent, image_caption: e.target.value })
+                }
+                rows={2}
+                placeholder="Optional caption to display under the image"
+              />
+            </div>
+
+            <div>
+              <Label>Credit Note</Label>
+              <Textarea
+                value={editingEvent.credit_note || ""}
+                onChange={(e) =>
+                  setEditingEvent({ ...editingEvent, credit_note: e.target.value })
+                }
+                rows={2}
+                placeholder="Optional credit information (e.g., Photo by: John Doe)"
+              />
+            </div>
 
             <div>
               <Label>Title</Label>
@@ -166,7 +201,7 @@ export default function EventsManagement({
                       ...editingEvent,
                       end_date: e.target.value
                         ? new Date(e.target.value).toISOString()
-                        : "",
+                        : null,
                     })
                   }
                 />
@@ -316,16 +351,16 @@ export default function EventsManagement({
         {events.map((event) => (
           <div
             key={event.id}
-            className="bg-white p-4 rounded-xl shadow-sm border flex items-center gap-4"
+            className="bg-white p-4 rounded-[8px] shadow-sm border border-gray-200 flex items-center gap-4"
           >
             {event.image_url ? (
               <img
                 src={event.image_url}
                 alt={event.title}
-                className="w-32 h-20 object-cover rounded-lg"
+                className="h-16 w-24 rounded-[8px] object-contain bg-gray-100 sm:h-[72px] sm:w-28"
               />
             ) : (
-              <div className="w-32 h-20 rounded-lg bg-gray-100 flex items-center justify-center text-xs text-gray-500">
+              <div className="flex h-16 w-24 items-center justify-center rounded-[8px] bg-gray-100 text-xs text-gray-500 sm:h-[72px] sm:w-28">
                 No image
               </div>
             )}

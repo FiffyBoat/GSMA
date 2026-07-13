@@ -218,7 +218,7 @@ export default function BulkGalleryUpload({
       <div
         {...getRootProps()}
         className={`
-          border-2 border-dashed rounded-lg cursor-pointer
+          border-2 border-dashed rounded-[8px] cursor-pointer
           transition-colors
           ${
             isDragActive
@@ -236,7 +236,7 @@ export default function BulkGalleryUpload({
           </div>
         ) : (
           <div className="flex flex-col items-center gap-4 text-center">
-            <div className="w-16 h-16 rounded-full bg-[#8B0000]/10 flex items-center justify-center">
+            <div className="w-16 h-16 rounded-[8px] bg-[#8B0000]/10 flex items-center justify-center">
               <Upload className="w-8 h-8 text-[#8B0000]" />
             </div>
             <div>
@@ -246,7 +246,7 @@ export default function BulkGalleryUpload({
                   : "Click or drag to upload images"}
               </p>
               <p className="text-sm text-gray-500 mt-2">
-                PNG, JPG, WEBP, GIF up to 5MB each • Max 50 images
+                PNG, JPG, WEBP, GIF up to 5MB each | Max 50 images
               </p>
             </div>
           </div>
@@ -254,7 +254,7 @@ export default function BulkGalleryUpload({
       </div>
 
       {files.length > 0 && (
-        <div className="bg-white p-6 rounded-xl shadow-sm border space-y-4">
+        <div className="bg-white p-6 rounded-[8px] shadow-sm border border-gray-200 space-y-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <h3 className="font-semibold text-lg">
               Selected Images ({files.length})
@@ -274,12 +274,12 @@ export default function BulkGalleryUpload({
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-h-96 overflow-y-auto">
             {files.map((item) => (
               <div key={item.id} className="relative group">
-                <div className="aspect-square rounded-lg overflow-hidden border-2 border-gray-200 bg-gray-50 relative">
+                <div className="aspect-square rounded-[8px] overflow-hidden border border-gray-200 bg-gray-50 relative">
                   {item.preview && (
                     <img
                       src={item.preview}
                       alt="preview"
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain p-2"
                     />
                   )}
 
@@ -294,7 +294,7 @@ export default function BulkGalleryUpload({
                       <Loader2 className="w-5 h-5 animate-spin text-white" />
                     )}
                     {item.status === "completed" && (
-                      <div className="text-white text-xs font-medium">✓</div>
+                      <div className="text-white text-xs font-medium">Done</div>
                     )}
                     {item.status === "failed" && (
                       <AlertCircle className="w-5 h-5 text-red-400" />

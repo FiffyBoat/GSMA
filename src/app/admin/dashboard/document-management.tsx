@@ -46,12 +46,20 @@ export default function DocumentManagement({
   return (
     <div className="space-y-6">
       {!editingDocument ? (
-        <div className="rounded-xl border bg-white p-6 shadow-sm">
+        <div className="rounded-[8px] border border-gray-200 bg-white p-6 shadow-sm">
           <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <h3 className="font-semibold">Upload Document</h3>
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#8B0000]">
+                Archive
+              </p>
+              <h3 className="mt-1 text-lg font-bold text-gray-900">Documents</h3>
+              <p className="mt-1 text-sm text-gray-600">
+                Upload reports, public notices, policies, and downloadable files.
+              </p>
+            </div>
             <Button
               size="sm"
-              className="w-full bg-[#8B0000] hover:bg-[#6B0000] sm:w-auto"
+              className="w-full rounded-[8px] bg-[#8B0000] hover:bg-[#6B0000] sm:w-auto"
               onClick={() => setEditingDocument(createEmptyDocument())}
             >
               <Plus className="mr-2 h-4 w-4" />
@@ -63,12 +71,12 @@ export default function DocumentManagement({
             {documents.map((doc) => (
               <div
                 key={doc.id}
-                className="flex flex-col gap-4 rounded-lg border bg-gray-50 p-4 sm:flex-row sm:items-center sm:justify-between"
+                className="flex flex-col gap-4 rounded-[8px] border border-gray-200 bg-gray-50 p-4 sm:flex-row sm:items-center sm:justify-between"
               >
                 <div className="min-w-0 flex-1">
                   <h4 className="font-semibold">{doc.title}</h4>
                   <p className="text-sm text-gray-500">
-                    {doc.category} • {(doc.file_size / 1024 / 1024).toFixed(2)} MB
+                    {doc.category} | {(doc.file_size / 1024 / 1024).toFixed(2)} MB
                   </p>
                   <p className="mt-1 text-xs text-gray-400">
                     {doc.is_published ? "Published" : "Draft"}
@@ -102,7 +110,7 @@ export default function DocumentManagement({
           </div>
         </div>
       ) : (
-        <div className="rounded-xl border bg-white p-6 shadow-sm">
+        <div className="rounded-[8px] border border-gray-200 bg-white p-6 shadow-sm">
           <h3 className="mb-6 font-semibold">
             {editingDocument.id ? "Edit Document" : "New Document"}
           </h3>
@@ -176,7 +184,7 @@ export default function DocumentManagement({
                 disabled={
                   saving || !editingDocument.title || !editingDocument.file_url
                 }
-                className="bg-[#8B0000] hover:bg-[#6B0000]"
+                className="rounded-[8px] bg-[#8B0000] hover:bg-[#6B0000]"
               >
                 {saving ? (
                   <Loader2 className="h-4 w-4 animate-spin" />

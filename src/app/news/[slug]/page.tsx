@@ -3,7 +3,7 @@ import Footer from "@/components/sections/footer";
 import PageHeader from "@/components/shared/PageHeader";
 import Image from "next/image";
 import Link from "next/link";
-import { Calendar, ArrowLeft } from "lucide-react";
+import { ArrowLeft, Calendar } from "lucide-react";
 import { notFound } from "next/navigation";
 import { createPublicServerSupabaseClient } from "@/lib/supabase/public-server";
 import { getSlug } from "@/lib/content-utils";
@@ -71,22 +71,22 @@ export default async function NewsArticlePage({ params }: PageProps) {
         ]}
       />
 
-      <article className="py-[40px] sm:py-[60px] md:py-[80px]">
+      <article className="bg-[#f7f8fa] py-[40px] sm:py-[60px] md:py-[80px]">
         <div className="container mx-auto px-[15px]">
           <div className="max-w-4xl mx-auto">
             <Link
               href="/news"
-              className="inline-flex items-center gap-[8px] text-[#8B0000] font-medium mb-[20px] sm:mb-[24px] md:mb-[30px] hover:underline text-[13px] sm:text-[14px] md:text-[15px]"
+              className="inline-flex items-center gap-[8px] text-[#8B0000] font-bold uppercase tracking-wide mb-[20px] sm:mb-[24px] md:mb-[30px] hover:underline text-[13px] sm:text-[14px]"
             >
               <ArrowLeft className="w-[16px] sm:w-[17px] md:w-[18px] h-[16px] sm:h-[17px] md:h-[18px]" />
               Back to News
             </Link>
 
-            <div className="mb-[24px] sm:mb-[28px] md:mb-[32px]">
-              <span className="inline-block bg-[#8B0000] text-white text-[11px] sm:text-[12px] md:text-[13px] font-semibold px-[14px] sm:px-[16px] md:px-[18px] py-[8px] sm:py-[10px] md:py-[12px] rounded mb-[14px] sm:mb-[16px] md:mb-[18px]">
+            <div className="mb-[24px] rounded-[8px] border border-gray-200 bg-white p-5 shadow-sm sm:mb-[28px] sm:p-7 md:mb-[32px] md:p-8">
+              <span className="inline-block bg-[#8B0000] text-white text-[11px] sm:text-[12px] md:text-[13px] font-bold px-[14px] sm:px-[16px] md:px-[18px] py-[8px] sm:py-[10px] rounded-[4px] mb-[14px] sm:mb-[16px] md:mb-[18px]">
                 {formatLooseLabel(article.category, "News")}
               </span>
-              <h1 className="text-[22px] sm:text-[28px] md:text-[36px] lg:text-[42px] font-bold text-gray-900 mb-[14px] sm:mb-[16px] md:mb-[20px] leading-[1.2] sm:leading-[1.3] md:leading-[1.3]">
+              <h1 className="text-[26px] sm:text-[34px] md:text-[42px] lg:text-[48px] font-bold text-gray-950 mb-[14px] sm:mb-[16px] md:mb-[20px] leading-[1.2] sm:leading-[1.25]">
                 {article.title}
               </h1>
               
@@ -113,36 +113,49 @@ export default async function NewsArticlePage({ params }: PageProps) {
               
               {/* Excerpt if available */}
               {article.excerpt && (
-                <p className="text-gray-700 text-[14px] sm:text-[15px] md:text-[16px] italic font-medium mb-[20px] sm:mb-[24px] md:mb-[28px] leading-[1.6] sm:leading-[1.7]">
+                <p className="text-gray-700 text-[15px] sm:text-[16px] md:text-[17px] italic font-semibold leading-[1.7]">
                   {article.excerpt}
                 </p>
               )}
             </div>
 
             {article.image_url && (
-              <div className="relative h-[200px] sm:h-[300px] md:h-[400px] lg:h-[500px] rounded-xl overflow-hidden mb-[20px] sm:mb-[25px] md:mb-[30px] lg:mb-[40px] bg-gray-100 flex items-center justify-center">
-                <Image
-                  src={article.image_url}
-                  alt={article.title}
-                  fill
-                  className="object-contain"
-                  priority
-                />
-              </div>
+              <>
+                <div className="relative h-[220px] sm:h-[320px] md:h-[440px] lg:h-[520px] rounded-[8px] overflow-hidden mb-[16px] sm:mb-[18px] md:mb-[20px] lg:mb-[22px] bg-gray-100 flex items-center justify-center border border-gray-200 shadow-sm">
+                  <Image
+                    src={article.image_url}
+                    alt={article.title}
+                    fill
+                    className="object-contain"
+                    priority
+                  />
+                </div>
+                {article.image_caption ? (
+                  <p className="text-center text-sm text-gray-500 mb-[20px] sm:mb-[24px] md:mb-[28px] italic">
+                    {article.image_caption}
+                  </p>
+                ) : null}
+              </>
             )}
 
-            <div className="prose prose-lg max-w-none">
+            <div className="rounded-[8px] border border-gray-200 bg-white p-5 shadow-sm sm:p-7 md:p-8">
               {article.content
                 ?.split("\n\n")
                 .map((paragraph: string, index: number) => (
-                  <p key={index} className="text-gray-700 leading-[1.6] sm:leading-[1.7] md:leading-[1.8] mb-[16px] sm:mb-[18px] md:mb-[20px] lg:mb-[24px] text-[13px] sm:text-[14px] md:text-[15px] lg:text-[16px]">
+                  <p key={index} className="text-gray-700 leading-[1.7] md:leading-[1.85] mb-[16px] sm:mb-[18px] md:mb-[20px] lg:mb-[24px] text-[14px] sm:text-[15px] md:text-[16px]">
                     {paragraph}
                   </p>
                 ))}
             </div>
 
+            {article.credit_note ? (
+              <div className="mt-[24px] sm:mt-[28px] md:mt-[32px] pt-[20px] border-t border-gray-200">
+                <p className="text-sm text-gray-500 italic">Credit: {article.credit_note}</p>
+              </div>
+            ) : null}
+
             {article.tags && article.tags.length > 0 && (
-              <div className="mt-[30px] sm:mt-[36px] md:mt-[48px] lg:mt-[64px] pt-[20px] sm:pt-[24px] md:pt-[32px] border-t border-gray-200">
+              <div className="mt-[18px] sm:mt-[20px] md:mt-[24px] pt-[16px] sm:pt-[18px] md:pt-[20px] border-t border-gray-200">
                 <div className="flex flex-wrap gap-[10px] sm:gap-[12px] md:gap-[14px]">
                   <span className="text-gray-600 font-medium text-[13px] sm:text-[14px] md:text-[15px]">Tags:</span>
                   {article.tags.map((tag: string) => (
@@ -173,7 +186,7 @@ export default async function NewsArticlePage({ params }: PageProps) {
                           src={related.image_url}
                           alt={related.title}
                           fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          className="object-contain p-2 group-hover:scale-105 transition-transform duration-300"
                         />
                       ) : (
                         <div className="w-full h-full bg-gradient-to-br from-[#8B0000] to-[#6B0000] flex items-center justify-center text-white font-bold text-[14px] sm:text-[16px] md:text-lg">

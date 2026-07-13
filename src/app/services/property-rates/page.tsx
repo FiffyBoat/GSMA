@@ -1,14 +1,10 @@
 import Footer from "@/components/sections/footer";
 import Navbar from "@/components/sections/navbar";
 import PageHeader from "@/components/shared/PageHeader";
+import ServiceShowMore from "@/components/shared/service-show-more";
 import { loadPublicSiteSettings } from "@/lib/public-site-settings";
 import { splitSettingRows } from "@/lib/site-settings";
-import {
-  AlertCircle,
-  CheckCircle,
-  MapPin,
-  Phone,
-} from "lucide-react";
+import { AlertCircle, CheckCircle, MapPin, Phone } from "lucide-react";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -46,141 +42,148 @@ export default async function PropertyRatesPage() {
         ]}
       />
 
-      <section className="py-16">
-        <div className="container mx-auto px-4 max-w-4xl">
-          <div className="mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+      <section className="bg-[#f7f8fa] py-[44px] sm:py-[64px] md:py-[88px]">
+        <div className="container mx-auto max-w-5xl px-[15px]">
+          <div className="mb-8 rounded-[8px] border border-gray-200 bg-white p-5 shadow-sm sm:p-7 md:p-8">
+            <p className="mb-3 text-[12px] font-bold uppercase tracking-[0.24em] text-[#8B0000]">
+              Municipal Service
+            </p>
+            <h2 className="mb-4 text-[26px] font-bold leading-tight text-gray-950 sm:text-[32px] md:text-[38px]">
               About Property Rates
             </h2>
             {overviewParagraphs.map((paragraph, index) => (
               <p
                 key={`${paragraph}-${index}`}
-                className="text-gray-600 leading-relaxed mb-4"
+                className="mb-4 leading-relaxed text-gray-600"
               >
                 {paragraph}
               </p>
             ))}
           </div>
 
-          <div className="mb-12">
-            <h3 className="text-2xl font-bold text-gray-900 mb-6">
+          <div className="mb-8 rounded-[8px] border border-gray-200 bg-white p-5 shadow-sm sm:p-7 md:p-8">
+            <h3 className="mb-6 text-2xl font-bold text-gray-900">
               Property Categories
             </h3>
             <div className="grid gap-4">
               {categories.map(([type, description, rate]) => (
                 <div
                   key={type}
-                  className="bg-gray-50 p-6 rounded-lg border border-gray-200"
+                  className="rounded-[8px] border border-gray-200 bg-gray-50 p-6"
                 >
-                  <h4 className="text-lg font-bold text-gray-900 mb-2">{type}</h4>
-                  <p className="text-gray-600 mb-3">{description}</p>
-                  <p className="text-[#8B0000] font-semibold">Rate: {rate}</p>
+                  <h4 className="mb-2 text-lg font-bold text-gray-900">{type}</h4>
+                  <p className="mb-3 text-gray-600">{description}</p>
+                  <p className="font-semibold text-[#8B0000]">Rate: {rate}</p>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="mb-12">
-            <h3 className="text-2xl font-bold text-gray-900 mb-6">
-              Documentation Requirements
+          <div className="mb-8 rounded-[8px] border border-gray-200 bg-white p-5 shadow-sm sm:p-7 md:p-8">
+            <h3 className="mb-6 text-2xl font-bold text-gray-900">
+              Need detailed guidance?
             </h3>
-            <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
-              <ul className="space-y-3">
-                {requirements.map((requirement) => (
-                  <li key={requirement} className="flex gap-3">
-                    <CheckCircle className="w-5 h-5 text-[#8B0000] flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-700">{requirement}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
+            <ServiceShowMore
+              className="mb-0"
+              collapsedLabel="Show requirements, steps, and support"
+            >
+              <h3 className="mb-6 text-2xl font-bold text-gray-900">
+                Documentation Requirements
+              </h3>
+              <div className="mb-8 rounded-[8px] border border-gray-200 bg-gray-50 p-6">
+                <ul className="space-y-3">
+                  {requirements.map((requirement) => (
+                    <li key={requirement} className="flex gap-3">
+                      <CheckCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-[#8B0000]" />
+                      <span className="text-gray-700">{requirement}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
-          <div className="mb-12">
-            <h3 className="text-2xl font-bold text-gray-900 mb-6">
-              Application Process
-            </h3>
-            <div className="space-y-4">
-              {steps.map(([title, description], index) => (
-                <div key={`${title}-${index}`} className="flex gap-4">
-                  <div className="flex-shrink-0">
-                    <div className="flex items-center justify-center h-10 w-10 rounded-full bg-[#8B0000] text-white font-bold">
-                      {index + 1}
+              <h3 className="mb-6 text-2xl font-bold text-gray-900">
+                Application Process
+              </h3>
+              <div className="mb-8 space-y-4">
+                {steps.map(([title, description], index) => (
+                  <div key={`${title}-${index}`} className="flex gap-4">
+                    <div className="flex-shrink-0">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#8B0000] font-bold text-white">
+                        {index + 1}
+                      </div>
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="mb-1 text-lg font-bold text-gray-900">
+                        {title}
+                      </h4>
+                      <p className="text-gray-600">{description}</p>
                     </div>
                   </div>
-                  <div className="flex-1">
-                    <h4 className="text-lg font-bold text-gray-900 mb-1">
-                      {title}
-                    </h4>
-                    <p className="text-gray-600">{description}</p>
+                ))}
+              </div>
+
+              <h3 className="mb-6 text-2xl font-bold text-gray-900">
+                Payment Methods
+              </h3>
+              <div className="mb-8 grid gap-4 md:grid-cols-2">
+                {paymentMethods.map(([method, details]) => (
+                  <div
+                    key={method}
+                    className="rounded-[8px] border border-green-200 bg-gradient-to-r from-green-50 to-emerald-50 p-6"
+                  >
+                    <h4 className="mb-2 text-lg font-bold text-gray-900">{method}</h4>
+                    <p className="text-gray-600">{details}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mb-8 rounded-[8px] border border-[#8B0000]/20 bg-gradient-to-r from-[#8B0000]/5 to-transparent p-8">
+                <h3 className="mb-6 text-2xl font-bold text-gray-900">
+                  Need Assistance?
+                </h3>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="flex gap-3">
+                    <Phone className="h-6 w-6 flex-shrink-0 text-[#8B0000]" />
+                    <div>
+                      <p className="font-semibold text-gray-900">
+                        {assistanceLines[0] ?? "Finance Department"}
+                      </p>
+                      <p className="text-gray-600">
+                        {assistanceLines[1] ?? "For rate inquiries and payment"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-3">
+                    <MapPin className="h-6 w-6 flex-shrink-0 text-[#8B0000]" />
+                    <div>
+                      <p className="font-semibold text-gray-900">
+                        {assistanceLines[2] ?? "Finance Office"}
+                      </p>
+                      <p className="text-gray-600">
+                        {assistanceLines[3] ?? "Municipal Assembly Headquarters"}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="mb-12">
-            <h3 className="text-2xl font-bold text-gray-900 mb-6">
-              Payment Methods
-            </h3>
-            <div className="grid gap-4 md:grid-cols-2">
-              {paymentMethods.map(([method, details]) => (
-                <div
-                  key={method}
-                  className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-lg border border-green-200"
-                >
-                  <h4 className="text-lg font-bold text-gray-900 mb-2">{method}</h4>
-                  <p className="text-gray-600">{details}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-r from-[#8B0000]/5 to-transparent p-8 rounded-lg border border-[#8B0000]/20 mb-12">
-            <h3 className="text-2xl font-bold text-gray-900 mb-6">
-              Need Assistance?
-            </h3>
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="flex gap-3">
-                <Phone className="w-6 h-6 text-[#8B0000] flex-shrink-0" />
-                <div>
-                  <p className="font-semibold text-gray-900">
-                    {assistanceLines[0] ?? "Finance Department"}
-                  </p>
-                  <p className="text-gray-600">
-                    {assistanceLines[1] ?? "For rate inquiries and payment"}
-                  </p>
-                </div>
               </div>
-              <div className="flex gap-3">
-                <MapPin className="w-6 h-6 text-[#8B0000] flex-shrink-0" />
-                <div>
-                  <p className="font-semibold text-gray-900">
-                    {assistanceLines[2] ?? "Finance Office"}
-                  </p>
-                  <p className="text-gray-600">
-                    {assistanceLines[3] ?? "Municipal Assembly Headquarters"}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
 
-          <div className="bg-amber-50 border border-amber-200 p-6 rounded-lg mb-12">
-            <h4 className="font-bold text-gray-900 mb-3 flex gap-2">
-              <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0" />
-              Important Information
-            </h4>
-            <ul className="space-y-2 text-gray-700 text-sm">
-              {importantNotes.map((note) => (
-                <li key={note}>- {note}</li>
-              ))}
-            </ul>
+              <div className="rounded-[8px] border border-amber-200 bg-amber-50 p-6">
+                <h4 className="mb-3 flex gap-2 font-bold text-gray-900">
+                  <AlertCircle className="h-5 w-5 flex-shrink-0 text-amber-600" />
+                  Important Information
+                </h4>
+                <ul className="space-y-2 text-sm text-gray-700">
+                  {importantNotes.map((note) => (
+                    <li key={note}>- {note}</li>
+                  ))}
+                </ul>
+              </div>
+            </ServiceShowMore>
           </div>
 
           <Link
             href="/services"
-            className="inline-flex items-center gap-2 text-[#8B0000] font-semibold hover:underline"
+            className="inline-flex items-center gap-2 text-[13px] font-bold uppercase tracking-wide text-[#8B0000] hover:underline"
           >
             Back to Services
           </Link>

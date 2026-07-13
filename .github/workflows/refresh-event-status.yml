@@ -1,0 +1,23 @@
+name: Refresh Event Statuses
+
+on:
+  schedule:
+    # Runs every hour; adjust cron as needed
+    - cron: '0 * * * *'
+  workflow_dispatch: {}
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call refresh endpoint
+        env:
+          REFRESH_SECRET: ${{ secrets.REFRESH_EVENTS_SECRET }}
+          SITE_URL: ${{ secrets.SITE_URL }}
+        run: |
+          if [ -z "$REFRESH_SECRET" ] || [ -z "$SITE_URL" ]; then
+            echo "Missing required secrets: REFRESH_EVENTS_SECRET or SITE_URL";
+            exit 1;
+          fi
+          echo "Triggering event status refresh..."
+          curl -X POST "$SITE_URL/api/admin/events/refresh-status" -H "x-refresh-secret: $REFRESH_SECRET" -f

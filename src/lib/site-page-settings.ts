@@ -1,4 +1,5 @@
 import type { SettingInputType } from "./profile-settings";
+import { DEFAULT_SOCIAL_LINKS, SOCIAL_LINK_KEYS } from "./social-links";
 
 export type SitePageSettingsSectionId =
   | "overview"
@@ -201,32 +202,32 @@ export const SITE_PAGE_SETTING_DEFINITIONS: SitePageSettingDefinition[] = [
     description: "Add one schedule line per row.",
   },
   {
-    key: "contact_facebook_url",
+    key: SOCIAL_LINK_KEYS.facebook,
     label: "Facebook URL",
     type: "text",
     section: "contact",
-    defaultValue: "https://web.facebook.com/gasouthmunicipal",
+    defaultValue: DEFAULT_SOCIAL_LINKS.facebook,
   },
   {
-    key: "contact_twitter_url",
-    label: "X / Twitter URL",
+    key: SOCIAL_LINK_KEYS.tiktok,
+    label: "TikTok URL",
     type: "text",
     section: "contact",
-    defaultValue: "https://x.com/GaSouthAssembly",
+    defaultValue: DEFAULT_SOCIAL_LINKS.tiktok,
   },
   {
-    key: "contact_instagram_url",
+    key: SOCIAL_LINK_KEYS.instagram,
     label: "Instagram URL",
     type: "text",
     section: "contact",
-    defaultValue: "https://www.instagram.com/gasouthmunicipalassembly/",
+    defaultValue: DEFAULT_SOCIAL_LINKS.instagram,
   },
   {
-    key: "contact_youtube_url",
+    key: SOCIAL_LINK_KEYS.youtube,
     label: "YouTube URL",
     type: "text",
     section: "contact",
-    defaultValue: "https://www.youtube.com/channel/UCJcI5FHNEmZQjNvZ3_hkRpg",
+    defaultValue: DEFAULT_SOCIAL_LINKS.youtube,
   },
   {
     key: "contact_form_intro",

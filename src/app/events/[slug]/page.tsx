@@ -14,6 +14,19 @@ interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
+function parseEventDate(value?: string | null, endOfDay = false) {
+  if (!value) return null;
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+
+  if (endOfDay && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    date.setHours(23, 59, 59, 999);
+  }
+
+  return date;
+}
+
 export default async function EventDetailPage({ params }: PageProps) {
   const { slug } = await params;
   const supabase = createPublicServerSupabaseClient();
@@ -64,32 +77,32 @@ export default async function EventDetailPage({ params }: PageProps) {
         ]}
       />
 
-      <section className="py-[40px] sm:py-[60px] md:py-[80px]">
+      <section className="bg-[#f7f8fa] py-[40px] sm:py-[60px] md:py-[80px]">
         <div className="container mx-auto px-[15px] max-w-5xl">
           <Link
             href="/events"
-            className="inline-flex items-center gap-[8px] sm:gap-[10px] text-[#8B0000] font-semibold mb-[24px] sm:mb-[28px] md:mb-[32px] hover:underline text-[13px] sm:text-[14px] md:text-[15px] transition-colors"
+            className="inline-flex items-center gap-[8px] sm:gap-[10px] text-[#8B0000] font-bold uppercase tracking-wide mb-[24px] sm:mb-[28px] md:mb-[32px] hover:underline text-[13px] sm:text-[14px] transition-colors"
           >
             <ArrowLeft className="w-[16px] sm:w-[17px] md:w-[18px] h-[16px] sm:h-[17px] md:h-[18px]" />
             Back to Events
           </Link>
 
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+          <div className="bg-white rounded-[8px] border border-gray-200 overflow-hidden shadow-sm">
             {/* Show a notice if the event is in the past (use end_date if present) or a "Happening now" badge when ongoing */}
             {(() => {
               const refDate = event.end_date || event.start_date;
               if (refDate) {
-                const end = new Date(refDate);
-                const start = new Date(event.start_date);
+                const end = parseEventDate(refDate, true);
+                const start = parseEventDate(event.start_date);
                 const now = new Date();
-                if (end < now) {
+                if (end && end < now) {
                   return (
                     <div className="p-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-700">
                       <strong>Note:</strong> This event has passed on {formatDateTime(refDate)}.
                     </div>
                   );
                 }
-                if (start <= now && end >= now) {
+                if (start && end && start <= now && end >= now) {
                   return (
                     <div className="p-4 bg-green-50 border-l-4 border-green-400 text-green-700">
                       <strong>Happening now:</strong> This event is currently in progress.
@@ -100,22 +113,36 @@ export default async function EventDetailPage({ params }: PageProps) {
               return null;
             })()}
             {event.image_url && (
-              <div className="relative h-[250px] sm:h-[320px] md:h-[400px] lg:h-[500px] w-full overflow-hidden">
-                <Image
-                  src={event.image_url}
-                  alt={event.title}
-                  fill
-                  className="object-cover"
-                  priority
-                />
-              </div>
+              <>
+                <div className="relative h-[220px] w-full overflow-hidden bg-gray-100 sm:h-[300px] md:h-[400px] lg:h-[460px]">
+                  <Image
+                    src={event.image_url}
+                    alt={event.title}
+                    fill
+                    className="object-contain"
+                    priority
+                  />
+                </div>
+                {event.image_caption ? (
+                  <p className="px-[20px] pt-[14px] text-center text-sm text-gray-500 italic sm:px-[24px] md:px-[32px] lg:px-[40px]">
+                    {event.image_caption}
+                  </p>
+                ) : null}
+              </>
             )}
             <div className="p-[20px] sm:p-[24px] md:p-[32px] lg:p-[40px]">
-              <h1 className="text-[24px] sm:text-[28px] md:text-[32px] lg:text-[36px] font-bold text-gray-900 mb-[16px] sm:mb-[20px] md:mb-[24px] leading-[1.2] sm:leading-[1.3]">
-                {event.title}
-              </h1>
+              <div className="mb-[24px] border-b border-gray-200 pb-[24px]">
+                {event.event_type ? (
+                  <p className="mb-3 text-[12px] font-bold uppercase tracking-[0.24em] text-[#8B0000]">
+                    {event.event_type.replace(/-/g, " ")}
+                  </p>
+                ) : null}
+                <h1 className="text-[26px] sm:text-[32px] md:text-[38px] lg:text-[42px] font-bold text-gray-950 leading-[1.2] sm:leading-[1.3]">
+                  {event.title}
+                </h1>
+              </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-[16px] sm:gap-[20px] md:gap-[24px] mb-[24px] sm:mb-[28px] md:mb-[32px] pb-[24px] sm:pb-[28px] md:pb-[32px] border-b border-gray-200">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-[12px] sm:gap-[14px] md:gap-[16px] mb-[24px] sm:mb-[28px] md:mb-[32px]">
                 <div className="flex items-start gap-[10px] sm:gap-[12px]">
                   <Calendar className="w-[18px] sm:w-[20px] md:w-[22px] h-[18px] sm:h-[20px] md:h-[22px] text-[#8B0000] shrink-0 mt-[2px]" />
                   <div className="flex-1 min-w-0">
@@ -135,15 +162,6 @@ export default async function EventDetailPage({ params }: PageProps) {
                         {formatDateTime(event.end_date)}
                         {event.end_date && <span className="ml-[8px]">{formatTime(event.end_date)}</span>}
                       </p>
-                    </div>
-                  </div>
-                )}
-                {event.event_type && (
-                  <div className="flex items-start gap-[10px] sm:gap-[12px]">
-                    <Tag className="w-[18px] sm:w-[20px] md:w-[22px] h-[18px] sm:h-[20px] md:h-[22px] text-[#8B0000] shrink-0 mt-[2px]" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[12px] sm:text-[13px] md:text-[14px] text-gray-600 mb-[2px]">Event Type</p>
-                      <p className="text-[13px] sm:text-[14px] md:text-[15px] text-gray-900 font-semibold capitalize">{event.event_type.replace(/-/g, " ")}</p>
                     </div>
                   </div>
                 )}
@@ -204,7 +222,7 @@ export default async function EventDetailPage({ params }: PageProps) {
               </div>
 
               {event.description && (
-                <div className="mb-[24px] sm:mb-[28px] md:mb-[32px] p-[16px] sm:p-[20px] md:p-[24px] bg-gray-50 border-l-[4px] border-[#8B0000] rounded">
+                <div className="mb-[24px] sm:mb-[28px] md:mb-[32px] p-[16px] sm:p-[20px] md:p-[24px] bg-gray-50 border-l-[4px] border-[#8B0000] rounded-[6px]">
                   <p className="text-[14px] sm:text-[15px] md:text-[16px] lg:text-[17px] font-semibold text-gray-900 leading-[1.6] sm:leading-[1.7]">
                     {event.description}
                   </p>
@@ -225,6 +243,12 @@ export default async function EventDetailPage({ params }: PageProps) {
                   </div>
                 </div>
               )}
+
+              {event.credit_note ? (
+                <div className="mt-[24px] border-t border-gray-200 pt-[18px]">
+                  <p className="text-center text-sm text-gray-500 italic">Credit: {event.credit_note}</p>
+                </div>
+              ) : null}
             </div>
           </div>
         </div>

@@ -12,10 +12,10 @@ import {
   Phone,
   Clock,
   Send,
-  Twitter,
   Youtube,
 } from "lucide-react";
 import { useState } from "react";
+import TikTokIcon from "@/components/shared/tiktok-icon";
 
 interface ContactPageClientProps {
   settings: Record<string, string>;
@@ -125,20 +125,25 @@ export default function ContactPageClient({
       <Navbar />
       <PageHeader title="Contact Us" breadcrumbs={[{ label: "Contact Us" }]} />
 
-      <section className="py-[40px] sm:py-[60px] md:py-[80px]">
-        <div className="container mx-auto px-[15px]">
+      <section className="bg-[#f7f8fa] py-[40px] sm:py-[60px] md:py-[80px]">
+        <div className="container mx-auto max-w-7xl px-[15px]">
+          <div className="mb-8 rounded-[8px] border border-gray-200 bg-white p-5 shadow-sm sm:p-7 md:p-8">
+            <p className="mb-3 text-[12px] font-bold uppercase tracking-[0.24em] text-[#8B0000]">
+              Contact The Assembly
+            </p>
+            <h2 className="mb-3 text-[26px] font-bold text-gray-950 sm:text-[32px] md:text-[38px]">
+              Get In Touch
+            </h2>
+            <p className="max-w-3xl text-[14px] leading-7 text-gray-600 sm:text-[15px]">
+              {settings.contact_intro}
+            </p>
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-[24px] sm:gap-[28px] md:gap-[30px] lg:gap-[40px]">
             <div className="lg:col-span-1">
-              <h2 className="text-[22px] sm:text-[26px] md:text-[28px] lg:text-[32px] font-bold text-gray-900 mb-[20px] sm:mb-[24px] md:mb-[28px]">
-                Get In Touch
-              </h2>
-              <p className="text-gray-600 mb-[24px] sm:mb-[28px] md:mb-[32px] text-[13px] sm:text-[14px] md:text-[15px]">
-                {settings.contact_intro}
-              </p>
-
-              <div className="space-y-[20px] sm:space-y-[24px] md:space-y-[28px]">
-                <div className="flex items-start gap-[14px] sm:gap-[16px] md:gap-[18px]">
-                  <div className="w-[44px] sm:w-[48px] h-[44px] sm:h-[48px] bg-[#8B0000] rounded-lg flex items-center justify-center shrink-0">
+              <div className="space-y-4">
+                <div className="flex items-start gap-[14px] rounded-[8px] border border-gray-200 bg-white p-4 shadow-sm sm:gap-[16px] md:gap-[18px]">
+                  <div className="w-[44px] sm:w-[48px] h-[44px] sm:h-[48px] bg-[#8B0000] rounded-[6px] flex items-center justify-center shrink-0">
                     <MapPin className="w-[20px] sm:w-[22px] h-[20px] sm:h-[22px] text-white" />
                   </div>
                   <div>
@@ -161,8 +166,8 @@ export default function ContactPageClient({
                   </div>
                 </div>
 
-                <div className="flex items-start gap-[14px] sm:gap-[16px] md:gap-[18px]">
-                  <div className="w-[44px] sm:w-[48px] h-[44px] sm:h-[48px] bg-[#8B0000] rounded-lg flex items-center justify-center shrink-0">
+                <div className="flex items-start gap-[14px] rounded-[8px] border border-gray-200 bg-white p-4 shadow-sm sm:gap-[16px] md:gap-[18px]">
+                  <div className="w-[44px] sm:w-[48px] h-[44px] sm:h-[48px] bg-[#8B0000] rounded-[6px] flex items-center justify-center shrink-0">
                     <Phone className="w-[20px] sm:w-[22px] h-[20px] sm:h-[22px] text-white" />
                   </div>
                   <div>
@@ -180,8 +185,8 @@ export default function ContactPageClient({
                   </div>
                 </div>
 
-                <div className="flex items-start gap-[14px] sm:gap-[16px] md:gap-[18px]">
-                  <div className="w-[44px] sm:w-[48px] h-[44px] sm:h-[48px] bg-[#8B0000] rounded-lg flex items-center justify-center shrink-0">
+                <div className="flex items-start gap-[14px] rounded-[8px] border border-gray-200 bg-white p-4 shadow-sm sm:gap-[16px] md:gap-[18px]">
+                  <div className="w-[44px] sm:w-[48px] h-[44px] sm:h-[48px] bg-[#8B0000] rounded-[6px] flex items-center justify-center shrink-0">
                     <Mail className="w-[20px] sm:w-[22px] h-[20px] sm:h-[22px] text-white" />
                   </div>
                   <div>
@@ -194,8 +199,8 @@ export default function ContactPageClient({
                   </div>
                 </div>
 
-                <div className="flex items-start gap-[14px] sm:gap-[16px] md:gap-[18px]">
-                  <div className="w-[44px] sm:w-[48px] h-[44px] sm:h-[48px] bg-[#8B0000] rounded-lg flex items-center justify-center shrink-0">
+                <div className="flex items-start gap-[14px] rounded-[8px] border border-gray-200 bg-white p-4 shadow-sm sm:gap-[16px] md:gap-[18px]">
+                  <div className="w-[44px] sm:w-[48px] h-[44px] sm:h-[48px] bg-[#8B0000] rounded-[6px] flex items-center justify-center shrink-0">
                     <Clock className="w-[20px] sm:w-[22px] h-[20px] sm:h-[22px] text-white" />
                   </div>
                   <div>
@@ -214,7 +219,7 @@ export default function ContactPageClient({
                 </div>
               </div>
 
-              <div className="mt-[24px] sm:mt-[28px] md:mt-[32px] pt-[20px] sm:pt-[24px] md:pt-[28px] border-t border-gray-200">
+              <div className="mt-[20px] rounded-[8px] border border-gray-200 bg-white p-4 shadow-sm">
                 <h3 className="font-bold text-gray-900 mb-[14px] sm:mb-[16px] text-[14px] sm:text-[15px] md:text-[16px]">
                   Follow Us
                 </h3>
@@ -233,9 +238,9 @@ export default function ContactPageClient({
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-[40px] sm:w-[44px] h-[40px] sm:h-[44px] bg-[#8B0000] rounded-lg flex items-center justify-center hover:bg-[#6B0000] transition-colors"
-                    title="Visit Twitter/X"
+                    title="Visit TikTok"
                   >
-                    <Twitter className="w-[18px] sm:w-[20px] h-[18px] sm:h-[20px] text-white" />
+                    <TikTokIcon className="w-[18px] sm:w-[20px] h-[18px] sm:h-[20px] text-white" />
                   </a>
                   <a
                     href={settings.contact_instagram_url}
@@ -260,7 +265,7 @@ export default function ContactPageClient({
             </div>
 
             <div className="lg:col-span-2">
-              <div className="bg-gray-50 rounded-lg p-[20px] sm:p-[24px] md:p-[28px] lg:p-[32px]">
+              <div className="rounded-[8px] border border-gray-200 bg-white p-[20px] shadow-sm sm:p-[24px] md:p-[28px] lg:p-[32px]">
                 <h2 className="text-[22px] sm:text-[26px] md:text-[28px] lg:text-[32px] font-bold text-gray-900 mb-[8px] sm:mb-[10px]">
                   Send Us A Message
                 </h2>
@@ -285,7 +290,7 @@ export default function ContactPageClient({
                         onChange={(event) =>
                           setFormData({ ...formData, name: event.target.value })
                         }
-                        className="w-full px-[12px] sm:px-[14px] md:px-[16px] py-[10px] sm:py-[12px] md:py-[14px] border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8B0000] focus:border-transparent text-[13px] sm:text-[14px] md:text-[15px]"
+                        className="w-full rounded-[6px] border border-gray-300 px-[12px] py-[10px] text-[13px] focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#8B0000] sm:px-[14px] sm:py-[12px] sm:text-[14px] md:px-[16px] md:py-[14px] md:text-[15px]"
                         placeholder="Your name"
                       />
                     </div>
@@ -301,7 +306,7 @@ export default function ContactPageClient({
                         onChange={(event) =>
                           setFormData({ ...formData, email: event.target.value })
                         }
-                        className="w-full px-[12px] sm:px-[14px] md:px-[16px] py-[10px] sm:py-[12px] md:py-[14px] border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8B0000] focus:border-transparent text-[13px] sm:text-[14px] md:text-[15px]"
+                        className="w-full rounded-[6px] border border-gray-300 px-[12px] py-[10px] text-[13px] focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#8B0000] sm:px-[14px] sm:py-[12px] sm:text-[14px] md:px-[16px] md:py-[14px] md:text-[15px]"
                         placeholder="your@email.com"
                       />
                     </div>
@@ -319,7 +324,7 @@ export default function ContactPageClient({
                         onChange={(event) =>
                           setFormData({ ...formData, phone: event.target.value })
                         }
-                        className="w-full px-[12px] sm:px-[14px] md:px-[16px] py-[10px] sm:py-[12px] md:py-[14px] border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8B0000] focus:border-transparent text-[13px] sm:text-[14px] md:text-[15px]"
+                        className="w-full rounded-[6px] border border-gray-300 px-[12px] py-[10px] text-[13px] focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#8B0000] sm:px-[14px] sm:py-[12px] sm:text-[14px] md:px-[16px] md:py-[14px] md:text-[15px]"
                         placeholder="+233 xxx xxx xxxx"
                       />
                     </div>
@@ -334,7 +339,7 @@ export default function ContactPageClient({
                         onChange={(event) =>
                           setFormData({ ...formData, subject: event.target.value })
                         }
-                        className="w-full px-[12px] sm:px-[14px] md:px-[16px] py-[10px] sm:py-[12px] md:py-[14px] border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8B0000] focus:border-transparent text-[13px] sm:text-[14px] md:text-[15px]"
+                        className="w-full rounded-[6px] border border-gray-300 px-[12px] py-[10px] text-[13px] focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#8B0000] sm:px-[14px] sm:py-[12px] sm:text-[14px] md:px-[16px] md:py-[14px] md:text-[15px]"
                       >
                         <option value="">Select a subject</option>
                         <option value="general">General Inquiry</option>
@@ -359,14 +364,14 @@ export default function ContactPageClient({
                       onChange={(event) =>
                         setFormData({ ...formData, message: event.target.value })
                       }
-                      className="w-full px-[12px] sm:px-[14px] md:px-[16px] py-[10px] sm:py-[12px] md:py-[14px] border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8B0000] focus:border-transparent resize-none text-[13px] sm:text-[14px] md:text-[15px]"
+                      className="w-full resize-none rounded-[6px] border border-gray-300 px-[12px] py-[10px] text-[13px] focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#8B0000] sm:px-[14px] sm:py-[12px] sm:text-[14px] md:px-[16px] md:py-[14px] md:text-[15px]"
                       placeholder="How can we help you?"
                     />
                   </div>
 
                   <button
                     type="submit"
-                    className="w-full md:w-auto px-[20px] sm:px-[24px] md:px-[28px] lg:px-[32px] py-[12px] sm:py-[14px] md:py-[16px] bg-[#8B0000] text-white font-bold rounded-lg hover:bg-[#6B0000] transition-colors flex items-center justify-center gap-[8px] sm:gap-[10px] text-[13px] sm:text-[14px] md:text-[15px]"
+                    className="flex w-full items-center justify-center gap-[8px] rounded-[4px] bg-[#8B0000] px-[20px] py-[12px] text-[13px] font-bold uppercase tracking-wide text-white transition-colors hover:bg-[#6B0000] sm:gap-[10px] sm:px-[24px] sm:py-[14px] sm:text-[14px] md:w-auto md:px-[28px] md:py-[16px] md:text-[15px] lg:px-[32px]"
                   >
                     <Send className="w-[18px] sm:w-[20px] h-[18px] sm:h-[20px]" />
                     Send Message
@@ -374,15 +379,7 @@ export default function ContactPageClient({
                 </form>
               </div>
 
-              <div className="mt-[24px] sm:mt-[28px] md:mt-[32px] rounded-lg overflow-hidden relative h-[250px] sm:h-[300px] md:h-[350px] lg:h-[400px] border border-gray-200">
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="bg-white/80 px-3 py-2 rounded-lg shadow-md flex items-center gap-2">
-                    <MapPin className="w-5 h-5 text-[#8B0000]" />
-                    <span className="text-sm font-semibold text-gray-900">
-                      Ga South Municipal Assembly
-                    </span>
-                  </div>
-                </div>
+              <div className="mt-[24px] sm:mt-[28px] md:mt-[32px] rounded-[8px] overflow-hidden relative h-[250px] sm:h-[300px] md:h-[350px] lg:h-[400px] border border-gray-200 bg-white shadow-sm">
                 <iframe
                   src={mapEmbedUrl}
                   width="100%"

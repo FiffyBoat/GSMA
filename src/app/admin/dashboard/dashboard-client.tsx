@@ -43,6 +43,7 @@ import {
   LogOut,
   Menu,
   Loader2,
+  RefreshCw,
 } from "lucide-react";
 
 const GROUP_STYLES: Record<
@@ -747,22 +748,31 @@ export default function AdminDashboardClient({ user }: { user: User }) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#f4f6f8]">
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-[86vw] max-w-72 bg-slate-900 shadow-2xl transform transition-transform lg:w-60 lg:max-w-none lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-[86vw] max-w-72 bg-[#111827] shadow-2xl transform transition-transform lg:w-64 lg:max-w-none lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         <div className="flex h-full flex-col overflow-hidden">
-          <div className="border-b border-slate-700 px-4 py-4">
-            <h1 className="text-lg font-bold text-white">GSMA Admin</h1>
-            <p className="mt-1 text-xs text-slate-400">{user.name}</p>
-            <p className="mt-1 text-[11px] uppercase tracking-[0.18em] text-slate-500">
-              {user.role.replace("_", " ")}
-            </p>
+          <div className="border-b border-white/10 px-4 py-4">
+            <div className="rounded-[8px] border border-white/10 bg-white/[0.03] p-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#ffcc00]">
+                GSMA Admin
+              </p>
+              <h1 className="mt-1 text-[15px] font-bold text-white">
+                Control Centre
+              </h1>
+              <div className="mt-3 border-t border-white/10 pt-3">
+                <p className="text-xs font-semibold text-slate-200">{user.name}</p>
+                <p className="mt-1 text-[11px] uppercase tracking-[0.16em] text-slate-400">
+                  {user.role.replace("_", " ")}
+                </p>
+              </div>
+            </div>
           </div>
 
-          <nav className="flex-1 space-y-2.5 overflow-y-auto p-3">
+          <nav className="flex-1 space-y-2 overflow-y-auto p-3">
             {availableNavGroups.map((group) => {
               const groupStyle = GROUP_STYLES[group.id];
               const groupActive = group.items.some((item) => item.id === activeTab);
@@ -779,7 +789,7 @@ export default function AdminDashboardClient({ user }: { user: User }) {
               return (
                 <div
                   key={group.id}
-                  className={`overflow-hidden rounded-xl border bg-slate-950/40 ${groupStyle.border}`}
+                  className={`overflow-hidden rounded-[8px] border bg-white/[0.03] ${groupStyle.border}`}
                 >
                   <button
                     type="button"
@@ -792,7 +802,7 @@ export default function AdminDashboardClient({ user }: { user: User }) {
                   >
                     <div className="flex items-center gap-3">
                       <span
-                        className={`flex h-8 w-8 items-center justify-center rounded-lg ${
+                        className={`flex h-8 w-8 items-center justify-center rounded-[8px] ${
                           groupActive
                             ? groupStyle.iconActive
                             : groupStyle.iconIdle
@@ -805,7 +815,7 @@ export default function AdminDashboardClient({ user }: { user: User }) {
                           <p className="text-[13px] font-semibold">{group.label}</p>
                           {groupCount > 0 ? (
                             <span
-                              className={`inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
+                              className={`inline-flex min-w-5 items-center justify-center rounded-[6px] px-1.5 py-0.5 text-[10px] font-semibold ${
                                 groupActive
                                   ? "bg-white/15 text-white"
                                   : groupStyle.accentBadge
@@ -816,7 +826,7 @@ export default function AdminDashboardClient({ user }: { user: User }) {
                           ) : null}
                           {groupAttentionCount > 0 ? (
                             <span
-                              className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-amber-200"
+                              className="inline-flex items-center gap-1 rounded-[6px] bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-amber-200"
                               title={`${groupAttentionCount} item${groupAttentionCount === 1 ? "" : "s"} need attention`}
                             >
                               <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
@@ -847,7 +857,7 @@ export default function AdminDashboardClient({ user }: { user: User }) {
                             key={item.id}
                             type="button"
                             onClick={() => handleTabSelect(item.id)}
-                            className={`flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] transition-colors ${
+                            className={`flex w-full items-center gap-2.5 rounded-[8px] px-2.5 py-2 text-[13px] transition-colors ${
                               activeTab === item.id
                                 ? "bg-[#8B0000] text-white shadow-sm"
                                 : "text-slate-300 hover:bg-slate-800 hover:text-white"
@@ -859,7 +869,7 @@ export default function AdminDashboardClient({ user }: { user: User }) {
                             </span>
                             {attentionCount > 0 ? (
                               <span
-                                className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
+                                className={`inline-flex items-center gap-1 rounded-[6px] px-1.5 py-0.5 text-[10px] font-semibold ${
                                   activeTab === item.id
                                     ? "bg-amber-300/20 text-amber-50"
                                     : "bg-amber-500/15 text-amber-200"
@@ -872,7 +882,7 @@ export default function AdminDashboardClient({ user }: { user: User }) {
                             ) : null}
                             {typeof tabCounts[item.id] === "number" ? (
                               <span
-                                className={`inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
+                                className={`inline-flex min-w-5 items-center justify-center rounded-[6px] px-1.5 py-0.5 text-[10px] font-semibold ${
                                   activeTab === item.id
                                     ? "bg-white/15 text-white"
                                     : "bg-slate-700 text-slate-200"
@@ -891,10 +901,10 @@ export default function AdminDashboardClient({ user }: { user: User }) {
             })}
           </nav>
 
-          <div className="border-t border-slate-700 p-3">
+          <div className="border-t border-white/10 p-3">
             <button
               onClick={handleLogout}
-              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-[13px] text-slate-300 transition-colors hover:bg-slate-800"
+              className="flex w-full items-center gap-2.5 rounded-[8px] px-3 py-2.5 text-[13px] text-slate-300 transition-colors hover:bg-white/10"
             >
               <LogOut className="h-4 w-4" />
               Logout
@@ -910,23 +920,44 @@ export default function AdminDashboardClient({ user }: { user: User }) {
         />
       )}
 
-      <main className="min-w-0 lg:pl-60">
-        <header className="sticky top-0 z-30 flex items-center gap-3 border-b bg-white/95 px-3 py-3 backdrop-blur sm:px-6 sm:py-4">
+      <main className="min-w-0 lg:pl-64">
+        <header className="sticky top-0 z-30 border-b border-gray-200 bg-white/95 px-3 py-3 backdrop-blur sm:px-6 sm:py-4">
+          <div className="flex items-center gap-3">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="rounded-lg p-2 hover:bg-gray-100 lg:hidden"
+            className="rounded-[8px] p-2 hover:bg-gray-100 lg:hidden"
           >
             <Menu className="w-6 h-6" />
           </button>
-          <h2 className="min-w-0 text-base font-semibold text-gray-900 capitalize sm:text-xl">
-            {getAdminTabTitle(activeTab)}
-          </h2>
+            <div className="min-w-0 flex-1">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#8B0000]">
+                Ga South Municipal Assembly
+              </p>
+              <h2 className="min-w-0 text-base font-semibold text-gray-900 capitalize sm:text-xl">
+                {getAdminTabTitle(activeTab)}
+              </h2>
+            </div>
+            <button
+              type="button"
+              onClick={loadData}
+              disabled={loading}
+              className="inline-flex items-center gap-2 rounded-[8px] border border-gray-200 bg-white px-3 py-2 text-[12px] font-semibold text-gray-700 shadow-sm transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
+              <span className="hidden sm:inline">Refresh</span>
+            </button>
+          </div>
         </header>
 
-        <div className="p-3 sm:p-6">
+        <div className="p-3 sm:p-6 lg:p-8">
           {loading ? (
-            <div className="flex items-center justify-center py-20">
-              <Loader2 className="w-8 h-8 animate-spin text-[#8B0000]" />
+            <div className="flex min-h-[360px] items-center justify-center rounded-[8px] border border-gray-200 bg-white shadow-sm">
+              <div className="text-center">
+                <Loader2 className="mx-auto h-8 w-8 animate-spin text-[#8B0000]" />
+                <p className="mt-3 text-sm font-medium text-gray-600">
+                  Loading admin records
+                </p>
+              </div>
             </div>
           ) : (
             <>

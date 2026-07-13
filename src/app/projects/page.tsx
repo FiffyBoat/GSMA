@@ -4,7 +4,7 @@ import PageHeader from "@/components/shared/PageHeader";
 import PaginationNav from "@/components/shared/PaginationNav";
 import Image from "next/image";
 import Link from "next/link";
-import { Calendar, MapPin, DollarSign, FileText } from "lucide-react";
+import { ArrowRight, Calendar, MapPin, DollarSign, FileText } from "lucide-react";
 import { getSlug } from "@/lib/content-utils";
 import { formatLooseLabel } from "@/lib/text-match";
 import { createPublicServerSupabaseClient } from "@/lib/supabase/public-server";
@@ -19,6 +19,8 @@ interface Project {
   slug: string;
   description: string;
   image_url: string;
+  image_caption?: string;
+  credit_note?: string;
   category: string;
   status: string;
   start_date: string;
@@ -99,19 +101,32 @@ export default async function ProjectsPage({
       <Navbar />
       <PageHeader title="Projects" breadcrumbs={[{ label: "Projects" }]} />
 
-      <section className="py-[44px] sm:py-[64px] md:py-[88px]">
+      <section className="bg-[#f7f8fa] py-[44px] sm:py-[64px] md:py-[88px]">
         <div className="container mx-auto max-w-7xl px-[15px]">
-          <div className="mb-[24px] rounded-[28px] border border-gray-100 bg-[linear-gradient(180deg,#ffffff,#faf7f1)] px-5 py-6 shadow-[0_14px_30px_rgba(15,23,42,0.06)] sm:mb-[28px] sm:px-7 md:mb-[32px]">
-            <h2 className="mb-[8px] text-[22px] font-bold text-gray-900 sm:text-[26px] md:text-[28px] lg:text-[32px]">
-              Projects Archive
-            </h2>
-            <p className="text-readable max-w-3xl text-[13px] text-gray-600 sm:text-[14px] md:text-[15px]">
-              Browse completed, ongoing, and planned Assembly projects one page at
-              a time so you can reach the project information you need faster.
-            </p>
+          <div className="mb-[24px] grid gap-6 rounded-[8px] border border-gray-200 bg-white px-5 py-6 shadow-sm sm:mb-[28px] sm:px-7 md:mb-[32px] md:grid-cols-[1fr_auto] md:items-end">
+            <div>
+              <p className="mb-3 text-[12px] font-bold uppercase tracking-[0.24em] text-[#8B0000]">
+                Development Tracker
+              </p>
+              <h2 className="mb-[8px] text-[26px] font-bold text-gray-950 sm:text-[32px] md:text-[38px]">
+                Projects Archive
+              </h2>
+              <p className="text-readable max-w-3xl text-[14px] leading-7 text-gray-600 sm:text-[15px]">
+                Browse completed, ongoing, and planned Assembly projects one page
+                at a time so you can follow development activity across the
+                municipality.
+              </p>
+            </div>
+            <div className="rounded-[6px] border border-gray-200 bg-gray-50 p-4 sm:min-w-[190px]">
+              <p className="text-[24px] font-bold text-gray-950">{count || 0}</p>
+              <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-500">
+                {activeCategory === "all" ? "Total Projects" : "Projects Found"}
+              </p>
+            </div>
           </div>
 
-          <div className="mb-[24px] flex flex-wrap justify-center gap-[12px] sm:mb-[28px] sm:gap-[14px] md:mb-[32px] md:gap-[16px]">
+          <div className="mb-[24px] rounded-[8px] border border-gray-200 bg-white p-3 shadow-sm sm:mb-[28px] md:mb-[32px]">
+            <div className="flex flex-wrap gap-[10px]">
             {categories.map((item) => {
               const isActive = activeCategory === item.id;
               const query = new URLSearchParams();
@@ -126,16 +141,17 @@ export default async function ProjectsPage({
                 <Link
                   key={item.id}
                   href={href}
-                  className={`rounded-lg px-[16px] py-[10px] text-[12px] font-semibold transition-colors sm:px-[18px] sm:py-[12px] sm:text-[13px] md:px-[20px] md:py-[14px] md:text-[14px] ${
+                  className={`rounded-full px-[14px] py-[9px] text-[12px] font-bold transition-colors sm:px-[16px] sm:py-[10px] sm:text-[13px] ${
                     isActive
                       ? "bg-[#8B0000] text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      : "border border-gray-200 bg-gray-50 text-gray-700 hover:border-[#8B0000]/30 hover:text-[#8B0000]"
                   }`}
                 >
                   {item.label}
                 </Link>
               );
             })}
+            </div>
           </div>
 
           {error ? (
@@ -158,15 +174,15 @@ export default async function ProjectsPage({
                   <Link
                     key={project.id}
                     href={`/projects/${getSlug(project.title, project.slug) || project.id}`}
-                    className="surface-card group overflow-hidden rounded-2xl transition-all hover:-translate-y-1.5 hover:shadow-[0_20px_45px_rgba(16,24,40,0.14)]"
+                    className="group flex h-full flex-col overflow-hidden rounded-[8px] border border-gray-200 bg-white shadow-sm transition-all hover:-translate-y-1.5 hover:shadow-[0_20px_45px_rgba(16,24,40,0.14)]"
                   >
-                    <div className="relative flex h-[150px] items-center justify-center overflow-hidden bg-gray-100 sm:h-[180px] md:h-[200px] lg:h-[240px]">
+                    <div className="relative flex h-[150px] items-center justify-center overflow-hidden bg-gray-100 sm:h-[180px] md:h-[200px] lg:h-[230px]">
                       {project.image_url ? (
                         <Image
                           src={project.image_url}
                           alt={project.title}
                           fill
-                          className="object-contain"
+                          className="object-contain p-2 transition-transform duration-500 group-hover:scale-105"
                         />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#8B0000] to-[#6B0000]">
@@ -174,13 +190,20 @@ export default async function ProjectsPage({
                         </div>
                       )}
                       <div className="absolute left-[12px] top-[12px] sm:left-[14px] sm:top-[14px] md:left-[16px] md:top-[16px]">
-                        <span className={`rounded-full px-[10px] py-[6px] text-[10px] font-semibold sm:px-[12px] sm:py-[8px] sm:text-[11px] md:px-[14px] md:py-[10px] md:text-[12px] ${getStatusColor(project.status)}`}>
+                        <span className={`rounded-full px-[10px] py-[6px] text-[10px] font-bold sm:px-[12px] sm:py-[8px] sm:text-[11px] md:px-[14px] md:py-[9px] md:text-[12px] ${getStatusColor(project.status)}`}>
                           {formatLooseLabel(project.status || project.category, "Project")}
                         </span>
                       </div>
                     </div>
+                    {project.image_caption ? (
+                      <div className="px-[16px] pt-[12px] sm:px-[18px] md:px-[20px] lg:px-[24px]">
+                        <p className="text-xs text-gray-500 italic line-clamp-2">
+                          {project.image_caption}
+                        </p>
+                      </div>
+                    ) : null}
 
-                    <div className="p-[16px] sm:p-[18px] md:p-[20px] lg:p-[24px]">
+                    <div className="flex flex-1 flex-col p-[16px] sm:p-[18px] md:p-[20px] lg:p-[22px]">
                       <h3 className="mb-[12px] line-clamp-2 text-[16px] font-bold leading-[1.3] text-gray-900 transition-colors group-hover:text-[#8B0000] sm:mb-[14px] sm:text-[17px] sm:leading-[1.4] md:text-[18px] lg:text-[20px]">
                         {project.title}
                       </h3>
@@ -203,7 +226,7 @@ export default async function ProjectsPage({
                         </div>
                       ) : null}
 
-                      <div className="space-y-[8px] text-[12px] text-gray-600 sm:space-y-[10px] sm:text-[13px] md:space-y-[12px] md:text-[14px]">
+                      <div className="mt-auto space-y-[8px] border-t border-gray-100 pt-[14px] text-[12px] text-gray-600 sm:space-y-[10px] sm:text-[13px] md:space-y-[12px] md:text-[14px]">
                         {project.location ? (
                           <div className="flex items-center gap-[8px] sm:gap-[10px]">
                             <MapPin className="h-[16px] w-[16px] flex-shrink-0 sm:h-[17px] sm:w-[17px] md:h-[18px] md:w-[18px]" />
@@ -224,8 +247,9 @@ export default async function ProjectsPage({
                         ) : null}
                       </div>
 
-                      <div className="mt-[16px] text-sm font-semibold text-[#8B0000] transition-colors group-hover:text-[#6B0000]">
+                      <div className="mt-[16px] inline-flex items-center gap-2 text-[13px] font-bold uppercase tracking-wide text-[#8B0000] transition-colors group-hover:text-[#6B0000]">
                         View project details
+                        <ArrowRight className="h-4 w-4" />
                       </div>
                     </div>
                   </Link>

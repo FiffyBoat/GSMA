@@ -162,6 +162,9 @@
 
   p {
     margin-bottom: 20px;
+    text-align: justify;
+    text-justify: inter-word;
+    hyphens: auto;
   }
 
   .container {

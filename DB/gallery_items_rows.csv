@@ -1,0 +1,4 @@
+id,title,description,image_url,video_url,category,tags,is_featured,display_order,created_at,updated_at
+0fea5abe-1d33-46f6-8d8f-8969268c1608,MCE,,https://kgadsaibqofxpzyehkpi.supabase.co/storage/v1/object/public/website-images/gallery/1769280555670-lz9mc1yapyc.jpg,,general,[],true,3,2026-01-24 18:49:31.927887+00,2026-01-24 18:49:31.927887+00
+4f1d427c-4459-4e78-8b72-4ec709335b3e,,,https://kgadsaibqofxpzyehkpi.supabase.co/storage/v1/object/public/website-images/gallery/1769280489919-fua6kj7pw26.jpg,,general,[],false,1,2026-01-24 18:48:21.553496+00,2026-01-24 18:48:21.553496+00
+82a034da-963d-4bdc-9eb2-b647c6d7dd89,MCD,,https://kgadsaibqofxpzyehkpi.supabase.co/storage/v1/object/public/website-images/gallery/1769280514177-ztzfvmtw9ir.jpg,,general,[],true,2,2026-01-24 18:48:50.080621+00,2026-01-24 18:48:50.080621+00

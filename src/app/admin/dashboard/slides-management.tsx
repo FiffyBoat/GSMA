@@ -41,10 +41,19 @@ export default function SlidesManagement({
 }: SlidesManagementProps) {
   return (
     <div className="space-y-6">
-      <div className="flex justify-end">
+      <div className="flex flex-col gap-4 rounded-[8px] border border-gray-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#8B0000]">
+            Homepage
+          </p>
+          <h3 className="mt-1 text-lg font-bold text-gray-900">Hero Slides</h3>
+          <p className="mt-1 text-sm text-gray-600">
+            Manage the large homepage slider images and captions.
+          </p>
+        </div>
         <Button
           onClick={() => setEditingSlide(createEmptySlide(slides.length + 1))}
-          className="bg-[#8B0000] hover:bg-[#6B0000]"
+          className="rounded-[8px] bg-[#8B0000] hover:bg-[#6B0000]"
         >
           <Plus className="w-4 h-4 mr-2" />
           Add Slide
@@ -52,7 +61,7 @@ export default function SlidesManagement({
       </div>
 
       {editingSlide && (
-        <div className="bg-white p-6 rounded-xl shadow-sm border">
+        <div className="bg-white p-6 rounded-[8px] shadow-sm border border-gray-200">
           <h3 className="font-semibold mb-4">
             {editingSlide.id ? "Edit Slide" : "New Slide"}
           </h3>
@@ -128,16 +137,16 @@ export default function SlidesManagement({
         {slides.map((slide) => (
           <div
             key={slide.id}
-            className="bg-white p-4 rounded-xl shadow-sm border flex items-center gap-4"
+            className="bg-white p-4 rounded-[8px] shadow-sm border border-gray-200 flex items-center gap-4"
           >
             {slide.image_url ? (
               <img
                 src={slide.image_url}
                 alt={slide.title}
-                className="w-32 h-20 object-cover rounded-lg"
+                className="w-32 h-20 object-contain rounded-[8px] bg-gray-100"
               />
             ) : (
-              <div className="w-32 h-20 rounded-lg bg-gray-100 flex items-center justify-center text-xs text-gray-500">
+              <div className="w-32 h-20 rounded-[8px] bg-gray-100 flex items-center justify-center text-xs text-gray-500">
                 No image
               </div>
             )}

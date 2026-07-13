@@ -133,7 +133,7 @@ function SearchResultsContent() {
                         <img
                           src={result.image_url}
                           alt={result.displayTitle}
-                          className="w-20 h-20 object-cover rounded-lg"
+                          className="w-20 h-20 object-contain rounded-lg bg-gray-100 p-1"
                         />
                       )}
                       <div className="flex-1">

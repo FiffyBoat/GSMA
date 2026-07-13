@@ -32,6 +32,8 @@ function createEmptyNewsPost(): NewsPost {
     excerpt: "",
     content: "",
     image_url: "",
+    image_caption: "",
+    credit_note: "",
     published_date: new Date().toISOString().split("T")[0],
     is_published: false,
     tags: [],
@@ -55,10 +57,19 @@ export default function NewsManagement({
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-end">
+      <div className="flex flex-col gap-4 rounded-[8px] border border-gray-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#8B0000]">
+            Content
+          </p>
+          <h3 className="mt-1 text-lg font-bold text-gray-900">News Posts</h3>
+          <p className="mt-1 text-sm text-gray-600">
+            Add and update public news items shown on the website.
+          </p>
+        </div>
         <Button
           onClick={() => setEditingNews(createEmptyNewsPost())}
-          className="bg-[#8B0000] hover:bg-[#6B0000]"
+          className="rounded-[8px] bg-[#8B0000] hover:bg-[#6B0000]"
         >
           <Plus className="w-4 h-4 mr-2" />
           Add News Post
@@ -66,7 +77,7 @@ export default function NewsManagement({
       </div>
 
       {editingNews && (
-        <div className="bg-white p-6 rounded-xl shadow-sm border">
+        <div className="bg-white p-6 rounded-[8px] shadow-sm border border-gray-200">
           <h3 className="font-semibold mb-4">
             {editingNews.id ? "Edit News Post" : "New News Post"}
           </h3>
@@ -124,6 +135,28 @@ export default function NewsManagement({
               label="News Image"
               aspectRatio="wide"
             />
+            <div>
+              <Label>Image Caption</Label>
+              <Textarea
+                value={editingNews.image_caption || ""}
+                onChange={(e) =>
+                  setEditingNews({ ...editingNews, image_caption: e.target.value })
+                }
+                rows={2}
+                placeholder="Optional caption to display under the image"
+              />
+            </div>
+            <div>
+              <Label>Credit Note</Label>
+              <Textarea
+                value={editingNews.credit_note || ""}
+                onChange={(e) =>
+                  setEditingNews({ ...editingNews, credit_note: e.target.value })
+                }
+                rows={2}
+                placeholder="Optional credit information (e.g., Photo by: John Doe)"
+              />
+            </div>
             <div>
               <Label>Excerpt</Label>
               <Textarea
@@ -217,13 +250,13 @@ export default function NewsManagement({
         {news.map((post) => (
           <div
             key={post.id}
-            className="bg-white p-4 rounded-xl shadow-sm border flex items-center gap-4"
+            className="bg-white p-4 rounded-[8px] shadow-sm border border-gray-200 flex items-center gap-4"
           >
             {post.image_url && (
               <img
                 src={post.image_url}
                 alt={post.title}
-                className="w-32 h-20 object-cover rounded-lg"
+                className="w-32 h-20 object-contain rounded-[8px] bg-gray-100"
               />
             )}
             <div className="flex-1">

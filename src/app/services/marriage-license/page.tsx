@@ -1,6 +1,7 @@
 import Footer from "@/components/sections/footer";
 import Navbar from "@/components/sections/navbar";
 import PageHeader from "@/components/shared/PageHeader";
+import ServiceShowMore from "@/components/shared/service-show-more";
 import { loadPublicSiteSettings } from "@/lib/public-site-settings";
 import { splitSettingRows } from "@/lib/site-settings";
 import {
@@ -44,150 +45,163 @@ export default async function MarriageLicensePage() {
         ]}
       />
 
-      <section className="py-16">
-        <div className="container mx-auto px-4 max-w-[1200px]">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+      <section className="bg-[#f7f8fa] py-[44px] sm:py-[64px] md:py-[88px]">
+        <div className="container mx-auto max-w-[1200px] px-[15px]">
+          <div className="mb-8 rounded-[8px] border border-gray-200 bg-white p-5 shadow-sm sm:p-7 md:p-8">
+            <p className="mb-3 text-[12px] font-bold uppercase tracking-[0.24em] text-[#8B0000]">
+              Municipal Service
+            </p>
+            <h2 className="mb-3 text-[26px] font-bold leading-tight text-gray-950 sm:text-[32px] md:text-[38px]">
+              Marriage License
+            </h2>
+            <p className="max-w-3xl text-[14px] leading-7 text-gray-600 sm:text-[15px]">
+              Review eligibility, marriage types, required documents, fees, and office details.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 gap-10 lg:grid-cols-3">
             <div className="lg:col-span-2">
-              <div className="prose max-w-none">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              <div className="rounded-[8px] border border-gray-200 bg-white p-5 shadow-sm sm:p-7 md:p-8">
+                <h2 className="mb-4 text-2xl font-bold text-gray-900">
                   Overview
                 </h2>
-                <p className="text-gray-600 mb-6 leading-relaxed">
+                <p className="mb-6 leading-relaxed text-gray-600">
                   {settings.marriage_license_overview}
                 </p>
 
-                <h3 className="text-xl font-bold text-gray-900 mb-4">
-                  (i) Ordinance Marriage (Cap 27)
-                </h3>
-                <p className="text-gray-600 mb-6 leading-relaxed">
-                  {settings.marriage_license_ordinance_body}
-                </p>
-
-                <h3 className="text-xl font-bold text-gray-900 mb-4">
-                  (ii) Customary Marriage
-                </h3>
-                <p className="text-gray-600 mb-6 leading-relaxed">
-                  {settings.marriage_license_customary_body}
-                </p>
-
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                <h2 className="mb-4 text-2xl font-bold text-gray-900">
                   Eligibility Requirements
                 </h2>
-                <div className="bg-[#8B0000]/5 rounded-lg p-6 mb-8">
-                  <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="mb-8 rounded-[8px] border border-[#8B0000]/10 bg-[#8B0000]/5 p-6">
+                  <ul className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     {eligibility.map((item) => (
                       <li key={item} className="flex items-center gap-2">
-                        <Heart className="w-5 h-5 text-[#8B0000]" />
+                        <Heart className="h-5 w-5 text-[#8B0000]" />
                         <span className="text-gray-700">{item}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
 
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                  Required Documents
-                </h2>
-                <div className="bg-gray-50 rounded-lg p-6 mb-8">
-                  <ul className="space-y-3">
-                    {requirements.map((requirement) => (
-                      <li key={requirement} className="flex items-start gap-3">
-                        <CheckCircle className="w-5 h-5 text-[#8B0000] shrink-0 mt-0.5" />
-                        <span className="text-gray-700">{requirement}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                <ServiceShowMore collapsedLabel="Show marriage types, documents, and fees">
+                  <h3 className="mb-4 text-xl font-bold text-gray-900">
+                    (i) Ordinance Marriage (Cap 27)
+                  </h3>
+                  <p className="mb-6 leading-relaxed text-gray-600">
+                    {settings.marriage_license_ordinance_body}
+                  </p>
 
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                  Application Process
-                </h2>
-                <div className="space-y-6 mb-8">
-                  {steps.map(([title, description], index) => (
-                    <div key={`${title}-${index}`} className="flex gap-4">
-                      <div className="w-10 h-10 bg-[#8B0000] rounded-full flex items-center justify-center text-white font-bold shrink-0">
-                        {index + 1}
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-gray-900 mb-1">{title}</h3>
-                        <p className="text-gray-600">{description}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                  <h3 className="mb-4 text-xl font-bold text-gray-900">
+                    (ii) Customary Marriage
+                  </h3>
+                  <p className="mb-6 leading-relaxed text-gray-600">
+                    {settings.marriage_license_customary_body}
+                  </p>
 
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                  Fee Structure
-                </h2>
-                <div className="overflow-x-auto mb-8">
-                  <table className="w-full border-collapse">
-                    <thead>
-                      <tr className="bg-[#8B0000] text-white">
-                        <th className="px-4 py-3 text-left font-semibold">
-                          Service
-                        </th>
-                        <th className="px-4 py-3 text-left font-semibold">Fee</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {fees.map(([service, amount], index) => (
-                        <tr
-                          key={`${service}-${index}`}
-                          className={index % 2 === 0 ? "bg-gray-50" : "bg-white"}
-                        >
-                          <td className="px-4 py-3 border-b border-gray-200">
-                            {service}
-                          </td>
-                          <td className="px-4 py-3 border-b border-gray-200 font-semibold text-[#8B0000]">
-                            {amount}
-                          </td>
-                        </tr>
+                  <h2 className="mb-4 text-2xl font-bold text-gray-900">
+                    Required Documents
+                  </h2>
+                  <div className="mb-8 rounded-[8px] border border-gray-200 bg-gray-50 p-6">
+                    <ul className="space-y-3">
+                      {requirements.map((requirement) => (
+                        <li key={requirement} className="flex items-start gap-3">
+                          <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-[#8B0000]" />
+                          <span className="text-gray-700">{requirement}</span>
+                        </li>
                       ))}
-                    </tbody>
-                  </table>
-                </div>
+                    </ul>
+                  </div>
 
-                <div className="bg-amber-50 border-l-4 border-amber-500 p-4 mb-8">
-                  <div className="flex items-start gap-3">
-                    <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-                    <div>
-                      <h4 className="font-bold text-amber-800 mb-1">
-                        Important Notice
-                      </h4>
-                      <p className="text-amber-700 text-sm">
-                        {settings.marriage_license_notice}
-                      </p>
+                  <h2 className="mb-4 text-2xl font-bold text-gray-900">
+                    Application Process
+                  </h2>
+                  <div className="mb-8 space-y-6">
+                    {steps.map(([title, description], index) => (
+                      <div key={`${title}-${index}`} className="flex gap-4">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#8B0000] font-bold text-white">
+                          {index + 1}
+                        </div>
+                        <div>
+                          <h3 className="mb-1 font-bold text-gray-900">{title}</h3>
+                          <p className="text-gray-600">{description}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <h2 className="mb-4 text-2xl font-bold text-gray-900">
+                    Fee Structure
+                  </h2>
+                  <div className="mb-8 overflow-x-auto">
+                    <table className="w-full border-collapse">
+                      <thead>
+                        <tr className="bg-[#8B0000] text-white">
+                          <th className="px-4 py-3 text-left font-semibold">
+                            Service
+                          </th>
+                          <th className="px-4 py-3 text-left font-semibold">Fee</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {fees.map(([service, amount], index) => (
+                          <tr
+                            key={`${service}-${index}`}
+                            className={index % 2 === 0 ? "bg-gray-50" : "bg-white"}
+                          >
+                            <td className="border-b border-gray-200 px-4 py-3">
+                              {service}
+                            </td>
+                            <td className="border-b border-gray-200 px-4 py-3 font-semibold text-[#8B0000]">
+                              {amount}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div className="mb-8 rounded-[8px] border border-amber-200 border-l-4 border-l-amber-500 bg-amber-50 p-4">
+                    <div className="flex items-start gap-3">
+                      <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
+                      <div>
+                        <h4 className="mb-1 font-bold text-amber-800">
+                          Important Notice
+                        </h4>
+                        <p className="text-sm text-amber-700">
+                          {settings.marriage_license_notice}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </ServiceShowMore>
               </div>
             </div>
 
             <div className="lg:col-span-1">
-              <div className="bg-gray-50 rounded-lg p-6 sticky top-24">
-                <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  <FileText className="w-5 h-5 text-[#8B0000]" />
+              <div className="sticky top-24 rounded-[8px] border border-gray-200 bg-white p-6 shadow-sm">
+                <h3 className="mb-4 flex items-center gap-2 font-bold text-gray-900">
+                  <FileText className="h-5 w-5 text-[#8B0000]" />
                   Quick Information
                 </h3>
 
-                <div className="space-y-4 mb-6">
+                <div className="mb-6 space-y-4">
                   <div className="flex items-start gap-3">
-                    <Clock className="w-5 h-5 text-[#8B0000] shrink-0 mt-1" />
+                    <Clock className="mt-1 h-5 w-5 shrink-0 text-[#8B0000]" />
                     <div>
-                      <p className="font-semibold text-gray-900 text-sm">
+                      <p className="text-sm font-semibold text-gray-900">
                         Processing Time
                       </p>
-                      <p className="text-gray-600 text-sm">
+                      <p className="text-sm text-gray-600">
                         {settings.marriage_license_processing_time}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <MapPin className="w-5 h-5 text-[#8B0000] shrink-0 mt-1" />
+                    <MapPin className="mt-1 h-5 w-5 shrink-0 text-[#8B0000]" />
                     <div>
-                      <p className="font-semibold text-gray-900 text-sm">
+                      <p className="text-sm font-semibold text-gray-900">
                         Where to Apply
                       </p>
-                      <p className="text-gray-600 text-sm">
+                      <p className="text-sm text-gray-600">
                         {whereToApply.map((line) => (
                           <span key={line}>
                             {line}
@@ -198,10 +212,10 @@ export default async function MarriageLicensePage() {
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <Phone className="w-5 h-5 text-[#8B0000] shrink-0 mt-1" />
+                    <Phone className="mt-1 h-5 w-5 shrink-0 text-[#8B0000]" />
                     <div>
-                      <p className="font-semibold text-gray-900 text-sm">Contact</p>
-                      <p className="text-gray-600 text-sm">
+                      <p className="text-sm font-semibold text-gray-900">Contact</p>
+                      <p className="text-sm text-gray-600">
                         {settings.marriage_license_contact}
                       </p>
                     </div>
@@ -209,14 +223,14 @@ export default async function MarriageLicensePage() {
                 </div>
 
                 <div className="border-t border-gray-200 pt-4">
-                  <h4 className="font-semibold text-gray-900 mb-3 text-sm">
+                  <h4 className="mb-3 text-sm font-semibold text-gray-900">
                     Related Services
                   </h4>
                   <ul className="space-y-2">
                     <li>
                       <Link
                         href="/services/business-operating-permit"
-                        className="text-[#8B0000] hover:underline text-sm"
+                        className="text-sm text-[#8B0000] hover:underline"
                       >
                         Business Operating Permit
                       </Link>
@@ -224,7 +238,7 @@ export default async function MarriageLicensePage() {
                     <li>
                       <Link
                         href="/services/building-permit"
-                        className="text-[#8B0000] hover:underline text-sm"
+                        className="text-sm text-[#8B0000] hover:underline"
                       >
                         Building Permit
                       </Link>
@@ -234,7 +248,7 @@ export default async function MarriageLicensePage() {
 
                 <Link
                   href="/contact"
-                  className="mt-6 w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#8B0000] text-white font-bold rounded hover:bg-[#6B0000] transition-colors"
+                  className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-[4px] bg-[#8B0000] px-6 py-3 text-[13px] font-bold uppercase tracking-wide text-white transition-colors hover:bg-[#6B0000]"
                 >
                   Contact Us
                 </Link>

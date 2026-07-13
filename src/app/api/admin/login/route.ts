@@ -39,13 +39,29 @@ export async function POST(request: Request) {
       );
     }
 
-    const isValid = await bcrypt.compare(password, admin.password_hash);
+    const storedPasswordHash =
+      typeof admin.password_hash === "string" ? admin.password_hash : "";
+    const isBcryptHash = storedPasswordHash.startsWith("$2");
+    const isValid = isBcryptHash
+      ? await bcrypt.compare(password, storedPasswordHash)
+      : password === storedPasswordHash;
 
     if (!isValid) {
       return NextResponse.json(
         { error: "Invalid email or password" },
         { status: 401 }
       );
+    }
+
+    if (!isBcryptHash) {
+      const passwordHash = await bcrypt.hash(password, 10);
+      await supabase
+        .from("admin_users")
+        .update({
+          password_hash: passwordHash,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", admin.id);
     }
 
     const token = await createSession({

@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
-import { Upload, X, Loader2, Image as ImageIcon } from "lucide-react";
+import { Upload, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -90,18 +90,23 @@ export default function ImageUpload({
     wide: "aspect-video",
     portrait: "aspect-[3/4]",
   };
+  const widthClasses = {
+    square: "max-w-[260px]",
+    wide: "max-w-xl",
+    portrait: "max-w-[260px]",
+  };
 
   return (
-    <div className={`space-y-2 ${className}`}>
+    <div className={`space-y-2 ${widthClasses[aspectRatio]} ${className}`}>
       <label className="text-sm font-medium text-gray-700">{label}</label>
       
       {preview ? (
         <div className="relative group">
-          <div className={`${aspectRatioClasses[aspectRatio]} rounded-lg overflow-hidden border-2 border-gray-200 bg-gray-50`}>
+          <div className={`${aspectRatioClasses[aspectRatio]} rounded-[8px] overflow-hidden border border-gray-200 bg-gray-50`}>
             <img
               src={preview}
               alt="Preview"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain p-2"
             />
           </div>
           <Button
@@ -114,7 +119,7 @@ export default function ImageUpload({
             <X className="w-4 h-4" />
           </Button>
           {uploading && (
-            <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-lg">
+            <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-[8px]">
               <Loader2 className="w-8 h-8 animate-spin text-white" />
             </div>
           )}
@@ -124,14 +129,14 @@ export default function ImageUpload({
           {...getRootProps()}
           className={`
             ${aspectRatioClasses[aspectRatio]}
-            border-2 border-dashed rounded-lg cursor-pointer
+            border-2 border-dashed rounded-[8px] cursor-pointer
             transition-colors
             ${
               isDragActive
                 ? "border-[#8B0000] bg-[#8B0000]/5"
                 : "border-gray-300 hover:border-[#8B0000] hover:bg-gray-50"
             }
-            flex flex-col items-center justify-center p-6
+            flex flex-col items-center justify-center p-4 sm:p-5
           `}
         >
           <input {...getInputProps()} />
@@ -142,7 +147,7 @@ export default function ImageUpload({
             </div>
           ) : (
             <div className="flex flex-col items-center gap-2 text-center">
-              <div className="w-12 h-12 rounded-full bg-[#8B0000]/10 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-[8px] bg-[#8B0000]/10 flex items-center justify-center">
                 <Upload className="w-6 h-6 text-[#8B0000]" />
               </div>
               <div>
@@ -150,7 +155,7 @@ export default function ImageUpload({
                   {isDragActive ? "Drop image here" : "Click or drag to upload"}
                 </p>
                 <p className="text-xs text-gray-500 mt-1">
-                  PNG, JPG, WEBP up to 5MB
+                  PNG, JPG, WEBP up to 15MB
                 </p>
               </div>
             </div>

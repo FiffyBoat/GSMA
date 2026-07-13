@@ -2,20 +2,47 @@ import Navbar from "@/components/sections/navbar";
 import Footer from "@/components/sections/footer";
 import PageHeader from "@/components/shared/PageHeader";
 import Sidebar from "@/components/shared/Sidebar";
-import LeadershipImage from "@/components/shared/LeadershipImage";
-import { Users, Building, Scale, FileText, User } from "lucide-react";
+import RepresentationAccordion from "@/components/assembly/RepresentationAccordion";
+import { Users, Building, Scale, FileText } from "lucide-react";
 import { createPublicServerSupabaseClient } from "@/lib/supabase/public-server";
-import { normalizeSupabaseImageUrl } from "@/lib/storage-utils";
 
 export const dynamic = "force-dynamic";
 
 const aboutLinks = [
   { label: "Overview", href: "/about/overview" },
   { label: "The Assembly", href: "/about/assembly" },
-  { label: "Leadership", href: "/about/leadership" },
-  { label: "MCE Profile", href: "/about/mce-profile" },
-  { label: "MCD Profile", href: "/about/mcd-profile" },
+  {
+    label: "Management",
+    href: "/about/leadership",
+    children: [
+      { label: "MCE Profile", href: "/about/mce-profile" },
+      { label: "MCD Profile", href: "/about/mcd-profile" },
+    ],
+  },
 ];
+
+function getPositionText(member: any) {
+  return String(member.position || "").toLowerCase();
+}
+
+function isPresidingMember(member: any) {
+  return getPositionText(member).includes("presiding");
+}
+
+function isGovernmentAppointee(member: any) {
+  const position = getPositionText(member).replace(/[^a-z0-9]+/g, " ").trim();
+  return (
+    position.includes("government appointee") ||
+    position.includes("government appointtee") ||
+    position.includes("govt appointee") ||
+    position.includes("govt appointtee") ||
+    position.includes("gov appointee") ||
+    position.includes("gov appointtee") ||
+    position.includes("appointed member") ||
+    position.includes("appointee") ||
+    position.includes("appointtee")
+  );
+}
 
 export default async function AssemblyPage() {
   const supabase = createPublicServerSupabaseClient();
@@ -26,7 +53,66 @@ export default async function AssemblyPage() {
     .eq("is_active", true)
     .order("display_order", { ascending: true });
 
+  const { data: assemblyMemberRows } = await supabase
+    .from("assembly_members")
+    .select("*, electoral_areas(name, display_order, constituency)")
+    .eq("is_active", true)
+    .order("display_order", { ascending: true });
+
+  const { data: leadership } = await supabase
+    .from("leadership")
+    .select("*")
+    .eq("is_active", true)
+    .order("display_order", { ascending: true });
+
   const areas = electoralAreas || [];
+  const allAssemblyMembers = (assemblyMemberRows || []).map((member: any) => ({
+    ...member,
+    electoral_area_name: member.electoral_areas?.name,
+    electoral_area_order: member.electoral_areas?.display_order || 0,
+  })
+  ).sort((a: any, b: any) => {
+    if (a.electoral_area_order !== b.electoral_area_order) {
+      return a.electoral_area_order - b.electoral_area_order;
+    }
+
+    return (a.display_order || 0) - (b.display_order || 0);
+  });
+  const presidingMember = allAssemblyMembers.find((member: any) => isPresidingMember(member));
+  const governmentAppointees = allAssemblyMembers.filter(
+    (member: any) => isGovernmentAppointee(member) && !isPresidingMember(member)
+  );
+  const membersOfParliament = (leadership || []).filter((leader: any) => {
+    const position = String(leader.position || "").toLowerCase();
+    return position.includes("parliament") || position === "mp";
+  });
+  const constituencyGroups = membersOfParliament.map((mp: any) => {
+    const constituency = String(mp.department || "");
+    const constituencyAreas = areas.filter((area: any) => area.constituency === constituency);
+    const assemblyMembers = constituencyAreas.flatMap((area: any) =>
+      (area.assembly_members || [])
+        .filter((member: any) => member.is_active && !isGovernmentAppointee(member) && !isPresidingMember(member))
+        .sort((a: any, b: any) => (a.display_order || 0) - (b.display_order || 0))
+        .map((member: any) => ({
+          ...member,
+          electoral_area_name: area.name,
+          electoral_area_order: area.display_order || 0,
+        }))
+    ).sort((a: any, b: any) => {
+      if (a.electoral_area_order !== b.electoral_area_order) {
+        return a.electoral_area_order - b.electoral_area_order;
+      }
+
+      return (a.display_order || 0) - (b.display_order || 0);
+    });
+
+    return {
+      mp,
+      constituency,
+      constituencyAreas,
+      assemblyMembers,
+    };
+  });
 
   return (
     <main className="min-h-screen bg-white">
@@ -125,85 +211,21 @@ export default async function AssemblyPage() {
         </div>
       </section>
 
-      {areas.length > 0 && (
+      {(constituencyGroups.length > 0 || presidingMember) && (
         <section className="py-[40px] sm:py-[60px] md:py-[80px] bg-gray-50">
           <div className="container mx-auto px-[20px] sm:px-[24px] md:px-[32px]">
             <div className="mb-[32px] sm:mb-[40px] md:mb-[48px]">
-              <h2 className="text-[24px] sm:text-[28px] md:text-[32px] lg:text-[36px] font-bold text-gray-900 mb-[12px] sm:mb-[14px]">Assembly Members by Electoral Area</h2>
+              <h2 className="text-[24px] sm:text-[28px] md:text-[32px] lg:text-[36px] font-bold text-gray-900 mb-[12px] sm:mb-[14px]">Parliamentary and Assembly Representation</h2>
               <p className="text-gray-600 text-[13px] sm:text-[14px] md:text-[15px]">
-                Meet the elected and appointed representatives of Ga South Municipality
+                Members of Parliament, the Presiding Member, and the representatives serving the Assembly
               </p>
             </div>
 
-            <div className="space-y-[40px] sm:space-y-[48px] md:space-y-[56px]">
-              {areas.map((area) => (
-                <div key={area.id}>
-                  <h3 className="text-[20px] sm:text-[22px] md:text-[24px] font-bold text-gray-900 mb-[20px] sm:mb-[24px] md:mb-[28px] pb-[16px] sm:pb-[18px] md:pb-[20px] border-b-[2px] border-[#8B0000]">
-                    {area.name}
-                  </h3>
-                  
-                  {area.assembly_members && area.assembly_members.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[20px] sm:gap-[24px] md:gap-[28px]">
-                      {area.assembly_members
-                        .filter((member: any) => member.is_active)
-                        .sort((a: any, b: any) => (a.display_order || 0) - (b.display_order || 0))
-                        .map((member: any) => (
-                          <div key={member.id} className="bg-white rounded-[22px] overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-gray-200">
-                            {member.image_url ? (
-                              <div className="relative h-[260px] sm:h-[300px] md:h-[320px] overflow-hidden bg-[linear-gradient(180deg,#faf7f1,#f1eadf)]">
-                                <div className="absolute inset-x-0 top-0 h-16 bg-[radial-gradient(circle_at_top,rgba(139,0,0,0.12),transparent_70%)]" />
-                                <LeadershipImage
-                                  src={normalizeSupabaseImageUrl(member.image_url)}
-                                  alt={member.name}
-                                  width={420}
-                                  height={320}
-                                  rounded={false}
-                                  className="h-full w-full p-4 sm:p-5 md:p-6"
-                                />
-                              </div>
-                            ) : (
-                              <div className="h-[260px] sm:h-[300px] md:h-[320px] bg-gradient-to-br from-[#8B0000] to-[#6B0000] flex items-center justify-center">
-                                <User className="w-[60px] sm:w-[70px] md:w-[80px] h-[60px] sm:h-[70px] md:h-[80px] text-white/30" />
-                              </div>
-                            )}
-                            <div className="p-[16px] sm:p-[18px] md:p-[20px]">
-                              <h4 className="text-[16px] sm:text-[17px] md:text-[18px] font-bold text-gray-900 mb-[8px] sm:mb-[10px]">
-                                {member.name}
-                              </h4>
-                              {member.position && (
-                                <p className="text-[12px] sm:text-[13px] md:text-[14px] text-[#8B0000] font-semibold mb-[12px] sm:mb-[14px]">
-                                  {member.position}
-                                </p>
-                              )}
-                              {member.bio && (
-                                <p className="text-[12px] sm:text-[13px] md:text-[14px] text-gray-600 mb-[12px] sm:mb-[14px] line-clamp-3">
-                                  {member.bio}
-                                </p>
-                              )}
-                              {(member.contact_email || member.contact_phone) && (
-                                <div className="pt-[12px] sm:pt-[14px] border-t border-gray-200 space-y-[6px]">
-                                  {member.contact_email && (
-                                    <a href={`mailto:${member.contact_email}`} className="text-[11px] sm:text-[12px] md:text-[13px] text-[#8B0000] hover:underline block truncate">
-                                      {member.contact_email}
-                                    </a>
-                                  )}
-                                  {member.contact_phone && (
-                                    <a href={`tel:${member.contact_phone}`} className="text-[11px] sm:text-[12px] md:text-[13px] text-[#8B0000] hover:underline block">
-                                      {member.contact_phone}
-                                    </a>
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                    </div>
-                  ) : (
-                    <p className="text-gray-500 text-[13px] sm:text-[14px] md:text-[15px] italic">No members assigned to this electoral area yet.</p>
-                  )}
-                </div>
-              ))}
-            </div>
+            <RepresentationAccordion
+              constituencyGroups={constituencyGroups}
+              presidingMember={presidingMember}
+              governmentAppointees={governmentAppointees}
+            />
           </div>
         </section>
       )}

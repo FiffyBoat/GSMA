@@ -32,6 +32,8 @@ function createEmptyProject(displayOrder: number): Project {
     description: "",
     content: "",
     image_url: "",
+    image_caption: "",
+    credit_note: "",
     category: "",
     status: "",
     start_date: "",
@@ -62,10 +64,19 @@ export default function ProjectManagement({
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-end">
+      <div className="flex flex-col gap-4 rounded-[8px] border border-gray-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#8B0000]">
+            Development
+          </p>
+          <h3 className="mt-1 text-lg font-bold text-gray-900">Projects</h3>
+          <p className="mt-1 text-sm text-gray-600">
+            Maintain project records, progress, locations, budgets, and status.
+          </p>
+        </div>
         <Button
           onClick={() => setEditingProject(createEmptyProject(projects.length + 1))}
-          className="bg-[#8B0000] hover:bg-[#6B0000]"
+          className="rounded-[8px] bg-[#8B0000] hover:bg-[#6B0000]"
         >
           <Plus className="w-4 h-4 mr-2" />
           Add Project
@@ -73,7 +84,7 @@ export default function ProjectManagement({
       </div>
 
       {editingProject && (
-        <div className="bg-white p-6 rounded-xl shadow-sm border">
+        <div className="bg-white p-6 rounded-[8px] shadow-sm border border-gray-200">
           <h3 className="font-semibold mb-4">
             {editingProject.id ? "Edit Project" : "New Project"}
           </h3>
@@ -87,6 +98,30 @@ export default function ProjectManagement({
               label="Project Image"
               aspectRatio="wide"
             />
+
+            <div>
+              <Label>Image Caption</Label>
+              <Textarea
+                value={editingProject.image_caption || ""}
+                onChange={(e) =>
+                  setEditingProject({ ...editingProject, image_caption: e.target.value })
+                }
+                rows={2}
+                placeholder="Optional caption to display under the image"
+              />
+            </div>
+
+            <div>
+              <Label>Credit Note</Label>
+              <Textarea
+                value={editingProject.credit_note || ""}
+                onChange={(e) =>
+                  setEditingProject({ ...editingProject, credit_note: e.target.value })
+                }
+                rows={2}
+                placeholder="Optional credit information (e.g., Photo by: John Doe)"
+              />
+            </div>
 
             <div>
               <Label>Title</Label>
@@ -350,23 +385,23 @@ export default function ProjectManagement({
         {projects.map((project) => (
           <div
             key={project.id}
-            className="bg-white p-4 rounded-xl shadow-sm border flex items-center gap-4"
+            className="bg-white p-4 rounded-[8px] shadow-sm border border-gray-200 flex items-center gap-4"
           >
             {project.image_url ? (
               <img
                 src={project.image_url}
                 alt={project.title}
-                className="w-32 h-20 object-cover rounded-lg"
+                className="w-32 h-20 object-contain rounded-[8px] bg-gray-100"
               />
             ) : (
-              <div className="w-32 h-20 rounded-lg bg-gray-100 flex items-center justify-center text-xs text-gray-500">
+              <div className="w-32 h-20 rounded-[8px] bg-gray-100 flex items-center justify-center text-xs text-gray-500">
                 No image
               </div>
             )}
             <div className="flex-1">
               <h4 className="font-semibold">{project.title}</h4>
               <p className="text-sm text-gray-500">
-                {project.category} • {project.status} • {project.progress_percentage}%
+                {project.category} | {project.status} | {project.progress_percentage}%
               </p>
             </div>
             <div className="flex gap-2">

@@ -49,7 +49,7 @@ export async function verifySession(): Promise<AdminSession | null> {
     const supabase = await createAdminSupabaseClient();
     const { data: admin, error } = await supabase
       .from("admin_users")
-      .select("id, email, name, role")
+      .select("*")
       .eq("id", adminId)
       .single();
 

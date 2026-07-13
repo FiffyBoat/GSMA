@@ -44,12 +44,21 @@ export default function GalleryManagement({
 }: GalleryManagementProps) {
   return (
     <div className="space-y-6">
-      <div className="flex justify-end">
+      <div className="flex flex-col gap-4 rounded-[8px] border border-gray-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#8B0000]">
+            Media Library
+          </p>
+          <h3 className="mt-1 text-lg font-bold text-gray-900">Gallery Albums</h3>
+          <p className="mt-1 text-sm text-gray-600">
+            Upload and organize public photos and videos into gallery records.
+          </p>
+        </div>
         <Button
           onClick={() =>
             setEditingGallery(createEmptyGalleryItem(gallery.length + 1))
           }
-          className="bg-[#8B0000] hover:bg-[#6B0000]"
+          className="rounded-[8px] bg-[#8B0000] hover:bg-[#6B0000]"
         >
           <Plus className="w-4 h-4 mr-2" />
           Add Gallery Item
@@ -57,7 +66,7 @@ export default function GalleryManagement({
       </div>
 
       {editingGallery && (
-        <div className="bg-white p-6 rounded-xl shadow-sm border">
+        <div className="bg-white p-6 rounded-[8px] shadow-sm border border-gray-200">
           <h3 className="font-semibold mb-4">
             {editingGallery.id ? "Edit Gallery Item" : "New Gallery Item"}
           </h3>
@@ -170,16 +179,16 @@ export default function GalleryManagement({
         {gallery.map((item) => (
           <div
             key={item.id}
-            className="bg-white p-4 rounded-xl shadow-sm border flex items-center gap-4"
+            className="bg-white p-4 rounded-[8px] shadow-sm border border-gray-200 flex items-center gap-4"
           >
             {item.image_url ? (
               <img
                 src={item.image_url}
                 alt={item.title}
-                className="w-32 h-20 object-cover rounded-lg"
+                className="h-16 w-24 rounded-[8px] object-contain bg-gray-100 sm:h-[72px] sm:w-28"
               />
             ) : (
-              <div className="w-32 h-20 rounded-lg bg-gray-100 flex items-center justify-center text-xs text-gray-500">
+              <div className="flex h-16 w-24 items-center justify-center rounded-[8px] bg-gray-100 text-xs text-gray-500 sm:h-[72px] sm:w-28">
                 No image
               </div>
             )}

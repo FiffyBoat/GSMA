@@ -9,13 +9,15 @@ import {
   MapPin,
   ChevronRight,
   Facebook,
-  Twitter,
   Instagram,
   Youtube,
 } from "lucide-react";
+import { usePublicSocialLinks } from "@/hooks/use-public-social-links";
+import TikTokIcon from "@/components/shared/tiktok-icon";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const socialLinks = usePublicSocialLinks();
 
   return (
     <footer className="bg-[#1a1a1a] pt-[22px] font-sans text-white sm:pt-[28px] md:pt-[34px]">
@@ -121,7 +123,7 @@ const Footer = () => {
             </p>
             <div className="flex gap-[10px] sm:gap-[12px]">
               <a
-                href="https://web.facebook.com/gasouthmunicipal"
+                href={socialLinks.facebook}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex h-[40px] w-[40px] items-center justify-center rounded-xl bg-[#8B0000] transition-colors hover:bg-[#6B0000] sm:h-[44px] sm:w-[44px]"
@@ -130,16 +132,16 @@ const Footer = () => {
                 <Facebook className="h-[18px] w-[18px] text-white sm:h-[20px] sm:w-[20px]" />
               </a>
               <a
-                href="https://x.com/GaSouthAssembly"
+                href={socialLinks.tiktok}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex h-[40px] w-[40px] items-center justify-center rounded-xl bg-[#8B0000] transition-colors hover:bg-[#6B0000] sm:h-[44px] sm:w-[44px]"
-                title="Visit Twitter/X"
+                title="Visit TikTok"
               >
-                <Twitter className="h-[18px] w-[18px] text-white sm:h-[20px] sm:w-[20px]" />
+                <TikTokIcon className="h-[18px] w-[18px] text-white sm:h-[20px] sm:w-[20px]" />
               </a>
               <a
-                href="https://www.instagram.com/gasouthmunicipalassembly/"
+                href={socialLinks.instagram}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex h-[40px] w-[40px] items-center justify-center rounded-xl bg-[#8B0000] transition-colors hover:bg-[#6B0000] sm:h-[44px] sm:w-[44px]"
@@ -148,7 +150,7 @@ const Footer = () => {
                 <Instagram className="h-[18px] w-[18px] text-white sm:h-[20px] sm:w-[20px]" />
               </a>
               <a
-                href="https://www.youtube.com/channel/UCJcI5FHNEmZQjNvZ3_hkRpg"
+                href={socialLinks.youtube}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex h-[40px] w-[40px] items-center justify-center rounded-xl bg-[#8B0000] transition-colors hover:bg-[#6B0000] sm:h-[44px] sm:w-[44px]"

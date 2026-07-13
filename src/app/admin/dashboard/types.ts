@@ -24,6 +24,8 @@ export interface NewsPost {
   excerpt: string;
   content: string;
   image_url: string;
+  image_caption?: string;
+  credit_note?: string;
   published_date: string;
   is_published: boolean;
   tags?: string[];
@@ -57,6 +59,8 @@ export interface Project {
   description: string;
   content: string;
   image_url: string;
+  image_caption?: string;
+  credit_note?: string;
   category: string;
   status: string;
   start_date: string;
@@ -76,9 +80,11 @@ export interface Event {
   description: string;
   content: string;
   image_url: string;
+  image_caption?: string;
+  credit_note?: string;
   event_type: string;
   start_date: string;
-  end_date: string;
+  end_date: string | null;
   location: string;
   venue: string;
   organizer: string;
@@ -97,6 +103,8 @@ export interface GalleryItem {
   image_url: string;
   images?: string[];
   video_url: string;
+  image_caption?: string;
+  credit_note?: string;
   category: string;
   is_featured: boolean;
   display_order: number;
@@ -122,6 +130,8 @@ export interface DepartmentUnit {
   name: string;
   title: string;
   description: string;
+  head_name?: string;
+  head_image_url?: string;
   order: number;
 }
 

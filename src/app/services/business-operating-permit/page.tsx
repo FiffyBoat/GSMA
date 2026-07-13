@@ -1,10 +1,11 @@
 import Footer from "@/components/sections/footer";
 import Navbar from "@/components/sections/navbar";
 import PageHeader from "@/components/shared/PageHeader";
+import ServiceShowMore from "@/components/shared/service-show-more";
 import { loadPublicSiteSettings } from "@/lib/public-site-settings";
+import { splitSettingLines, splitSettingRows } from "@/lib/site-settings";
 import { createPublicServerSupabaseClient } from "@/lib/supabase/public-server";
 import { includesLooseText } from "@/lib/text-match";
-import { splitSettingLines, splitSettingRows } from "@/lib/site-settings";
 import {
   AlertCircle,
   CheckCircle,
@@ -37,6 +38,19 @@ export default async function BusinessOperatingPermitPage() {
       matchesFeeFixingDocument(doc.title) ||
       matchesFeeFixingDocument(doc.description)
   );
+  const latestFeeFixingDoc = feeFixingDocs[0] ?? null;
+  const archivedFeeFixingDocs = feeFixingDocs.slice(1);
+
+  const getDocumentReferenceHref = (documentId: string) => {
+    const documentIndex = (documents || []).findIndex((doc) => doc.id === documentId);
+
+    if (documentIndex === -1) {
+      return "/documents";
+    }
+
+    const archivePage = Math.floor(documentIndex / 9) + 1;
+    return `/documents?page=${archivePage}&doc=${documentId}#document-${documentId}`;
+  };
 
   const overviewParagraphs = settings.business_permit_overview
     .split("\n\n")
@@ -60,28 +74,39 @@ export default async function BusinessOperatingPermitPage() {
         ]}
       />
 
-      <section className="py-16">
-        <div className="container mx-auto px-4 max-w-[1200px]">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+      <section className="bg-[#f7f8fa] py-[44px] sm:py-[64px] md:py-[88px]">
+        <div className="container mx-auto max-w-[1200px] px-[15px]">
+          <div className="mb-8 rounded-[8px] border border-gray-200 bg-white p-5 shadow-sm sm:p-7 md:p-8">
+            <p className="mb-3 text-[12px] font-bold uppercase tracking-[0.24em] text-[#8B0000]">
+              Municipal Service
+            </p>
+            <h2 className="mb-3 text-[26px] font-bold leading-tight text-gray-950 sm:text-[32px] md:text-[38px]">
+              Business Operating Permit
+            </h2>
+            <p className="max-w-3xl text-[14px] leading-7 text-gray-600 sm:text-[15px]">
+              Review the process, requirements, fees, and office details before applying.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 gap-10 lg:grid-cols-3">
             <div className="lg:col-span-2">
-              <div className="prose max-w-none">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              <div className="rounded-[8px] border border-gray-200 bg-white p-5 shadow-sm sm:p-7 md:p-8">
+                <h2 className="mb-4 text-2xl font-bold text-gray-900">
                   General Information
                 </h2>
                 {overviewParagraphs.map((paragraph, index) => (
                   <p
                     key={`${paragraph}-${index}`}
-                    className="text-gray-600 mb-6 leading-relaxed"
+                    className="mb-6 leading-relaxed text-gray-600"
                   >
                     {paragraph}
                   </p>
                 ))}
 
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                <h2 className="mb-4 text-2xl font-bold text-gray-900">
                   Processes to Obtain a Business Operating Permit
                 </h2>
-                <div className="bg-gray-50 rounded-lg p-6 mb-8">
-                  <ol className="space-y-3 list-decimal list-inside">
+                <div className="mb-8 rounded-[8px] border border-gray-200 bg-gray-50 p-6">
+                  <ol className="list-inside list-decimal space-y-3">
                     {processSteps.map((step) => (
                       <li key={step} className="text-gray-700">
                         {step}
@@ -90,190 +115,220 @@ export default async function BusinessOperatingPermitPage() {
                   </ol>
                 </div>
 
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                  Apply for a Business License
-                </h2>
-                <p className="text-gray-600 mb-6 leading-relaxed">
-                  {settings.business_permit_apply}
-                </p>
+                <ServiceShowMore collapsedLabel="Show requirements, fees, and more">
+                  <h2 className="mb-4 text-2xl font-bold text-gray-900">
+                    Apply for a Business License
+                  </h2>
+                  <p className="mb-6 leading-relaxed text-gray-600">
+                    {settings.business_permit_apply}
+                  </p>
 
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                  Business Changes & Closures
-                </h2>
-                <p className="text-gray-600 mb-6 leading-relaxed">
-                  {settings.business_permit_changes}
-                </p>
+                  <h2 className="mb-4 text-2xl font-bold text-gray-900">
+                    Business Changes & Closures
+                  </h2>
+                  <p className="mb-6 leading-relaxed text-gray-600">
+                    {settings.business_permit_changes}
+                  </p>
 
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                  Business License Renewals
-                </h2>
-                <p className="text-gray-600 mb-6 leading-relaxed">
-                  {settings.business_permit_renewals}
-                </p>
+                  <h2 className="mb-4 text-2xl font-bold text-gray-900">
+                    Business License Renewals
+                  </h2>
+                  <p className="mb-6 leading-relaxed text-gray-600">
+                    {settings.business_permit_renewals}
+                  </p>
 
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                  Mode of Payment
-                </h2>
-                <div className="bg-gray-50 rounded-lg p-6 mb-8">
-                  <ul className="space-y-2">
-                    {paymentModes.map((mode) => (
-                      <li
-                        key={mode}
-                        className="flex items-center gap-2 text-gray-700"
-                      >
-                        <span className="w-2 h-2 bg-[#8B0000] rounded-full"></span>
-                        {mode}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                  Requirements
-                </h2>
-                <div className="bg-gray-50 rounded-lg p-6 mb-8">
-                  <ul className="space-y-3">
-                    {requirements.map((requirement) => (
-                      <li key={requirement} className="flex items-start gap-3">
-                        <CheckCircle className="w-5 h-5 text-[#8B0000] shrink-0 mt-0.5" />
-                        <span className="text-gray-700">{requirement}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                  Fee Structure
-                </h2>
-                <div className="overflow-x-auto mb-8">
-                  <table className="w-full border-collapse">
-                    <thead>
-                      <tr className="bg-[#8B0000] text-white">
-                        <th className="px-4 py-3 text-left font-semibold">
-                          Business Category
-                        </th>
-                        <th className="px-4 py-3 text-left font-semibold">
-                          Fee Range
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {fees.map(([category, amount], index) => (
-                        <tr
-                          key={`${category}-${index}`}
-                          className={index % 2 === 0 ? "bg-gray-50" : "bg-white"}
+                  <h2 className="mb-4 text-2xl font-bold text-gray-900">
+                    Mode of Payment
+                  </h2>
+                  <div className="mb-8 rounded-[8px] border border-gray-200 bg-gray-50 p-6">
+                    <ul className="space-y-2">
+                      {paymentModes.map((mode) => (
+                        <li
+                          key={mode}
+                          className="flex items-center gap-2 text-gray-700"
                         >
-                          <td className="px-4 py-3 border-b border-gray-200">
-                            {category}
-                          </td>
-                          <td className="px-4 py-3 border-b border-gray-200 font-semibold text-[#8B0000]">
-                            {amount}
-                          </td>
-                        </tr>
+                          <span className="h-2 w-2 rounded-full bg-[#8B0000]"></span>
+                          {mode}
+                        </li>
                       ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                <div className="bg-amber-50 border-l-4 border-amber-500 p-4 mb-8">
-                  <div className="flex items-start gap-3">
-                    <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-                    <div>
-                      <h4 className="font-bold text-amber-800 mb-1">
-                        Important Notice
-                      </h4>
-                      <p className="text-amber-700 text-sm">
-                        {settings.business_permit_notice}
-                      </p>
-                    </div>
+                    </ul>
                   </div>
-                </div>
 
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                  Fee Fixing
-                </h2>
-                {feeFixingDocs && feeFixingDocs.length > 0 ? (
-                  <div className="space-y-4 mb-8">
-                    {feeFixingDocs.map((doc) => (
-                      <div
-                        key={doc.id}
-                        className="bg-white border border-gray-200 rounded-lg p-6"
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <h3 className="font-bold text-gray-900 mb-2">
-                              {doc.title}
-                            </h3>
-                            <p className="text-gray-600 text-sm mb-4">
-                              {doc.description}
-                            </p>
-                            <div className="flex items-center gap-2 text-xs text-gray-500">
-                              <FileText className="w-4 h-4" />
-                              <span>{doc.file_type.toUpperCase()}</span>
-                              <span>•</span>
-                              <span>
-                                {(doc.file_size / 1024 / 1024).toFixed(2)} MB
-                              </span>
-                            </div>
-                          </div>
-                          <a
-                            href={doc.file_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="ml-4 px-4 py-2 bg-[#8B0000] text-white rounded font-semibold hover:bg-[#6B0000] transition-colors whitespace-nowrap"
+                  <h2 className="mb-4 text-2xl font-bold text-gray-900">
+                    Requirements
+                  </h2>
+                  <div className="mb-8 rounded-[8px] border border-gray-200 bg-gray-50 p-6">
+                    <ul className="space-y-3">
+                      {requirements.map((requirement) => (
+                        <li key={requirement} className="flex items-start gap-3">
+                          <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-[#8B0000]" />
+                          <span className="text-gray-700">{requirement}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <h2 className="mb-4 text-2xl font-bold text-gray-900">
+                    Fee Structure
+                  </h2>
+                  <div className="mb-8 overflow-x-auto">
+                    <table className="w-full border-collapse">
+                      <thead>
+                        <tr className="bg-[#8B0000] text-white">
+                          <th className="px-4 py-3 text-left font-semibold">
+                            Business Category
+                          </th>
+                          <th className="px-4 py-3 text-left font-semibold">
+                            Fee Range
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {fees.map(([category, amount], index) => (
+                          <tr
+                            key={`${category}-${index}`}
+                            className={index % 2 === 0 ? "bg-gray-50" : "bg-white"}
                           >
-                            Download
-                          </a>
-                        </div>
-                      </div>
-                    ))}
+                            <td className="border-b border-gray-200 px-4 py-3">
+                              {category}
+                            </td>
+                            <td className="border-b border-gray-200 px-4 py-3 font-semibold text-[#8B0000]">
+                              {amount}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
-                ) : (
-                  <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 mb-8">
+
+                  <div className="mb-8 rounded-[8px] border border-amber-200 border-l-4 border-l-amber-500 bg-amber-50 p-4">
                     <div className="flex items-start gap-3">
-                      <AlertCircle className="w-5 h-5 text-yellow-600 shrink-0 mt-0.5" />
+                      <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
                       <div>
-                        <h4 className="font-bold text-yellow-800 mb-1">
-                          Fee Document Coming Soon
+                        <h4 className="mb-1 font-bold text-amber-800">
+                          Important Notice
                         </h4>
-                        <p className="text-yellow-700 text-sm">
-                          The detailed fee fixing document is being prepared and
-                          will be available shortly. Please check back soon or
-                          contact the Revenue Unit for more information.
+                        <p className="text-sm text-amber-700">
+                          {settings.business_permit_notice}
                         </p>
                       </div>
                     </div>
                   </div>
-                )}
+
+                  <h2 className="mb-4 text-2xl font-bold text-gray-900">
+                    Fee Fixing
+                  </h2>
+                  {latestFeeFixingDoc ? (
+                    <div className="mb-8 space-y-5">
+                      <div className="rounded-[8px] border border-[#8B0000]/15 bg-[#fff8f2] p-5">
+                        <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.22em] text-[#8B0000]">
+                          Current Fee Fixing Document
+                        </p>
+                        <div className="rounded-lg border border-gray-200 bg-white p-6">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1">
+                              <h3 className="mb-2 font-bold text-gray-900">
+                                {latestFeeFixingDoc.title}
+                              </h3>
+                              <p className="mb-4 text-sm text-gray-600">
+                                {latestFeeFixingDoc.description}
+                              </p>
+                              <div className="flex items-center gap-2 text-xs text-gray-500">
+                                <FileText className="h-4 w-4" />
+                                <span>{latestFeeFixingDoc.file_type.toUpperCase()}</span>
+                                <span>-</span>
+                                <span>
+                                  {(latestFeeFixingDoc.file_size / 1024 / 1024).toFixed(2)} MB
+                                </span>
+                              </div>
+                            </div>
+                            <a
+                              href={latestFeeFixingDoc.file_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="ml-4 whitespace-nowrap rounded bg-[#8B0000] px-4 py-2 font-semibold text-white transition-colors hover:bg-[#6B0000]"
+                            >
+                              Download
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+
+                      {archivedFeeFixingDocs.length > 0 ? (
+                        <div className="rounded-xl border border-gray-200 bg-gray-50 p-5">
+                          <p className="mb-3 text-sm font-semibold text-gray-900">
+                            Previous Fee Fixing Documents
+                          </p>
+                          <ul className="space-y-3">
+                            {archivedFeeFixingDocs.map((doc) => (
+                              <li
+                                key={doc.id}
+                                className="rounded-lg border border-gray-200 bg-white px-4 py-3"
+                              >
+                                <Link
+                                  href={getDocumentReferenceHref(doc.id)}
+                                  className="font-semibold text-[#8B0000] hover:underline"
+                                >
+                                  {doc.title}
+                                </Link>
+                                {doc.description ? (
+                                  <p className="mt-1 mb-0 text-sm text-gray-600">
+                                    {doc.description}
+                                  </p>
+                                ) : null}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : (
+                  <div className="mb-8 rounded-[8px] border border-yellow-200 border-l-4 border-l-yellow-500 bg-yellow-50 p-4">
+                      <div className="flex items-start gap-3">
+                        <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-yellow-600" />
+                        <div>
+                          <h4 className="mb-1 font-bold text-yellow-800">
+                            Fee Document Coming Soon
+                          </h4>
+                          <p className="text-sm text-yellow-700">
+                            The detailed fee fixing document is being prepared and
+                            will be available shortly. Please check back soon or
+                            contact the Revenue Unit for more information.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </ServiceShowMore>
               </div>
             </div>
 
             <div className="lg:col-span-1">
-              <div className="bg-gray-50 rounded-lg p-6 sticky top-24">
-                <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  <FileText className="w-5 h-5 text-[#8B0000]" />
+              <div className="sticky top-24 rounded-[8px] border border-gray-200 bg-white p-6 shadow-sm">
+                <h3 className="mb-4 flex items-center gap-2 font-bold text-gray-900">
+                  <FileText className="h-5 w-5 text-[#8B0000]" />
                   Quick Information
                 </h3>
 
-                <div className="space-y-4 mb-6">
+                <div className="mb-6 space-y-4">
                   <div className="flex items-start gap-3">
-                    <Clock className="w-5 h-5 text-[#8B0000] shrink-0 mt-1" />
+                    <Clock className="mt-1 h-5 w-5 shrink-0 text-[#8B0000]" />
                     <div>
-                      <p className="font-semibold text-gray-900 text-sm">
+                      <p className="text-sm font-semibold text-gray-900">
                         Processing Time
                       </p>
-                      <p className="text-gray-600 text-sm">
+                      <p className="text-sm text-gray-600">
                         {settings.business_permit_processing_time}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <MapPin className="w-5 h-5 text-[#8B0000] shrink-0 mt-1" />
+                    <MapPin className="mt-1 h-5 w-5 shrink-0 text-[#8B0000]" />
                     <div>
-                      <p className="font-semibold text-gray-900 text-sm">
+                      <p className="text-sm font-semibold text-gray-900">
                         Where to Apply
                       </p>
-                      <p className="text-gray-600 text-sm">
+                      <p className="text-sm text-gray-600">
                         {whereToApply.map((line) => (
                           <span key={line}>
                             {line}
@@ -284,12 +339,12 @@ export default async function BusinessOperatingPermitPage() {
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <Clock className="w-5 h-5 text-[#8B0000] shrink-0 mt-1" />
+                    <Clock className="mt-1 h-5 w-5 shrink-0 text-[#8B0000]" />
                     <div>
-                      <p className="font-semibold text-gray-900 text-sm">
+                      <p className="text-sm font-semibold text-gray-900">
                         Office Hours
                       </p>
-                      <p className="text-gray-600 text-sm">
+                      <p className="text-sm text-gray-600">
                         {officeHours.map((line) => (
                           <span key={line}>
                             {line}
@@ -300,10 +355,10 @@ export default async function BusinessOperatingPermitPage() {
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <Phone className="w-5 h-5 text-[#8B0000] shrink-0 mt-1" />
+                    <Phone className="mt-1 h-5 w-5 shrink-0 text-[#8B0000]" />
                     <div>
-                      <p className="font-semibold text-gray-900 text-sm">Contact</p>
-                      <p className="text-gray-600 text-sm">
+                      <p className="text-sm font-semibold text-gray-900">Contact</p>
+                      <p className="text-sm text-gray-600">
                         {settings.business_permit_contact}
                       </p>
                     </div>
@@ -311,14 +366,14 @@ export default async function BusinessOperatingPermitPage() {
                 </div>
 
                 <div className="border-t border-gray-200 pt-4">
-                  <h4 className="font-semibold text-gray-900 mb-3 text-sm">
+                  <h4 className="mb-3 text-sm font-semibold text-gray-900">
                     Related Services
                   </h4>
                   <ul className="space-y-2">
                     <li>
                       <Link
                         href="/services/building-permit"
-                        className="text-[#8B0000] hover:underline text-sm"
+                        className="text-sm text-[#8B0000] hover:underline"
                       >
                         Building Permit
                       </Link>
@@ -326,7 +381,7 @@ export default async function BusinessOperatingPermitPage() {
                     <li>
                       <Link
                         href="/services/marriage-license"
-                        className="text-[#8B0000] hover:underline text-sm"
+                        className="text-sm text-[#8B0000] hover:underline"
                       >
                         Marriage License
                       </Link>
@@ -336,7 +391,7 @@ export default async function BusinessOperatingPermitPage() {
 
                 <Link
                   href="/contact"
-                  className="mt-6 w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#8B0000] text-white font-bold rounded hover:bg-[#6B0000] transition-colors"
+                  className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-[4px] bg-[#8B0000] px-6 py-3 text-[13px] font-bold uppercase tracking-wide text-white transition-colors hover:bg-[#6B0000]"
                 >
                   Contact Us
                 </Link>

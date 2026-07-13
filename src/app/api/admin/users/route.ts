@@ -22,7 +22,7 @@ export async function GET() {
     const supabase = await createAdminSupabaseClient();
     const { data, error } = await supabase
       .from("admin_users")
-      .select("id, email, name, role, created_at, updated_at")
+      .select("*")
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -111,7 +111,7 @@ export async function POST(request: Request) {
         name,
         role: normalizedRole,
       })
-      .select("id, email, name, role, created_at")
+      .select("*")
       .single();
 
     if (error) {
@@ -229,7 +229,7 @@ export async function PUT(request: Request) {
         updated_at: new Date().toISOString(),
       })
       .eq("id", id)
-      .select("id, email, name, role, created_at, updated_at")
+      .select("*")
       .single();
 
     if (error) {

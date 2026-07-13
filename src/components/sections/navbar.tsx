@@ -3,24 +3,48 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Search, Phone, Mail, Instagram, Twitter, ChevronDown, Menu, X } from "lucide-react";
+import {
+  Phone,
+  Mail,
+  Instagram,
+  ChevronDown,
+  ChevronRight,
+  Menu,
+  X,
+} from "lucide-react";
+import { usePublicSocialLinks } from "@/hooks/use-public-social-links";
+import TikTokIcon from "@/components/shared/tiktok-icon";
+import { getDepartmentUnitHref } from "@/lib/department-unit-links";
 
 interface NavLink {
   name: string;
   href: string;
-  dropdown?: { name: string; href: string }[];
+  dropdown?: NavDropdownItem[];
+}
+
+interface NavDropdownItem {
+  name: string;
+  href: string;
+  children?: NavDropdownItem[];
+}
+
+interface DepartmentUnit {
+  id: string;
+  name: string;
 }
 
 interface Department {
   id: string;
   name: string;
   slug: string;
+  units?: DepartmentUnit[];
 }
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [departments, setDepartments] = useState<Department[]>([]);
+  const socialLinks = usePublicSocialLinks();
 
   // Fetch departments from the database
   useEffect(() => {
@@ -59,9 +83,14 @@ const Navbar = () => {
       dropdown: [
         { name: "Overview", href: "/about/overview" },
         { name: "The Assembly", href: "/about/assembly" },
-        { name: "Leadership", href: "/about/leadership" },
-        { name: "MCE Profile", href: "/about/mce-profile" },
-        { name: "MCD Profile", href: "/about/mcd-profile" },
+        {
+          name: "Management",
+          href: "/about/leadership",
+          children: [
+            { name: "MCE Profile", href: "/about/mce-profile" },
+            { name: "MCD Profile", href: "/about/mcd-profile" },
+          ],
+        },
       ],
     },
     {
@@ -83,6 +112,10 @@ const Navbar = () => {
         ...departments.map((dept) => ({
           name: dept.name,
           href: `/departments/${dept.slug}`,
+          children: (dept.units || []).map((unit) => ({
+            name: unit.name,
+            href: getDepartmentUnitHref(dept.slug, unit.name, unit.id),
+          })),
         })),
         { name: "Units & Committees", href: "/units-committees" },
       ],
@@ -123,15 +156,15 @@ const Navbar = () => {
             </a>
           </div>
           <div className="flex items-center space-x-4">
-            <a href="https://web.facebook.com/gasouthmunicipal" target="_blank" rel="noopener noreferrer" className="hover:text-[#ffcc00] transition-colors" aria-label="Facebook" title="Visit Facebook">
+            <a href={socialLinks.facebook} target="_blank" rel="noopener noreferrer" className="hover:text-[#ffcc00] transition-colors" aria-label="Facebook" title="Visit Facebook">
               <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
                 <path d="M18.77,7.46H14.5v-1.9c0-.9.6-1.1,1-1.1h3V.53L14.17.53A5.44,5.44,0,0,0,8.44,6v1.46H5v4.59H8.44V23.47h6.06V12.05h4.1l.17-4.59Z" />
               </svg>
             </a>
-            <a href="https://x.com/GaSouthAssembly" target="_blank" rel="noopener noreferrer" className="hover:text-[#ffcc00] transition-colors" aria-label="Twitter" title="Visit Twitter/X">
-              <Twitter className="w-4 h-4 fill-current" />
+            <a href={socialLinks.tiktok} target="_blank" rel="noopener noreferrer" className="hover:text-[#ffcc00] transition-colors" aria-label="TikTok" title="Visit TikTok">
+              <TikTokIcon className="w-4 h-4 fill-current" />
             </a>
-            <a href="https://www.instagram.com/gasouthmunicipalassembly/" target="_blank" rel="noopener noreferrer" className="hover:text-[#ffcc00] transition-colors" aria-label="Instagram" title="Visit Instagram">
+            <a href={socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="hover:text-[#ffcc00] transition-colors" aria-label="Instagram" title="Visit Instagram">
               <Instagram className="w-4 h-4" />
             </a>
           </div>
@@ -178,13 +211,39 @@ const Navbar = () => {
                     <div className="absolute top-full left-0 z-50 w-56 rounded-2xl border border-gray-100 bg-white p-2 shadow-xl opacity-0 invisible translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-300">
                       <ul className="py-2">
                         {link.dropdown.map((subItem) => (
-                          <li key={subItem.href}>
+                          <li key={subItem.href} className="relative group/submenu">
                             <Link
                               href={subItem.href}
-                              className="block rounded-xl px-4 py-2.5 text-[12px] font-medium text-gray-700 hover:bg-[#fff8f5] hover:text-[#8B0000] transition-colors"
+                              className={`block rounded-xl px-4 py-2.5 text-[12px] font-medium text-gray-700 hover:bg-[#fff8f5] hover:text-[#8B0000] transition-colors ${
+                                subItem.children && subItem.children.length > 0
+                                  ? "pr-10"
+                                  : ""
+                              }`}
                             >
                               {subItem.name}
                             </Link>
+                            {subItem.children && subItem.children.length > 0 ? (
+                              <>
+                                <ChevronRight className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400 transition-colors group-hover/submenu:text-[#8B0000]" />
+                                <div className="absolute left-full top-0 z-50 -ml-1 w-60 rounded-2xl border border-gray-100 bg-white p-2 shadow-xl opacity-0 invisible translate-x-2 transition-all duration-300 group-hover/submenu:opacity-100 group-hover/submenu:visible group-hover/submenu:translate-x-0">
+                                  <p className="px-4 pb-2 pt-3 text-[10px] font-bold uppercase tracking-[0.18em] text-[#8B0000]">
+                                    {subItem.name} Units
+                                  </p>
+                                  <ul className="pb-2">
+                                    {subItem.children.map((childItem) => (
+                                      <li key={childItem.href}>
+                                        <Link
+                                          href={childItem.href}
+                                          className="block rounded-xl px-4 py-2.5 text-[12px] font-medium text-gray-700 hover:bg-[#fff8f5] hover:text-[#8B0000] transition-colors"
+                                        >
+                                          {childItem.name}
+                                        </Link>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              </>
+                            ) : null}
                           </li>
                         ))}
                       </ul>
@@ -194,23 +253,9 @@ const Navbar = () => {
               ))}
             </ul>
 
-            <Link
-              href="/search"
-              className="ml-2 xl:ml-4 rounded-full border border-transparent p-2 text-[#333333] hover:border-[#8B0000]/15 hover:bg-[#fff5f0] hover:text-[#8B0000] transition-colors cursor-pointer"
-              aria-label="Search"
-            >
-              <Search className="w-5 h-5 stroke-[2.5]" />
-            </Link>
           </div>
 
           <div className="lg:hidden flex shrink-0 items-center space-x-1">
-            <Link
-              href="/search"
-              className="rounded-full p-2 text-[#333333] hover:bg-[#fff5f0] hover:text-[#8B0000] transition-colors"
-              aria-label="Search"
-            >
-              <Search className="w-5 h-5" />
-            </Link>
             <button 
               className="rounded-full p-2 text-[#333333] hover:bg-[#fff5f0] hover:text-[#8B0000] transition-colors"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -268,6 +313,21 @@ const Navbar = () => {
                               >
                                 {subItem.name}
                               </Link>
+                              {subItem.children && subItem.children.length > 0 ? (
+                                <ul className="bg-[#faf7f2] py-1">
+                                  {subItem.children.map((childItem) => (
+                                    <li key={childItem.href}>
+                                      <Link
+                                        href={childItem.href}
+                                        onClick={() => setMobileMenuOpen(false)}
+                                        className="block px-9 sm:px-11 py-2 text-[11px] sm:text-[12px] font-medium text-gray-500 hover:bg-white hover:text-[#8B0000] transition-colors"
+                                      >
+                                        {childItem.name}
+                                      </Link>
+                                    </li>
+                                  ))}
+                                </ul>
+                              ) : null}
                             </li>
                           ))}
                         </ul>
@@ -300,15 +360,15 @@ const Navbar = () => {
                 </a>
               </div>
               <div className="flex gap-3 pt-2">
-                <a href="https://web.facebook.com/gasouthmunicipal" target="_blank" rel="noopener noreferrer" className="p-2 bg-white rounded hover:bg-gray-100 transition-colors" aria-label="Facebook">
+                <a href={socialLinks.facebook} target="_blank" rel="noopener noreferrer" className="p-2 bg-white rounded hover:bg-gray-100 transition-colors" aria-label="Facebook">
                   <svg className="w-4 h-4 fill-[#8B0000]" viewBox="0 0 24 24">
                     <path d="M18.77,7.46H14.5v-1.9c0-.9.6-1.1,1-1.1h3V.53L14.17.53A5.44,5.44,0,0,0,8.44,6v1.46H5v4.59H8.44V23.47h6.06V12.05h4.1l.17-4.59Z" />
                   </svg>
                 </a>
-                <a href="https://x.com/GaSouthAssembly" target="_blank" rel="noopener noreferrer" className="p-2 bg-white rounded hover:bg-gray-100 transition-colors" aria-label="Twitter">
-                  <Twitter className="w-4 h-4 text-[#8B0000]" />
+                <a href={socialLinks.tiktok} target="_blank" rel="noopener noreferrer" className="p-2 bg-white rounded hover:bg-gray-100 transition-colors" aria-label="TikTok">
+                  <TikTokIcon className="w-4 h-4 text-[#8B0000]" />
                 </a>
-                <a href="https://www.instagram.com/gasouthmunicipalassembly/" target="_blank" rel="noopener noreferrer" className="p-2 bg-white rounded hover:bg-gray-100 transition-colors" aria-label="Instagram">
+                <a href={socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="p-2 bg-white rounded hover:bg-gray-100 transition-colors" aria-label="Instagram">
                   <Instagram className="w-4 h-4 text-[#8B0000]" />
                 </a>
               </div>

@@ -34,6 +34,19 @@ function createEmptyLeader(displayOrder: number): Leadership {
   };
 }
 
+function formatDepartmentLabel(value: string) {
+  const labels: Record<string, string> = {
+    "ngleshie-amanfro-bortianor": "Bortianor-Ngleshie-Amanfro Constituency",
+    "bortianor-ngleshie-amanfro": "Bortianor-Ngleshie-Amanfro Constituency",
+    "obom-domeabra": "Domeabra-Obom Constituency",
+    "domeabra-obom": "Domeabra-Obom Constituency",
+  };
+
+  return labels[value] || value
+    .replace(/-/g, " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
 export default function LeadershipManagement({
   leadership,
   departments,
@@ -45,10 +58,19 @@ export default function LeadershipManagement({
 }: LeadershipManagementProps) {
   return (
     <div className="space-y-6">
-      <div className="flex justify-stretch sm:justify-end">
+      <div className="flex flex-col gap-4 rounded-[8px] border border-gray-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#8B0000]">
+            Management
+          </p>
+          <h3 className="mt-1 text-lg font-bold text-gray-900">Leadership Records</h3>
+          <p className="mt-1 text-sm text-gray-600">
+            Manage public leadership profiles, MPs, and management members.
+          </p>
+        </div>
         <Button
           onClick={() => setEditingLeader(createEmptyLeader(leadership.length + 1))}
-          className="w-full bg-[#8B0000] hover:bg-[#6B0000] sm:w-auto"
+          className="w-full rounded-[8px] bg-[#8B0000] hover:bg-[#6B0000] sm:w-auto"
         >
           <Plus className="w-4 h-4 mr-2" />
           Add Leader
@@ -56,7 +78,7 @@ export default function LeadershipManagement({
       </div>
 
       {editingLeader && (
-        <div className="bg-white p-6 rounded-xl shadow-sm border">
+        <div className="bg-white p-6 rounded-[8px] shadow-sm border border-gray-200">
           <h3 className="font-semibold mb-4">
             {editingLeader.id ? "Edit Leader" : "New Leader"}
           </h3>
@@ -114,10 +136,10 @@ export default function LeadershipManagement({
                 )}
                 <optgroup label="Constituencies">
                   <option value="ngleshie-amanfro-bortianor">
-                    Ngleshie Amanfro-Bortianor Constituency
+                    Bortianor-Ngleshie-Amanfro Constituency
                   </option>
                   <option value="obom-domeabra">
-                    Obom-Domeabra Constituency
+                    Domeabra-Obom Constituency
                   </option>
                 </optgroup>
               </select>
@@ -176,14 +198,14 @@ export default function LeadershipManagement({
         {leadership.map((leader) => (
           <div
             key={leader.id}
-            className="bg-white p-4 rounded-xl shadow-sm border flex flex-col items-start gap-4 sm:flex-row sm:items-center"
+            className="bg-white p-4 rounded-[8px] shadow-sm border border-gray-200 flex flex-col items-start gap-4 sm:flex-row sm:items-center"
           >
-            <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
+            <div className="w-16 h-16 bg-gray-100 rounded-[8px] flex items-center justify-center overflow-hidden">
               {leader.image_url ? (
                 <img
                   src={leader.image_url}
                   alt={leader.name}
-                  className="w-full h-full object-cover rounded-full"
+                  className="w-full h-full object-contain"
                 />
               ) : (
                 <Users className="w-8 h-8 text-gray-400" />
@@ -199,9 +221,7 @@ export default function LeadershipManagement({
                   {leader.position.includes("Parliament")
                     ? "Constituency:"
                     : "Department:"}{" "}
-                  {leader.department
-                    .replace(/-/g, " ")
-                    .replace(/\b\w/g, (letter) => letter.toUpperCase())}
+                  {formatDepartmentLabel(leader.department)}
                 </p>
               )}
             </div>

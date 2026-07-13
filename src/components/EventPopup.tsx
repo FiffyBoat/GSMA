@@ -23,9 +23,26 @@ interface EventPopupProps {
 
 type EventStatus = "upcoming" | "ongoing" | "past";
 
+function parseEventDate(value?: string | null, endOfDay = false) {
+  if (!value) return null;
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+
+  if (endOfDay && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    date.setHours(23, 59, 59, 999);
+  }
+
+  return date;
+}
+
 function getEventStatus(event: Event, now: Date): EventStatus {
-  const start = new Date(event.start_date);
-  const end = event.end_date ? new Date(event.end_date) : start;
+  const start = parseEventDate(event.start_date);
+  const end = parseEventDate(event.end_date || event.start_date, true);
+
+  if (!start || !end) {
+    return "upcoming";
+  }
 
   if (start > now) {
     return "upcoming";
@@ -163,7 +180,7 @@ export default function EventPopup({ onOpen }: EventPopupProps) {
               </button>
 
               {event.image_url ? (
-                <div className="relative flex h-[200px] items-center justify-center overflow-hidden bg-gray-100 sm:h-[250px] md:h-[320px]">
+                <div className="relative flex h-[180px] items-center justify-center overflow-hidden bg-gray-100 sm:h-[220px] md:h-[280px]">
                   <img
                     src={event.image_url}
                     alt={event.title}

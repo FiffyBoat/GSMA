@@ -82,7 +82,7 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
                         <img
                           src={article.image_url}
                           alt={article.title}
-                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                          className="h-full w-full object-contain p-2 transition-transform duration-300 group-hover:scale-105"
                         />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#8B0000] to-[#6B0000]">
@@ -102,6 +102,11 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
                         </div>
                       )}
                     </div>
+                    {article.image_caption ? (
+                      <p className="px-[16px] pb-[10px] text-[12px] text-gray-500 italic sm:px-[18px] md:px-[20px] lg:px-[24px]">
+                        {article.image_caption}
+                      </p>
+                    ) : null}
                     <div className="p-[16px] sm:p-[18px] md:p-[20px] lg:p-[24px]">
                       <h3 className="mb-[12px] line-clamp-2 text-[16px] font-bold leading-[1.3] text-gray-900 transition-colors group-hover:text-[#8B0000] sm:mb-[14px] sm:text-[17px] sm:leading-[1.4] md:text-[18px] lg:text-[20px]">
                         {article.title}

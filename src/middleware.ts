@@ -7,6 +7,12 @@ const ADMIN_PASS = process.env.ADMIN_BASIC_AUTH_PASS;
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   if (pathname.startsWith('/admin')) {
+    if (pathname === '/admin') return NextResponse.next();
+    if (pathname === '/admin/login') return NextResponse.next();
+
+    const hasAdminSession = Boolean(req.cookies.get('admin_session')?.value);
+    if (hasAdminSession) return NextResponse.next();
+
     // If admin creds are not set, do not block (app may rely on another auth mechanism).
     if (!ADMIN_USER || !ADMIN_PASS) return NextResponse.next();
 

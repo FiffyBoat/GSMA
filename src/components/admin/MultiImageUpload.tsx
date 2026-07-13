@@ -2,10 +2,9 @@
 
 import { useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { Upload, X, Loader2, Image as ImageIcon, Plus } from "lucide-react";
+import { ImagePlus, Loader2, Plus, RefreshCw, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import Image from "next/image";
 
 interface MultiImageUploadProps {
   values?: string[];
@@ -23,13 +22,26 @@ export default function MultiImageUpload({
   maxImages = 10,
 }: MultiImageUploadProps) {
   const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState<{ [key: string]: number }>({});
-  const [previews, setPreviews] = useState<{ [key: string]: string }>(
-    values.reduce((acc, url, idx) => {
-      acc[`existing-${idx}`] = url;
-      return acc;
-    }, {} as { [key: string]: string })
-  );
+  const [replacingIndex, setReplacingIndex] = useState<number | null>(null);
+
+  const uploadImageFile = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("folder", folder);
+
+    const res = await fetch("/api/admin/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.url) {
+      throw new Error(data.error || `Failed to upload ${file.name}`);
+    }
+
+    return data.url as string;
+  };
 
   const onDrop = async (acceptedFiles: File[]) => {
     if (values.length + acceptedFiles.length > maxImages) {
@@ -37,75 +49,58 @@ export default function MultiImageUpload({
       return;
     }
 
-      // Create previews for all files
-      const newPreviews = { ...previews };
-      acceptedFiles.forEach((file) => {
-        const reader = new FileReader();
-        const fileKey = `new-${Date.now()}-${Math.random()}`;
-        reader.onloadend = () => {
-          newPreviews[fileKey] = reader.result as string;
-          setPreviews(newPreviews);
-        };
-        reader.readAsDataURL(file);
-      });
+    setUploading(true);
 
-      // Upload all files
-      setUploading(true);
+    try {
       const uploadedUrls: string[] = [];
-      let errorCount = 0;
 
       for (const file of acceptedFiles) {
-        try {
-          const fileKey = `new-${Date.now()}-${Math.random()}`;
-          setUploadProgress((prev) => ({ ...prev, [fileKey]: 0 }));
-
-          const formData = new FormData();
-          formData.append("file", file);
-          formData.append("folder", folder);
-
-          const res = await fetch("/api/admin/upload", {
-            method: "POST",
-            body: formData,
-          });
-
-          const data = await res.json();
-
-          if (res.ok && data.url) {
-            uploadedUrls.push(data.url);
-            setUploadProgress((prev) => ({ ...prev, [fileKey]: 100 }));
-            setTimeout(() => {
-              setUploadProgress((prev) => {
-                const newProgress = { ...prev };
-                delete newProgress[fileKey];
-                return newProgress;
-              });
-            }, 500);
-          } else {
-            errorCount++;
-            toast.error(`Failed to upload ${file.name}`);
-            setUploadProgress((prev) => {
-              const newProgress = { ...prev };
-              delete newProgress[fileKey];
-              return newProgress;
-            });
-          }
-        } catch (error) {
-          errorCount++;
-          console.error("Upload error:", error);
-          const errorMessage =
-            error instanceof Error ? error.message : "Network error";
-          toast.error(`Error uploading ${file.name}: ${errorMessage}`);
-        }
+        const url = await uploadImageFile(file);
+        uploadedUrls.push(url);
       }
 
       if (uploadedUrls.length > 0) {
-        const newUrls = [...values, ...uploadedUrls];
-        onChange(newUrls);
-        toast.success(`${uploadedUrls.length} image${uploadedUrls.length !== 1 ? "s" : ""} uploaded successfully`);
+        onChange([...values, ...uploadedUrls]);
+        toast.success(
+          `${uploadedUrls.length} image${uploadedUrls.length === 1 ? "" : "s"} uploaded successfully`
+        );
       }
-
-    if (errorCount === 0) {
+    } catch (error) {
+      console.error("Upload error:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "Network error";
+      toast.error(errorMessage);
+    } finally {
       setUploading(false);
+    }
+  };
+
+  const replaceImage = async (
+    index: number,
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+
+    if (!file) {
+      return;
+    }
+
+    setReplacingIndex(index);
+
+    try {
+      const url = await uploadImageFile(file);
+      const nextUrls = [...values];
+      nextUrls[index] = url;
+      onChange(nextUrls);
+      toast.success("Image replaced successfully");
+    } catch (error) {
+      console.error("Replace error:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "Network error";
+      toast.error(errorMessage);
+    } finally {
+      setReplacingIndex(null);
     }
   };
 
@@ -114,22 +109,13 @@ export default function MultiImageUpload({
     accept: {
       "image/*": [".jpeg", ".jpg", ".png", ".webp", ".gif"],
     },
-    maxSize: 5 * 1024 * 1024, // 5MB per file
-    disabled: values.length >= maxImages || uploading,
+    maxSize: 5 * 1024 * 1024,
+    disabled: values.length >= maxImages || uploading || replacingIndex !== null,
   });
 
   const removeImage = (index: number) => {
-    const newUrls = values.filter((_, i) => i !== index);
-    onChange(newUrls);
-    
-    // Also remove preview
-    const previewKeys = Object.keys(previews).filter((k) => k.startsWith("existing-"));
-    const keyToRemove = previewKeys[index];
-    if (keyToRemove) {
-      const newPreviews = { ...previews };
-      delete newPreviews[keyToRemove];
-      setPreviews(newPreviews);
-    }
+    onChange(values.filter((_, currentIndex) => currentIndex !== index));
+    toast.success("Image removed from album. Save to apply changes.");
   };
 
   const canAddMore = values.length < maxImages;
@@ -143,39 +129,67 @@ export default function MultiImageUpload({
         </span>
       </div>
 
-      {/* Image Grid */}
-      {values.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-          {values.map((url, index) => (
-            <div key={index} className="relative group">
-              <div className="aspect-square rounded-lg overflow-hidden border-2 border-gray-200 bg-gray-50">
-                <img
-                  src={url}
-                  alt={`Preview ${index + 1}`}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <Button
-                type="button"
-                variant="destructive"
-                size="sm"
-                className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                onClick={() => removeImage(index)}
-              >
-                <X className="w-3 h-3" />
-              </Button>
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all rounded-lg" />
-            </div>
-          ))}
+      {values.length > 0 ? (
+        <div className="grid max-w-4xl grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+          {values.map((url, index) => {
+            const isReplacing = replacingIndex === index;
 
-          {/* Upload More Button */}
-          {canAddMore && (
+            return (
+              <div key={`${url}-${index}`} className="group relative">
+                <div className="aspect-square overflow-hidden rounded-[8px] border border-gray-200 bg-gray-50">
+                  <img
+                    src={url}
+                    alt={`Preview ${index + 1}`}
+                    className="h-full w-full object-contain p-2"
+                  />
+                </div>
+
+                {index === 0 ? (
+                  <span className="absolute left-2 top-2 rounded-[6px] bg-[#8B0000] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-white">
+                    Cover
+                  </span>
+                ) : null}
+
+                <div className="absolute inset-x-2 bottom-2 flex gap-2 opacity-0 transition-opacity group-hover:opacity-100">
+                  <label className="flex-1">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      disabled={uploading || replacingIndex !== null}
+                      onChange={(event) => replaceImage(index, event)}
+                    />
+                    <span className="flex cursor-pointer items-center justify-center gap-1 rounded-md bg-white/95 px-2 py-1.5 text-[11px] font-medium text-gray-800 shadow-sm transition hover:bg-white">
+                      {isReplacing ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : (
+                        <RefreshCw className="h-3 w-3" />
+                      )}
+                      Replace
+                    </span>
+                  </label>
+
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    className="h-auto px-2 py-1.5 text-[11px]"
+                    onClick={() => removeImage(index)}
+                    disabled={uploading || replacingIndex !== null}
+                  >
+                    <X className="mr-1 h-3 w-3" />
+                    Remove
+                  </Button>
+                </div>
+              </div>
+            );
+          })}
+
+          {canAddMore ? (
             <div
               {...getRootProps()}
               className={`
-                aspect-square
-                border-2 border-dashed rounded-lg cursor-pointer
-                transition-colors
+                aspect-square rounded-[8px] border-2 border-dashed cursor-pointer transition-colors
                 ${
                   isDragActive
                     ? "border-[#8B0000] bg-[#8B0000]/5"
@@ -188,62 +202,72 @@ export default function MultiImageUpload({
               <div className="flex flex-col items-center gap-1 text-center">
                 {uploading ? (
                   <>
-                    <Loader2 className="w-6 h-6 animate-spin text-[#8B0000]" />
+                    <Loader2 className="h-6 w-6 animate-spin text-[#8B0000]" />
                     <p className="text-xs text-gray-600">Uploading...</p>
                   </>
                 ) : (
                   <>
-                    <Plus className="w-6 h-6 text-[#8B0000]" />
+                    <Plus className="h-6 w-6 text-[#8B0000]" />
                     <p className="text-xs font-medium text-gray-700">Add more</p>
                   </>
                 )}
               </div>
             </div>
-          )}
+          ) : null}
         </div>
-      )}
+      ) : null}
 
-      {/* Initial Upload Area */}
-      {values.length === 0 && (
+      {values.length === 0 ? (
         <div
           {...getRootProps()}
           className={`
-            border-2 border-dashed rounded-lg cursor-pointer
-            transition-colors
+            max-w-3xl rounded-[8px] border-2 border-dashed cursor-pointer transition-colors
             ${
               isDragActive
                 ? "border-[#8B0000] bg-[#8B0000]/5"
                 : "border-gray-300 hover:border-[#8B0000] hover:bg-gray-50"
             }
-            flex flex-col items-center justify-center p-8
+            flex flex-col items-center justify-center p-6
           `}
         >
           <input {...getInputProps()} />
           {uploading ? (
             <div className="flex flex-col items-center gap-2">
-              <Loader2 className="w-8 h-8 animate-spin text-[#8B0000]" />
+              <Loader2 className="h-8 w-8 animate-spin text-[#8B0000]" />
               <p className="text-sm text-gray-600">Uploading images...</p>
             </div>
           ) : (
             <div className="flex flex-col items-center gap-3 text-center">
-              <div className="w-12 h-12 rounded-full bg-[#8B0000]/10 flex items-center justify-center">
-                <Upload className="w-6 h-6 text-[#8B0000]" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-[8px] bg-[#8B0000]/10">
+                <Upload className="h-6 w-6 text-[#8B0000]" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-700">
                   {isDragActive ? "Drop images here" : "Click or drag to upload"}
                 </p>
-                <p className="text-xs text-gray-500 mt-1">
-                  Multiple images supported • PNG, JPG, WEBP up to 5MB each
+                <p className="mt-1 text-xs text-gray-500">
+                  Multiple images supported | PNG, JPG, WEBP up to 5MB each
                 </p>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="mt-1 text-xs text-gray-500">
                   Max {maxImages} images
                 </p>
               </div>
             </div>
           )}
         </div>
-      )}
+      ) : null}
+
+      {values.length > 0 ? (
+        <div className="rounded-[8px] border border-gray-200 bg-gray-50 px-3 py-2 text-xs text-gray-600">
+          <div className="flex items-start gap-2">
+            <ImagePlus className="mt-0.5 h-3.5 w-3.5 text-[#8B0000]" />
+            <span>
+              Remove or replace any single image in this album. The first image is
+              used as the cover image.
+            </span>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -118,7 +118,7 @@ export default function WelcomeSection({
                   src={normalizeSupabaseImageUrl(mceImageUrl)}
                   alt={`${mceName} - Municipal Chief Executive`}
                   fill
-                  className="object-cover"
+                  className="object-contain p-3"
                   priority
                 />
                 <div className="absolute inset-x-0 bottom-0 bg-[#8B0000]/90 p-3 sm:p-4 md:p-5 text-white transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">

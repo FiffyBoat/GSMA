@@ -1,0 +1,2 @@
+INSERT INTO "public"."electoral_areas" ("id", "name", "description", "display_order", "is_active", "created_at", "updated_at") 
+VALUES ('a5df2d1e-c186-46ba-8d68-7ff21c658a0a', 'kasoa', '', '1', 'true', '2026-01-24 19:16:52.194223+00', '2026-01-24 19:16:52.194223+00');

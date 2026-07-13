@@ -30,7 +30,7 @@ export default function LeadershipHighlight({
                   src={normalizeSupabaseImageUrl(mceImageUrl)}
                   alt={`${mceName} - Municipal Chief Executive`}
                   fill
-                  className="object-cover"
+                  className="object-contain p-3"
                   priority
                 />
               </div>

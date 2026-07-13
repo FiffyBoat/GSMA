@@ -31,6 +31,10 @@ export async function POST(request: Request) {
 
   const body = await request.json();
   const supabase = await createAdminSupabaseClient();
+  const endDate =
+    typeof body.end_date === "string" && body.end_date.trim()
+      ? body.end_date
+      : null;
 
   const { data, error } = await supabase
     .from("events")
@@ -40,9 +44,11 @@ export async function POST(request: Request) {
       description: body.description,
       content: body.content,
       image_url: body.image_url,
+      image_caption: body.image_caption,
+      credit_note: body.credit_note,
       event_type: body.event_type,
       start_date: body.start_date,
-      end_date: body.end_date,
+      end_date: endDate,
       location: body.location,
       venue: body.venue,
       organizer: body.organizer,
@@ -71,6 +77,10 @@ export async function PUT(request: Request) {
 
   const body = await request.json();
   const supabase = await createAdminSupabaseClient();
+  const endDate =
+    typeof body.end_date === "string" && body.end_date.trim()
+      ? body.end_date
+      : null;
 
   const { data, error } = await supabase
     .from("events")
@@ -80,9 +90,11 @@ export async function PUT(request: Request) {
       description: body.description,
       content: body.content,
       image_url: body.image_url,
+      image_caption: body.image_caption,
+      credit_note: body.credit_note,
       event_type: body.event_type,
       start_date: body.start_date,
-      end_date: body.end_date,
+      end_date: endDate,
       location: body.location,
       venue: body.venue,
       organizer: body.organizer,

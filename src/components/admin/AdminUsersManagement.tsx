@@ -182,15 +182,18 @@ export default function AdminUsersManagement({
   return (
     <div className="space-y-6">
       {!editingAdmin ? (
-        <div className="bg-white p-6 rounded-xl shadow-sm border">
+        <div className="bg-white p-6 rounded-[8px] shadow-sm border border-gray-200">
           <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h3 className="font-semibold">Admin Users</h3>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#8B0000]">
+                System
+              </p>
+              <h3 className="mt-1 text-lg font-bold text-gray-900">Admin Users</h3>
               <p className="text-sm text-gray-500 mt-1">
                 Create admin accounts and assign the right role for their responsibilities.
               </p>
             </div>
-            <Button onClick={startCreate} className="w-full bg-[#8B0000] hover:bg-[#6B0000] sm:w-auto">
+            <Button onClick={startCreate} className="w-full rounded-[8px] bg-[#8B0000] hover:bg-[#6B0000] sm:w-auto">
               <Plus className="w-4 h-4 mr-2" />
               New Admin
             </Button>
@@ -203,13 +206,13 @@ export default function AdminUsersManagement({
               admins.map((admin) => (
                 <div
                   key={admin.id}
-                  className="flex flex-col gap-4 rounded-lg border bg-gray-50 p-4 sm:flex-row sm:items-start sm:justify-between"
+                  className="flex flex-col gap-4 rounded-[8px] border border-gray-200 bg-gray-50 p-4 sm:flex-row sm:items-start sm:justify-between"
                 >
                   <div className="min-w-0 flex-1">
                     <h4 className="font-semibold text-gray-900">{admin.name}</h4>
                     <p className="text-sm text-gray-600 break-all">{admin.email}</p>
                     <div className="mt-2">
-                      <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
+                      <span className="inline-flex rounded-[6px] bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
                         {ADMIN_ROLE_LABELS[admin.role]}
                       </span>
                     </div>
@@ -239,7 +242,7 @@ export default function AdminUsersManagement({
           </div>
         </div>
       ) : (
-        <div className="bg-white p-6 rounded-xl shadow-sm border">
+        <div className="bg-white p-6 rounded-[8px] shadow-sm border border-gray-200">
           <h3 className="font-semibold mb-4">
             {editingAdmin.id ? "Edit Admin User" : "Create Admin User"}
           </h3>
@@ -321,7 +324,7 @@ export default function AdminUsersManagement({
               <Button
                 onClick={saveAdmin}
                 disabled={saving}
-                className="bg-[#8B0000] hover:bg-[#6B0000]"
+                className="rounded-[8px] bg-[#8B0000] hover:bg-[#6B0000]"
               >
                 {saving ? (
                   <Loader2 className="w-4 h-4 animate-spin" />

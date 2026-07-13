@@ -3,6 +3,16 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
+interface DepartmentUnitNavItem {
+  id: string;
+  department_id: string;
+  name: string;
+  title: string;
+  head_name?: string | null;
+  head_image_url?: string | null;
+  order: number;
+}
+
 export async function GET(req: NextRequest) {
   try {
     const supabase = createPublicServerSupabaseClient();
@@ -30,7 +40,39 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    return NextResponse.json(departments);
+    if (!departments || departments.length === 0) {
+      return NextResponse.json([]);
+    }
+
+    const departmentIds = departments.map((department) => department.id);
+    const { data: units, error: unitsError } = await supabase
+      .from("department_units")
+      .select("id, department_id, name, title, head_name, head_image_url, order")
+      .in("department_id", departmentIds)
+      .order("order", { ascending: true });
+
+    if (unitsError) {
+      console.error("Supabase units error:", unitsError);
+      return NextResponse.json(
+        { error: "Failed to fetch departments" },
+        { status: 500 }
+      );
+    }
+
+    const unitsByDepartment = new Map<string, DepartmentUnitNavItem[]>();
+
+    for (const unit of units || []) {
+      const departmentUnits = unitsByDepartment.get(unit.department_id) || [];
+      departmentUnits.push(unit);
+      unitsByDepartment.set(unit.department_id, departmentUnits);
+    }
+
+    return NextResponse.json(
+      departments.map((department) => ({
+        ...department,
+        units: unitsByDepartment.get(department.id) || [],
+      }))
+    );
   } catch (error) {
     console.error("Error fetching departments:", error);
     return NextResponse.json(

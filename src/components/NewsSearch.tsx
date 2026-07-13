@@ -119,7 +119,7 @@ export default function NewsSearch({ news }: NewsSearchProps) {
                           <img
                             src={result.image_url}
                             alt={result.displayTitle}
-                            className="w-[44px] sm:w-[48px] h-[44px] sm:h-[48px] object-cover rounded flex-shrink-0"
+                            className="w-[44px] sm:w-[48px] h-[44px] sm:h-[48px] object-contain rounded flex-shrink-0 bg-gray-100 p-1"
                           />
                         )}
                         <div className="flex-1 min-w-0">

@@ -3,6 +3,26 @@ import { requireAdminPermission } from "@/lib/admin-route-access";
 import { deleteImage } from "@/lib/storage-utils";
 import { NextResponse } from "next/server";
 
+function normalizeImages(
+  images: unknown,
+  fallbackImageUrl?: unknown
+): string[] {
+  const imageList = Array.isArray(images)
+    ? images
+    : fallbackImageUrl
+      ? [fallbackImageUrl]
+      : [];
+
+  return Array.from(
+    new Set(
+      imageList
+        .filter((image): image is string => typeof image === "string")
+        .map((image) => image.trim())
+        .filter(Boolean)
+    )
+  );
+}
+
 export async function GET() {
   const access = await requireAdminPermission("manage_gallery");
   if ("response" in access) {
@@ -32,8 +52,8 @@ export async function POST(request: Request) {
   const supabase = await createAdminSupabaseClient();
 
   // Handle both single image_url and multiple images array
-  const images = body.images || (body.image_url ? [body.image_url] : []);
-  const featuredImage = body.image_url || images[0] || null;
+  const images = normalizeImages(body.images, body.image_url);
+  const featuredImage = images[0] || null;
 
   // Validate that we have at least one image or video
   if (!featuredImage && !body.video_url) {
@@ -75,14 +95,27 @@ export async function PUT(request: Request) {
   const supabase = await createAdminSupabaseClient();
 
   // Handle both single image_url and multiple images array
-  const images = body.images || (body.image_url ? [body.image_url] : []);
-  const featuredImage = body.image_url || images[0] || null;
+  const images = normalizeImages(body.images, body.image_url);
+  const featuredImage = images[0] || null;
 
   // Validate that we have at least one image or video
   if (!featuredImage && !body.video_url) {
     return NextResponse.json(
       { error: "Gallery item must have either an image or video URL" },
       { status: 400 }
+    );
+  }
+
+  const { data: existingItem, error: existingItemError } = await supabase
+    .from("gallery_items")
+    .select("image_url, images")
+    .eq("id", body.id)
+    .single();
+
+  if (existingItemError) {
+    return NextResponse.json(
+      { error: existingItemError.message },
+      { status: 500 }
     );
   }
 
@@ -105,6 +138,18 @@ export async function PUT(request: Request) {
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  const previousImages = normalizeImages(
+    existingItem?.images,
+    existingItem?.image_url
+  );
+  const removedImages = previousImages.filter(
+    (imageUrl) => !images.includes(imageUrl)
+  );
+
+  for (const imageUrl of removedImages) {
+    await deleteImage(imageUrl);
   }
 
   return NextResponse.json({ data });

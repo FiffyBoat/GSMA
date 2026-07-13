@@ -2,29 +2,9 @@
 // This checks if all required tables exist and have the correct structure
 
 const { createClient } = require('@supabase/supabase-js');
-const fs = require('fs');
-const path = require('path');
+const { loadEnvConfig } = require('@next/env');
 
-// Simple env file parser
-function loadEnvFile(filePath) {
-  const env = {};
-  if (fs.existsSync(filePath)) {
-    const content = fs.readFileSync(filePath, 'utf8');
-    content.split('\n').forEach(line => {
-      const match = line.match(/^([^=:#]+)=(.*)$/);
-      if (match) {
-        const key = match[1].trim();
-        const value = match[2].trim().replace(/^["']|["']$/g, '');
-        env[key] = value;
-      }
-    });
-  }
-  return env;
-}
-
-// Load .env.local
-const envLocal = loadEnvFile(path.join(__dirname, '..', '.env.local'));
-Object.assign(process.env, envLocal);
+loadEnvConfig(process.cwd());
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;

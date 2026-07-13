@@ -168,14 +168,14 @@ export default async function DepartmentsPage() {
         breadcrumbs={[{ label: "Departments" }]}
       />
 
-      <section className="py-[40px] sm:py-[60px] md:py-[80px] lg:py-[100px]">
-        <div className="container mx-auto px-[15px]">
-          <div className="mb-8 flex flex-col gap-4 rounded-[28px] border border-[#eadfce] bg-[linear-gradient(135deg,#fffaf4,#f5efe5)] px-6 py-6 shadow-[0_18px_40px_rgba(16,24,40,0.08)] sm:mb-10 sm:px-8 sm:py-8 lg:flex-row lg:items-end lg:justify-between">
+      <section className="bg-[#f7f8fa] py-[40px] sm:py-[60px] md:py-[80px] lg:py-[100px]">
+        <div className="container mx-auto max-w-7xl px-[15px]">
+          <div className="mb-8 grid gap-5 rounded-[8px] border border-gray-200 bg-white px-6 py-6 shadow-sm sm:mb-10 sm:px-8 sm:py-8 lg:grid-cols-[1fr_auto] lg:items-end">
             <div className="max-w-[720px]">
               <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.28em] text-[#8B0000] sm:text-[12px]">
                 Departments & Offices
               </p>
-              <h2 className="mb-3 border-none pb-0 text-[24px] font-bold text-[#1f2937] after:hidden sm:text-[30px] md:text-[34px]">
+              <h2 className="mb-3 border-none pb-0 text-[26px] font-bold text-gray-950 after:hidden sm:text-[32px] md:text-[38px]">
                 Find the Right Office Faster
               </h2>
               <p className="text-readable mb-0 text-[14px] leading-[1.75] text-[#5f6368] sm:text-[15px] md:text-[16px]">
@@ -186,7 +186,7 @@ export default async function DepartmentsPage() {
             </div>
             <Link
               href="/contact"
-              className="inline-flex items-center gap-2 self-start rounded-full bg-[#8B0000] px-5 py-3 text-[13px] font-bold uppercase tracking-[0.16em] text-white transition-colors hover:bg-[#6f0000] sm:px-6"
+              className="inline-flex items-center justify-center gap-2 self-start rounded-[4px] bg-[#8B0000] px-5 py-3 text-[13px] font-bold uppercase tracking-[0.16em] text-white transition-colors hover:bg-[#6f0000] sm:px-6"
             >
               Need Help?
               <ArrowRight className="h-4 w-4" />
@@ -194,11 +194,11 @@ export default async function DepartmentsPage() {
           </div>
 
           {departmentsWithUnits.length === 0 ? (
-            <div className="text-center py-[40px]">
-              <p className="text-gray-600">No departments available.</p>
-            </div>
-          ) : (
-            <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="rounded-[8px] border border-gray-200 bg-white py-[40px] text-center shadow-sm">
+                <p className="text-gray-600">No departments available.</p>
+              </div>
+            ) : (
+              <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {departmentsWithUnits.map((dept) => (
                 <li key={dept.id}>
                   {(() => {
@@ -207,14 +207,14 @@ export default async function DepartmentsPage() {
                     return (
                   <Link
                     href={`/departments/${dept.slug}`}
-                    className="group surface-card flex h-full flex-col rounded-[26px] p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_45px_rgba(16,24,40,0.14)] focus:outline-none focus:ring-2 focus:ring-[#8B0000] focus:ring-offset-2 sm:p-7"
+                    className="group flex h-full flex-col rounded-[8px] border border-gray-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_45px_rgba(16,24,40,0.14)] focus:outline-none focus:ring-2 focus:ring-[#8B0000] focus:ring-offset-2 sm:p-7"
                   >
                     <div className="mb-5 flex items-start justify-between gap-4">
-                      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#8B0000] text-white transition-transform duration-300 group-hover:scale-105 group-hover:bg-[#6f0000]">
+                      <div className="flex h-14 w-14 items-center justify-center rounded-[6px] bg-[#8B0000] text-white transition-transform duration-300 group-hover:scale-105 group-hover:bg-[#6f0000]">
                         <Icon className="h-7 w-7" />
                       </div>
-                      <span className="rounded-full bg-[#fff3e6] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[#8B0000]">
-                        Department
+                      <span className="rounded-full bg-gray-100 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-gray-600">
+                        {dept.units?.length || 0} Unit{dept.units?.length === 1 ? "" : "s"}
                       </span>
                     </div>
                     <h3 className="mb-3 text-[18px] font-bold leading-tight text-[#1f2937] transition-colors duration-200 group-hover:text-[#8B0000] sm:text-[20px]">

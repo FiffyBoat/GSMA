@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Lock, Mail } from "lucide-react";
+import { ArrowLeft, Loader2, Lock, Mail, ShieldCheck } from "lucide-react";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -43,20 +43,52 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="bg-white rounded-2xl shadow-2xl p-8">
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-[#8B0000] rounded-full flex items-center justify-center mx-auto mb-4">
-              <Lock className="w-8 h-8 text-white" />
+    <div className="min-h-screen bg-[#111827] flex items-center justify-center p-4">
+      <div className="w-full max-w-[980px] overflow-hidden rounded-[8px] border border-white/10 bg-white shadow-2xl">
+        <div className="grid min-h-[560px] grid-cols-1 lg:grid-cols-[0.95fr_1.05fr]">
+          <div className="hidden bg-[#8B0000] p-8 text-white lg:flex lg:flex-col lg:justify-between">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#ffcc00]">
+                Ga South Municipal Assembly
+              </p>
+              <h1 className="mt-4 text-3xl font-bold leading-tight">
+                Website Administration
+              </h1>
+              <p className="mt-4 text-sm leading-6 text-white/80">
+                Manage public notices, events, projects, gallery albums,
+                departments, leadership records, and municipal service content.
+              </p>
             </div>
-            <h1 className="text-2xl font-bold text-gray-900">Admin Login</h1>
-            <p className="text-gray-500 mt-2">GSMA Content Management System</p>
+            <div className="rounded-[8px] border border-white/15 bg-white/10 p-4">
+              <div className="flex items-center gap-3">
+                <ShieldCheck className="h-5 w-5 text-[#ffcc00]" />
+                <p className="text-sm font-semibold">Secure access only</p>
+              </div>
+              <p className="mt-2 text-xs leading-5 text-white/75">
+                Sign in with an authorized admin account to continue.
+              </p>
+            </div>
+          </div>
+
+          <div className="p-6 sm:p-8 lg:p-10">
+          <div className="text-center mb-8">
+            <div className="w-14 h-14 bg-[#8B0000] rounded-[8px] flex items-center justify-center mx-auto mb-4">
+              <Lock className="w-7 h-7 text-white" />
+            </div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#8B0000]">
+              Admin Portal
+            </p>
+            <h2 className="mt-2 text-2xl font-bold text-gray-900">
+              Sign in to continue
+            </h2>
+            <p className="text-gray-500 mt-2">
+              GSMA Content Management System
+            </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-[8px] text-sm">
                 {error}
               </div>
             )}
@@ -73,7 +105,7 @@ export default function AdminLoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="admin@gsma.gov.gh"
-                  className="pl-10 h-12"
+                  className="pl-10 h-12 rounded-[8px]"
                   required
                 />
               </div>
@@ -91,7 +123,7 @@ export default function AdminLoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
-                  className="pl-10 h-12"
+                  className="pl-10 h-12 rounded-[8px]"
                   required
                 />
               </div>
@@ -99,7 +131,7 @@ export default function AdminLoginPage() {
 
             <Button
               type="submit"
-              className="w-full h-12 bg-[#8B0000] hover:bg-[#6B0000] text-white font-semibold"
+              className="w-full h-12 rounded-[8px] bg-[#8B0000] hover:bg-[#6B0000] text-white font-semibold"
               disabled={loading}
             >
               {loading ? (
@@ -116,10 +148,12 @@ export default function AdminLoginPage() {
           <div className="mt-6 pt-6 border-t border-gray-100 text-center">
             <Link
               href="/"
-              className="text-sm text-gray-500 hover:text-[#8B0000] transition-colors"
+              className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-[#8B0000] transition-colors"
             >
+              <ArrowLeft className="h-4 w-4" />
               Back to main website
             </Link>
+          </div>
           </div>
         </div>
       </div>

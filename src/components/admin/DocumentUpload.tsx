@@ -120,7 +120,7 @@ export default function DocumentUpload({
         <Label>Document File</Label>
         <div className="mt-2">
           {!fileUrl ? (
-            <div className="rounded-lg border-2 border-dashed border-gray-300 p-6 text-center transition-colors hover:border-gray-400">
+            <div className="rounded-[8px] border-2 border-dashed border-gray-300 bg-gray-50 p-6 text-center transition-colors hover:border-[#8B0000] hover:bg-red-50">
               <input
                 ref={fileInputRef}
                 type="file"
@@ -157,13 +157,13 @@ export default function DocumentUpload({
               </Button>
             </div>
           ) : (
-            <div className="flex flex-col gap-3 rounded-lg border border-green-200 bg-green-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-3 rounded-[8px] border border-green-200 bg-green-50 p-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0 flex-1">
                 <p className="break-words text-sm font-medium text-green-900">
                   {fileName}
                 </p>
                 <p className="mt-1 text-xs text-green-700">
-                  ✓ File uploaded successfully
+                  File uploaded successfully
                 </p>
               </div>
               <Button
