@@ -303,7 +303,7 @@ export default function AssemblyManagement() {
                   id="area-name"
                   value={areaForm.name}
                   onChange={(e) => setAreaForm({ ...areaForm, name: e.target.value })}
-                  placeholder="e.g., Weija Electoral Area"
+                  placeholder="e.g., Ngleshie Amanfro Electoral Area"
                 />
               </div>
 
