@@ -86,9 +86,9 @@ export const SITE_PAGE_SETTINGS_SECTIONS: SitePageSettingsSection[] = [
   },
   {
     id: "units-committees",
-    title: "Units & Committees",
+    title: "All Units",
     description:
-      "Manage the committees page introduction, committees, and special units.",
+      "Manage the All Units page introduction and supporting content.",
   },
 ];
 
@@ -790,11 +790,11 @@ export const SITE_PAGE_SETTING_DEFINITIONS: SitePageSettingDefinition[] = [
   },
   {
     key: "units_intro",
-    label: "Units & Committees Intro",
+    label: "All Units Intro",
     type: "textarea",
     section: "units-committees",
     defaultValue:
-      "The Ga South Municipal Assembly operates through various sub-committees that are responsible for specific areas of governance and development. These committees ensure effective deliberation and implementation of programmes across all sectors.",
+      "Browse the Assembly's operational units and offices, each supporting the delivery of essential municipal services.",
   },
   {
     key: "units_committee_items",

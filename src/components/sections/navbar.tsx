@@ -117,7 +117,7 @@ const Navbar = () => {
             href: getDepartmentUnitHref(dept.slug, unit.name, unit.id),
           })),
         })),
-        { name: "Units & Committees", href: "/units-committees" },
+        { name: "All Units", href: "/units-committees" },
       ],
     },
     { name: "Projects", href: "/projects" },

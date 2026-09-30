@@ -117,18 +117,21 @@ export default async function UnitsCommitteesPage() {
     })
     .filter((unit): unit is PublicUnit => Boolean(unit));
 
-  const unitsTitle =
-    settings.units_special_units_title || "Units & Sections";
+  const defaultUnitsIntro =
+    "Browse the Assembly's operational units and offices, each supporting the delivery of essential municipal services.";
+  const legacyUnitsIntro =
+    "The Ga South Municipal Assembly operates through various sub-committees that are responsible for specific areas of governance and development. These committees ensure effective deliberation and implementation of programmes across all sectors.";
   const unitsIntro =
-    settings.units_intro ||
-    "Explore the service units and sections managed under the Assembly's departments.";
+    settings.units_intro && settings.units_intro !== legacyUnitsIntro
+      ? settings.units_intro
+      : defaultUnitsIntro;
 
   return (
     <main className="min-h-screen bg-white">
       <Navbar />
       <PageHeader
-        title="Units & Committees"
-        breadcrumbs={[{ label: "Units & Committees" }]}
+        title="All Units"
+        breadcrumbs={[{ label: "All Units" }]}
       />
 
       <section className="py-[40px] sm:py-[60px] md:py-[80px]">
@@ -193,10 +196,10 @@ export default async function UnitsCommitteesPage() {
           <div className="mb-8 flex flex-col gap-4 rounded-[28px] border border-[#eadfce] bg-[linear-gradient(135deg,#fffaf4,#f5efe5)] px-6 py-6 shadow-[0_18px_40px_rgba(16,24,40,0.08)] sm:mb-10 sm:px-8 sm:py-8 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-[720px]">
               <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.28em] text-[#8B0000] sm:text-[12px]">
-                Units & Offices
+                Assembly Structure
               </p>
               <h2 className="mb-3 border-none pb-0 text-[24px] font-bold text-[#1f2937] after:hidden sm:text-[30px] md:text-[34px]">
-                {unitsTitle}
+                All Units
               </h2>
               <p className="text-readable mb-0 text-[14px] leading-[1.75] text-[#5f6368] sm:text-[15px] md:text-[16px]">
                 {unitsIntro}
