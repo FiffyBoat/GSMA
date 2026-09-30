@@ -121,11 +121,11 @@ const Navbar = () => {
       ],
     },
     { name: "Projects", href: "/projects" },
+    { name: "News", href: "/news" },
     {
       name: "Media",
-      href: "/news",
+      href: "/gallery",
       dropdown: [
-        { name: "News", href: "/news" },
         { name: "Events", href: "/events" },
         { name: "Gallery", href: "/gallery" },
         { name: "Documents", href: "/documents" },
@@ -193,7 +193,7 @@ const Navbar = () => {
             </Link>
           </div>
 
-          <div className="hidden lg:flex items-center space-x-1">
+          <div className="hidden xl:flex items-center space-x-1">
             <ul className="flex items-center list-none m-0 p-0">
               {navLinks.map((link) => (
                 <li key={link.name} className="relative group px-1">
@@ -255,7 +255,7 @@ const Navbar = () => {
 
           </div>
 
-          <div className="lg:hidden flex shrink-0 items-center space-x-1">
+          <div className="xl:hidden flex shrink-0 items-center space-x-1">
             <button 
               className="rounded-full p-2 text-[#333333] hover:bg-[#fff5f0] hover:text-[#8B0000] transition-colors"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -267,9 +267,9 @@ const Navbar = () => {
         </div>
 
         <div
-          className={`fixed inset-0 z-[1100] bg-[#fcfaf6]/85 shadow-2xl backdrop-blur-xl transform transition-transform duration-300 lg:hidden ${
+          className={`fixed inset-0 z-[1100] bg-[#fcfaf6]/85 shadow-2xl backdrop-blur-xl transform transition-transform duration-300 ${
             mobileMenuOpen ? "translate-x-0" : "translate-x-full"
-          }`}
+          } xl:hidden`}
         >
           <div className="bg-white/85 p-3 sm:p-4 flex justify-between items-center border-b border-gray-200">
             <div className="flex items-center gap-2">

@@ -212,7 +212,7 @@ export default async function DocumentsPage({
                           <div className="mb-[14px] space-y-[6px] text-[10px] text-gray-500 sm:mb-[16px] sm:space-y-[8px] sm:text-[11px] md:text-[12px]">
                             <div className="flex items-center gap-[8px] sm:gap-[10px]">
                               <Calendar className="h-[16px] w-[16px] sm:h-[17px] sm:w-[17px] md:h-[18px] md:w-[18px]" />
-                              {new Date(doc.uploaded_date).toLocaleDateString()}
+                              Uploaded: {new Date(doc.uploaded_date).toLocaleDateString()}
                             </div>
                             {doc.file_size ? (
                               <div className="flex items-center gap-[8px] sm:gap-[10px]">

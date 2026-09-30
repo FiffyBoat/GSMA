@@ -3,7 +3,7 @@ import Footer from "@/components/sections/footer";
 import PageHeader from "@/components/shared/PageHeader";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, Calendar, DollarSign, MapPin } from "lucide-react";
+import { ArrowLeft, Calendar, DollarSign, Landmark, MapPin, UserRound } from "lucide-react";
 import { notFound } from "next/navigation";
 import { createPublicServerSupabaseClient } from "@/lib/supabase/public-server";
 import { getSlug } from "@/lib/content-utils";
@@ -83,6 +83,16 @@ export default async function ProjectDetailPage({ params }: PageProps) {
                   <h1 className="text-[26px] font-bold leading-tight text-gray-950 sm:text-[34px] md:text-[42px]">
                     {project.title}
                   </h1>
+                  <div className="mt-4 inline-flex items-center gap-2 rounded-[6px] border border-gray-200 bg-gray-50 px-3 py-2 text-[12px] font-bold uppercase tracking-wide text-gray-700">
+                    {project.project_source === "individual" ? (
+                      <UserRound className="h-4 w-4 text-[#8B0000]" />
+                    ) : (
+                      <Landmark className="h-4 w-4 text-[#8B0000]" />
+                    )}
+                    {project.project_source === "individual"
+                      ? "Project by an Individual"
+                      : "Project by the Assembly"}
+                  </div>
                 </div>
                 {project.status ? (
                   <span className="w-fit rounded-full bg-[#8B0000]/10 px-4 py-2 text-[12px] font-bold uppercase tracking-wide text-[#8B0000]">

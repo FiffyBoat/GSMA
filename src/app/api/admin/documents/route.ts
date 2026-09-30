@@ -5,6 +5,15 @@ import { NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+function getUploadedDate(value: unknown) {
+  if (typeof value !== "string" || !value) {
+    return new Date().toISOString();
+  }
+
+  const parsed = new Date(value.length === 10 ? `${value}T12:00:00.000Z` : value);
+  return Number.isNaN(parsed.getTime()) ? new Date().toISOString() : parsed.toISOString();
+}
+
 export async function GET(request: Request) {
   const access = await requireAdminPermission("manage_documents");
   if ("response" in access) {
@@ -50,7 +59,16 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { title, description, file_url, file_type, category, file_size, is_published } = body;
+    const {
+      title,
+      description,
+      file_url,
+      file_type,
+      category,
+      file_size,
+      is_published,
+      uploaded_date,
+    } = body;
 
     if (!title || !file_url || !file_type || !category) {
       return NextResponse.json(
@@ -70,7 +88,7 @@ export async function POST(request: Request) {
           category,
           file_size: file_size || 0,
           is_published: is_published ?? true,
-          uploaded_date: new Date().toISOString(),
+          uploaded_date: getUploadedDate(uploaded_date),
         },
       ])
       .select();
@@ -98,7 +116,7 @@ export async function PUT(request: Request) {
 
   try {
     const body = await request.json();
-    const { id, title, description, category, file_url, is_published } = body;
+    const { id, title, description, category, file_url, is_published, uploaded_date } = body;
 
     if (!id) {
       return NextResponse.json(
@@ -115,6 +133,7 @@ export async function PUT(request: Request) {
         category,
         file_url,
         is_published,
+        uploaded_date: getUploadedDate(uploaded_date),
       })
       .eq("id", id)
       .select();

@@ -23,6 +23,9 @@
 # misc
 .DS_Store
 *.pem
+.env*
+DB/admin_users_rows.csv
+DB/admin_users_rows.sql
 
 # debug
 npm-debug.log*

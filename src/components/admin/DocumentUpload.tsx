@@ -52,7 +52,7 @@ export default function DocumentUpload({
     }
 
     if (file.size > 50 * 1024 * 1024) {
-      toast.error("File size must be less than 50MB");
+      toast.error("File size must be 50MB or less");
       return;
     }
 

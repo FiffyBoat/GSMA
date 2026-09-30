@@ -4,7 +4,7 @@ import PageHeader from "@/components/shared/PageHeader";
 import PaginationNav from "@/components/shared/PaginationNav";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Calendar, MapPin, DollarSign, FileText } from "lucide-react";
+import { ArrowRight, Calendar, MapPin, DollarSign, FileText, Landmark, UserRound } from "lucide-react";
 import { getSlug } from "@/lib/content-utils";
 import { formatLooseLabel } from "@/lib/text-match";
 import { createPublicServerSupabaseClient } from "@/lib/supabase/public-server";
@@ -22,6 +22,7 @@ interface Project {
   image_caption?: string;
   credit_note?: string;
   category: string;
+  project_source?: "assembly" | "individual";
   status: string;
   start_date: string;
   budget: number;
@@ -30,7 +31,7 @@ interface Project {
 }
 
 interface ProjectsPageProps {
-  searchParams: Promise<{ page?: string; category?: string }>;
+  searchParams: Promise<{ page?: string; category?: string; source?: string }>;
 }
 
 const categories = [
@@ -39,6 +40,12 @@ const categories = [
   { id: "Health Projects", label: "Health Projects" },
   { id: "Roads and Drains", label: "Roads and Drains" },
   { id: "Industrial Projects", label: "Industrial Projects" },
+];
+
+const projectSources = [
+  { id: "all", label: "All Sources" },
+  { id: "assembly", label: "Assembly Projects" },
+  { id: "individual", label: "Individual Projects" },
 ];
 
 function getStatusColor(status: string) {
@@ -68,9 +75,11 @@ function formatCurrency(amount: number) {
 export default async function ProjectsPage({
   searchParams,
 }: ProjectsPageProps) {
-  const { page, category } = await searchParams;
+  const { page, category, source } = await searchParams;
   const currentPage = Math.max(1, Number(page) || 1);
   const activeCategory = category || "all";
+  const activeSource =
+    source === "individual" ? "individual" : source === "assembly" ? "assembly" : "all";
   const from = (currentPage - 1) * PROJECTS_PER_PAGE;
   const to = from + PROJECTS_PER_PAGE - 1;
   const supabase = createPublicServerSupabaseClient();
@@ -86,6 +95,11 @@ export default async function ProjectsPage({
   if (activeCategory !== "all") {
     countQuery = countQuery.eq("category", activeCategory);
     dataQuery = dataQuery.eq("category", activeCategory);
+  }
+
+  if (activeSource !== "all") {
+    countQuery = countQuery.eq("project_source", activeSource);
+    dataQuery = dataQuery.eq("project_source", activeSource);
   }
 
   const [{ count }, { data, error }] = await Promise.all([
@@ -112,9 +126,9 @@ export default async function ProjectsPage({
                 Projects Archive
               </h2>
               <p className="text-readable max-w-3xl text-[14px] leading-7 text-gray-600 sm:text-[15px]">
-                Browse completed, ongoing, and planned Assembly projects one page
-                at a time so you can follow development activity across the
-                municipality.
+                Browse completed, ongoing, and planned projects by category and
+                source, including projects delivered by the Assembly and by
+                individuals across the municipality.
               </p>
             </div>
             <div className="rounded-[6px] border border-gray-200 bg-gray-50 p-4 sm:min-w-[190px]">
@@ -135,6 +149,10 @@ export default async function ProjectsPage({
                 query.set("category", item.id);
               }
 
+              if (activeSource !== "all") {
+                query.set("source", activeSource);
+              }
+
               const href = query.toString() ? `/projects?${query.toString()}` : "/projects";
 
               return (
@@ -151,6 +169,42 @@ export default async function ProjectsPage({
                 </Link>
               );
             })}
+            </div>
+
+            <div className="mt-3 border-t border-gray-100 pt-3">
+              <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.16em] text-gray-500">
+                Project Source
+              </p>
+              <div className="flex flex-wrap gap-[10px]">
+                {projectSources.map((item) => {
+                  const isActive = activeSource === item.id;
+                  const query = new URLSearchParams();
+
+                  if (activeCategory !== "all") {
+                    query.set("category", activeCategory);
+                  }
+
+                  if (item.id !== "all") {
+                    query.set("source", item.id);
+                  }
+
+                  const href = query.toString() ? `/projects?${query.toString()}` : "/projects";
+
+                  return (
+                    <Link
+                      key={item.id}
+                      href={href}
+                      className={`rounded-[6px] px-[14px] py-[9px] text-[12px] font-bold transition-colors sm:px-[16px] sm:py-[10px] sm:text-[13px] ${
+                        isActive
+                          ? "bg-[#8B0000] text-white"
+                          : "border border-gray-200 bg-gray-50 text-gray-700 hover:border-[#8B0000]/30 hover:text-[#8B0000]"
+                      }`}
+                    >
+                      {item.label}
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
           </div>
 
@@ -192,6 +246,16 @@ export default async function ProjectsPage({
                       <div className="absolute left-[12px] top-[12px] sm:left-[14px] sm:top-[14px] md:left-[16px] md:top-[16px]">
                         <span className={`rounded-full px-[10px] py-[6px] text-[10px] font-bold sm:px-[12px] sm:py-[8px] sm:text-[11px] md:px-[14px] md:py-[9px] md:text-[12px] ${getStatusColor(project.status)}`}>
                           {formatLooseLabel(project.status || project.category, "Project")}
+                        </span>
+                      </div>
+                      <div className="absolute right-[12px] top-[12px] sm:right-[14px] sm:top-[14px] md:right-[16px] md:top-[16px]">
+                        <span className="inline-flex items-center gap-1.5 rounded-[6px] bg-white/95 px-[10px] py-[6px] text-[10px] font-bold text-gray-800 shadow-sm sm:px-[12px] sm:py-[8px] sm:text-[11px]">
+                          {project.project_source === "individual" ? (
+                            <UserRound className="h-3 w-3 text-[#8B0000]" />
+                          ) : (
+                            <Landmark className="h-3 w-3 text-[#8B0000]" />
+                          )}
+                          {project.project_source === "individual" ? "Individual" : "Assembly"}
                         </span>
                       </div>
                     </div>
@@ -260,7 +324,10 @@ export default async function ProjectsPage({
                 basePath="/projects"
                 currentPage={currentPage}
                 totalPages={totalPages}
-                query={{ category: activeCategory !== "all" ? activeCategory : undefined }}
+                query={{
+                  category: activeCategory !== "all" ? activeCategory : undefined,
+                  source: activeSource !== "all" ? activeSource : undefined,
+                }}
               />
             </>
           )}

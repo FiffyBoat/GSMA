@@ -372,14 +372,22 @@ export default function GalleryLightbox({ items }: GalleryLightboxProps) {
                 onClick={() => openItem(item.id)}
                 className="group overflow-hidden rounded-[8px] border border-gray-200 bg-white text-left shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_45px_rgba(50,35,18,0.12)]"
               >
-                <div className="relative aspect-[4/3] overflow-hidden bg-[#e9e2d7]">
+                <div className="relative aspect-[16/10] overflow-hidden bg-[#101010] sm:aspect-[4/3]">
                   {item.coverImage ? (
                     <Image
                       src={item.coverImage}
                       alt={item.title}
                       fill
-                      className="object-contain p-2 transition duration-300"
+                      className="object-contain transition duration-300"
                       sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+                    />
+                  ) : item.video_url ? (
+                    <video
+                      src={item.video_url}
+                      muted
+                      playsInline
+                      preload="metadata"
+                      className="h-full w-full object-contain"
                     />
                   ) : (
                     <div className="absolute inset-0 bg-[#8B0000]" />
@@ -490,8 +498,8 @@ export default function GalleryLightbox({ items }: GalleryLightboxProps) {
             </div>
 
             <div className="grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_auto] bg-[#f7f5f1] lg:grid-cols-[minmax(0,1fr)_360px] lg:grid-rows-1">
-              <div className="flex min-h-[58vh] flex-col bg-[#0d0d0d] lg:min-h-0">
-                <div className="relative flex min-h-[46vh] flex-1 items-center justify-center bg-[#080808] p-2 sm:min-h-[54vh] sm:p-4 lg:min-h-0 lg:p-6">
+              <div className="flex min-h-[66svh] flex-col bg-[#0d0d0d] sm:min-h-[58vh] lg:min-h-0">
+                <div className="relative flex min-h-[62svh] flex-1 items-center justify-center bg-[#080808] p-0 sm:min-h-[54vh] sm:p-4 lg:min-h-0 lg:p-6">
                   {isCurrentAssetVideo && currentMediaUrl ? (
                     <video
                       src={currentMediaUrl}
@@ -499,7 +507,7 @@ export default function GalleryLightbox({ items }: GalleryLightboxProps) {
                       muted={isMuted}
                       playsInline
                       preload="metadata"
-                      className="h-full max-h-full w-full max-w-full rounded-[8px] object-contain"
+                      className="h-full max-h-full w-full max-w-full object-contain sm:rounded-[8px]"
                     />
                   ) : currentMediaUrl ? (
                     <div className="relative h-full w-full">
@@ -508,7 +516,7 @@ export default function GalleryLightbox({ items }: GalleryLightboxProps) {
                         alt={currentItem.title}
                         fill
                         priority
-                        className="rounded-[8px] object-contain"
+                        className="object-contain sm:rounded-[8px]"
                         sizes="100vw"
                       />
                     </div>
@@ -558,43 +566,6 @@ export default function GalleryLightbox({ items }: GalleryLightboxProps) {
                   ) : null}
                 </div>
 
-                {currentAssets.length > 1 ? (
-                  <div className="border-t border-white/10 bg-black/70 px-3 py-3 sm:px-4">
-                    <div className="flex gap-3 overflow-x-auto pb-1">
-                      {currentAssets.map((asset, index) => (
-                        <button
-                          key={`${currentItem.id}-${asset.type}-${asset.url}-${index}`}
-                          type="button"
-                          onClick={() => setSelectedAssetIndex(index)}
-                          className={`relative h-20 w-24 flex-shrink-0 overflow-hidden rounded-[8px] border transition ${
-                            index === selectedAssetIndex
-                              ? "border-white ring-2 ring-white/35"
-                              : "border-white/20 hover:border-white/60"
-                          }`}
-                        >
-                          {asset.thumbnailUrl ? (
-                            <Image
-                              src={asset.thumbnailUrl}
-                              alt={`${currentItem.title} ${asset.label}`}
-                              fill
-                              className="object-contain p-1"
-                            />
-                          ) : (
-                            <div className="absolute inset-0 bg-[#8B0000]" />
-                          )}
-                          <div className="absolute inset-x-0 bottom-0 bg-black/60 px-2 py-1 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-white">
-                            {asset.label}
-                          </div>
-                          {asset.type === "video" ? (
-                            <div className="absolute inset-0 flex items-center justify-center bg-black/35">
-                              <Play className="h-5 w-5 fill-white text-white" />
-                            </div>
-                          ) : null}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                ) : null}
               </div>
 
                   <div className="max-h-[44vh] overflow-y-auto border-t border-gray-200 bg-white px-4 py-4 sm:px-6 sm:py-5 lg:max-h-none lg:border-l lg:border-t-0 lg:px-5 lg:py-6">
@@ -631,6 +602,47 @@ export default function GalleryLightbox({ items }: GalleryLightboxProps) {
                       <p className="text-xs uppercase tracking-[0.14em] text-gray-500">Videos</p>
                     </div>
                   </div>
+
+                  {currentAssets.length > 1 ? (
+                    <div>
+                      <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.16em] text-gray-500">
+                        Album Media
+                      </p>
+                      <div className="grid grid-cols-3 gap-2 lg:grid-cols-2">
+                        {currentAssets.map((asset, index) => (
+                          <button
+                            key={`${currentItem.id}-${asset.type}-${asset.url}-${index}`}
+                            type="button"
+                            onClick={() => setSelectedAssetIndex(index)}
+                            className={`relative aspect-square overflow-hidden rounded-[8px] border bg-[#f7f8fa] transition ${
+                              index === selectedAssetIndex
+                                ? "border-[#8B0000] ring-2 ring-[#8B0000]/20"
+                                : "border-gray-200 hover:border-[#8B0000]/40"
+                            }`}
+                          >
+                            {asset.thumbnailUrl ? (
+                              <Image
+                                src={asset.thumbnailUrl}
+                                alt={`${currentItem.title} ${asset.label}`}
+                                fill
+                                className="object-contain p-1"
+                              />
+                            ) : (
+                              <div className="absolute inset-0 bg-[#8B0000]" />
+                            )}
+                            <div className="absolute inset-x-0 bottom-0 bg-black/65 px-2 py-1 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-white">
+                              {asset.label}
+                            </div>
+                            {asset.type === "video" ? (
+                              <div className="absolute inset-0 flex items-center justify-center bg-black/35">
+                                <Play className="h-5 w-5 fill-white text-white" />
+                              </div>
+                            ) : null}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
                 </div>
 
                 <div className="mt-5 grid grid-cols-2 gap-3 sm:max-w-md">
@@ -656,7 +668,7 @@ export default function GalleryLightbox({ items }: GalleryLightboxProps) {
 
                 {(visibleItems.length > 1 || currentAssets.length > 1) && (
                   <p className="mt-3 text-xs text-gray-500">
-                    Use the media arrows or thumbnail strip to move inside this album.
+                    Select any image or video above to view it in the large media area.
                   </p>
                 )}
               </div>

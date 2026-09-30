@@ -35,6 +35,7 @@ function createEmptyProject(displayOrder: number): Project {
     image_caption: "",
     credit_note: "",
     category: "",
+    project_source: "assembly",
     status: "",
     start_date: "",
     end_date: "",
@@ -183,6 +184,23 @@ export default function ProjectManagement({
                 <option value="Health Projects">Health Projects</option>
                 <option value="Roads and Drains">Roads and Drains</option>
                 <option value="Industrial Projects">Industrial Projects</option>
+              </select>
+            </div>
+
+            <div>
+              <Label>Project Source</Label>
+              <select
+                value={editingProject.project_source || "assembly"}
+                onChange={(e) =>
+                  setEditingProject({
+                    ...editingProject,
+                    project_source: e.target.value as Project["project_source"],
+                  })
+                }
+                className="w-full rounded-[8px] border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#8B0000]"
+              >
+                <option value="assembly">Project by the Assembly</option>
+                <option value="individual">Project by an Individual</option>
               </select>
             </div>
 
@@ -401,7 +419,7 @@ export default function ProjectManagement({
             <div className="flex-1">
               <h4 className="font-semibold">{project.title}</h4>
               <p className="text-sm text-gray-500">
-                {project.category} | {project.status} | {project.progress_percentage}%
+                {project.project_source === "individual" ? "Individual" : "Assembly"} | {project.category} | {project.status} | {project.progress_percentage}%
               </p>
             </div>
             <div className="flex gap-2">

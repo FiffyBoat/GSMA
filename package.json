@@ -13,6 +13,7 @@
         "setup-local-env": "node scripts/setup-local-env.js",
         "backup-db": "node scripts/backup-db.js",
         "migrate:assembly": "node scripts/migrate-assembly-members.js",
+        "migrate:project-source": "node scripts/apply-project-source-migration.js",
         "migrate-gallery-images": "node scripts/migrate-gallery-images.js",
         "update-department-order": "npx tsx scripts/update-department-order.ts",
         "supabase:start": "supabase start",

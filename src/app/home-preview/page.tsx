@@ -67,12 +67,48 @@ interface GalleryRecord {
 }
 
 const quickLinks = [
-  { title: "Services", href: "/services", icon: FileText },
-  { title: "Departments", href: "/departments", icon: Landmark },
-  { title: "Assembly", href: "/about/assembly", icon: Users },
-  { title: "Documents", href: "/documents", icon: FileText },
-  { title: "Events", href: "/events", icon: CalendarDays },
-  { title: "Contact", href: "/contact", icon: Phone },
+  {
+    title: "Services",
+    href: "/services",
+    icon: FileText,
+    cardClass: "border-[#8B0000]/25 bg-[#fff4f2] hover:border-[#8B0000]/50",
+    accentClass: "text-[#8B0000]",
+  },
+  {
+    title: "Departments",
+    href: "/departments",
+    icon: Landmark,
+    cardClass: "border-emerald-700/20 bg-emerald-50 hover:border-emerald-700/45",
+    accentClass: "text-emerald-700",
+  },
+  {
+    title: "Assembly",
+    href: "/about/assembly",
+    icon: Users,
+    cardClass: "border-amber-600/25 bg-amber-50 hover:border-amber-600/50",
+    accentClass: "text-amber-700",
+  },
+  {
+    title: "Documents",
+    href: "/documents",
+    icon: FileText,
+    cardClass: "border-sky-700/20 bg-sky-50 hover:border-sky-700/45",
+    accentClass: "text-sky-700",
+  },
+  {
+    title: "Events",
+    href: "/events",
+    icon: CalendarDays,
+    cardClass: "border-rose-700/20 bg-rose-50 hover:border-rose-700/45",
+    accentClass: "text-rose-700",
+  },
+  {
+    title: "Contact",
+    href: "/contact",
+    icon: Phone,
+    cardClass: "border-indigo-700/20 bg-indigo-50 hover:border-indigo-700/45",
+    accentClass: "text-indigo-700",
+  },
 ];
 
 function formatDate(value?: string | null) {
@@ -189,12 +225,12 @@ export default async function HomePreviewPage() {
                     <Link
                       key={item.href}
                       href={item.href}
-                      className="group flex min-h-[92px] flex-col justify-between rounded-[6px] border border-gray-200 bg-gray-50 p-4 transition-all duration-300 hover:-translate-y-1 hover:border-[#8B0000]/30 hover:bg-white hover:shadow-[0_18px_36px_rgba(16,24,40,0.12)]"
+                      className={`group flex min-h-[92px] flex-col justify-between rounded-[6px] border p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_36px_rgba(16,24,40,0.12)] ${item.cardClass}`}
                     >
-                      <Icon className="h-5 w-5 text-[#8B0000] transition-transform duration-300 group-hover:scale-110" />
+                      <Icon className={`h-5 w-5 transition-transform duration-300 group-hover:scale-110 ${item.accentClass}`} />
                       <span className="flex items-center justify-between text-[13px] font-bold text-gray-900">
                         {item.title}
-                        <ChevronRight className="h-4 w-4 text-gray-400 transition group-hover:translate-x-0.5 group-hover:text-[#8B0000]" />
+                        <ChevronRight className={`h-4 w-4 transition group-hover:translate-x-0.5 ${item.accentClass}`} />
                       </span>
                     </Link>
                   );

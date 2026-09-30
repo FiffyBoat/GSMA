@@ -4,6 +4,10 @@ import { getSlug } from "@/lib/content-utils";
 import { deleteImage } from "@/lib/storage-utils";
 import { NextResponse } from "next/server";
 
+function getProjectSource(value: unknown) {
+  return value === "individual" ? "individual" : "assembly";
+}
+
 export async function GET() {
   const access = await requireAdminPermission("manage_projects");
   if ("response" in access) {
@@ -43,6 +47,7 @@ export async function POST(request: Request) {
       image_caption: body.image_caption,
       credit_note: body.credit_note,
       category: body.category || "ongoing",
+      project_source: getProjectSource(body.project_source),
       status: body.status,
       start_date: body.start_date,
       end_date: body.end_date,
@@ -83,6 +88,7 @@ export async function PUT(request: Request) {
       image_caption: body.image_caption,
       credit_note: body.credit_note,
       category: body.category,
+      project_source: getProjectSource(body.project_source),
       status: body.status,
       start_date: body.start_date,
       end_date: body.end_date,

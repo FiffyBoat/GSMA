@@ -1,7 +1,7 @@
 "use client";
 
 import type { Dispatch, SetStateAction } from "react";
-import { Edit, Loader2, Plus, Trash2, X, Save } from "lucide-react";
+import { Calendar, Edit, Loader2, Plus, Trash2, X, Save } from "lucide-react";
 import DocumentUpload from "@/components/admin/DocumentUpload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -78,6 +78,12 @@ export default function DocumentManagement({
                   <p className="text-sm text-gray-500">
                     {doc.category} | {(doc.file_size / 1024 / 1024).toFixed(2)} MB
                   </p>
+                  {doc.uploaded_date ? (
+                    <p className="mt-1 inline-flex items-center gap-1.5 text-xs text-gray-500">
+                      <Calendar className="h-3.5 w-3.5" />
+                      Uploaded: {new Date(doc.uploaded_date).toLocaleDateString()}
+                    </p>
+                  ) : null}
                   <p className="mt-1 text-xs text-gray-400">
                     {doc.is_published ? "Published" : "Draft"}
                   </p>
@@ -164,6 +170,19 @@ export default function DocumentManagement({
                   })
                 }
                 placeholder="e.g., Reports, Policies, Guidelines"
+              />
+            </div>
+            <div>
+              <Label>Uploaded Date</Label>
+              <Input
+                type="date"
+                value={editingDocument.uploaded_date?.split("T")[0] || ""}
+                onChange={(e) =>
+                  setEditingDocument({
+                    ...editingDocument,
+                    uploaded_date: e.target.value,
+                  })
+                }
               />
             </div>
             <div className="flex items-center gap-2">

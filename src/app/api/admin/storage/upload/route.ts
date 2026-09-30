@@ -5,6 +5,17 @@ import { NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+const DOCUMENT_MAX_SIZE = 50 * 1024 * 1024;
+const DOCUMENT_TYPES = new Set([
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/vnd.ms-powerpoint",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+]);
+
 export async function POST(request: Request) {
   const access = await requireAdminPermission("upload_media");
   if ("response" in access) {
@@ -21,6 +32,20 @@ export async function POST(request: Request) {
     if (!file) {
       return NextResponse.json(
         { error: "No file provided" },
+        { status: 400 }
+      );
+    }
+
+    if (folder === "documents" && file.size > DOCUMENT_MAX_SIZE) {
+      return NextResponse.json(
+        { error: "Document files must be 50MB or less" },
+        { status: 400 }
+      );
+    }
+
+    if (folder === "documents" && !DOCUMENT_TYPES.has(file.type)) {
+      return NextResponse.json(
+        { error: "Only PDF, Word, Excel, and PowerPoint documents are allowed" },
         { status: 400 }
       );
     }

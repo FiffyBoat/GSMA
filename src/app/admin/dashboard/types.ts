@@ -62,6 +62,7 @@ export interface Project {
   image_caption?: string;
   credit_note?: string;
   category: string;
+  project_source: "assembly" | "individual";
   status: string;
   start_date: string;
   end_date: string;

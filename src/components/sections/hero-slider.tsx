@@ -80,13 +80,13 @@ export default function HeroSlider() {
                   <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4">
                     <Link
                       href="/services"
-                      className="inline-block px-6 sm:px-8 py-3 sm:py-4 bg-[#8B0000] hover:bg-[#6B0000] text-white font-semibold text-[12px] sm:text-[14px] uppercase tracking-wider rounded-[4px] transition-standard text-center sm:text-left"
+                      className="inline-block rounded-[6px] bg-[#8B0000] px-6 py-3 text-center text-[12px] font-semibold uppercase tracking-wider text-white transition-standard hover:bg-[#6B0000] sm:px-8 sm:py-4 sm:text-left sm:text-[14px]"
                     >
                       Our Services
                     </Link>
                     <Link
                       href="/about/overview"
-                      className="inline-block px-6 sm:px-8 py-3 sm:py-4 bg-transparent border-2 border-white hover:bg-white hover:text-[#8B0000] text-white font-semibold text-[12px] sm:text-[14px] uppercase tracking-wider rounded-[4px] transition-standard text-center sm:text-left"
+                      className="inline-block rounded-[6px] border-2 border-[#ffcc00] bg-[#ffcc00] px-6 py-3 text-center text-[12px] font-semibold uppercase tracking-wider text-[#4b2600] transition-standard hover:border-white hover:bg-white sm:px-8 sm:py-4 sm:text-left sm:text-[14px]"
                     >
                       Learn More
                     </Link>

@@ -21,7 +21,7 @@ import {
   SITE_SETTINGS_SECTIONS,
   type SiteSettingsSection,
 } from "@/lib/site-settings";
-import { Loader2, Save, Search, Settings2 } from "lucide-react";
+import { ChevronsDownUp, ChevronsUpDown, Loader2, Save, Search, Settings2 } from "lucide-react";
 
 interface SettingsManagementProps {
   settings: SiteSetting[];
@@ -183,6 +183,14 @@ export default function SettingsManagement({
     }
   };
 
+  const expandAllSections = () => {
+    setOpenSections(visibleSectionIds);
+  };
+
+  const collapseAllSections = () => {
+    setOpenSections([]);
+  };
+
   const renderSettingField = (setting: SiteSetting) => {
     const definition = getSiteSettingDefinition(setting.key);
     const label = definition?.label ?? setting.key.replace(/_/g, " ");
@@ -254,10 +262,10 @@ export default function SettingsManagement({
 
   return (
     <div className="space-y-6">
-      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="rounded-[8px] border border-slate-200 bg-white p-5 shadow-sm">
         <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
           <div className="max-w-3xl">
-            <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-[#8B0000]/8 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-[#8B0000]">
+            <div className="mb-2 inline-flex items-center gap-2 rounded-[6px] bg-[#8B0000]/8 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-[#8B0000]">
               <Settings2 className="h-3.5 w-3.5" />
               Settings Workspace
             </div>
@@ -271,7 +279,7 @@ export default function SettingsManagement({
           </div>
 
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:min-w-[360px]">
-            <div className="rounded-2xl border border-gray-200 bg-[linear-gradient(180deg,#ffffff,#f8f6f2)] px-4 py-3">
+            <div className="rounded-[8px] border border-gray-200 bg-[#f7f8fa] px-4 py-3">
               <p className="text-xs uppercase tracking-[0.14em] text-gray-500">
                 Sections
               </p>
@@ -279,7 +287,7 @@ export default function SettingsManagement({
                 {sectionViews.length}
               </p>
             </div>
-            <div className="rounded-2xl border border-gray-200 bg-[linear-gradient(180deg,#ffffff,#f8f6f2)] px-4 py-3">
+            <div className="rounded-[8px] border border-gray-200 bg-[#f7f8fa] px-4 py-3">
               <p className="text-xs uppercase tracking-[0.14em] text-gray-500">
                 Visible Fields
               </p>
@@ -307,14 +315,40 @@ export default function SettingsManagement({
         </div>
 
         <div className="mt-5">
-          <div className="relative max-w-xl">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-            <Input
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="Search settings by name, key, or description"
-              className="pl-9"
-            />
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="relative max-w-xl flex-1">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <Input
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Search settings by name, key, or description"
+                className="pl-9"
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={expandAllSections}
+                disabled={searchIsActive}
+                className="rounded-[8px]"
+              >
+                <ChevronsUpDown className="h-4 w-4" />
+                Expand all
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={collapseAllSections}
+                disabled={searchIsActive}
+                className="rounded-[8px]"
+              >
+                <ChevronsDownUp className="h-4 w-4" />
+                Collapse all
+              </Button>
+            </div>
           </div>
           {searchIsActive ? (
             <p className="mt-2 text-sm text-gray-500">
@@ -326,7 +360,7 @@ export default function SettingsManagement({
 
       <div className="grid gap-6 xl:grid-cols-[280px_minmax(0,1fr)]">
         <aside className="xl:sticky xl:top-24 xl:self-start">
-          <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+          <div className="rounded-[8px] border border-gray-200 bg-white p-4 shadow-sm">
             <h4 className="text-sm font-semibold uppercase tracking-[0.16em] text-gray-500">
               Section Navigation
             </h4>
@@ -341,7 +375,7 @@ export default function SettingsManagement({
                     key={section.id}
                     type="button"
                     onClick={() => scrollToSection(section.id)}
-                    className="flex w-full items-start justify-between gap-3 rounded-2xl border border-gray-200 bg-[linear-gradient(180deg,#ffffff,#fbfaf7)] px-3 py-3 text-left transition hover:border-[#8B0000]/25 hover:bg-[#fff9f6]"
+                    className="flex w-full items-start justify-between gap-3 rounded-[8px] border border-gray-200 bg-white px-3 py-3 text-left transition hover:border-[#8B0000]/25 hover:bg-[#fff9f6]"
                   >
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-gray-900">
@@ -370,7 +404,7 @@ export default function SettingsManagement({
 
         <div className="space-y-4">
           {sectionViews.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-gray-300 bg-white px-6 py-10 text-center text-sm text-gray-500 shadow-sm">
+            <div className="rounded-[8px] border border-dashed border-gray-300 bg-white px-6 py-10 text-center text-sm text-gray-500 shadow-sm">
               No settings matched your search. Try a different keyword.
             </div>
           ) : (
@@ -394,7 +428,7 @@ export default function SettingsManagement({
                     key={section.id}
                     value={section.id}
                     id={`settings-section-${section.id}`}
-                    className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm"
+                    className="overflow-hidden rounded-[8px] border border-gray-200 bg-white shadow-sm"
                   >
                     <div className="px-5 pt-1 sm:px-6">
                       <AccordionTrigger className="hover:no-underline">
@@ -431,14 +465,14 @@ export default function SettingsManagement({
 
                     <AccordionContent>
                       <div className="border-t border-gray-100 px-5 pb-5 pt-5 sm:px-6 sm:pb-6">
-                        <div className="mb-5 flex flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="mb-5 flex flex-col gap-3 rounded-[8px] border border-slate-200 bg-slate-50 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
                           <p className="text-sm text-slate-600">
                             Update the fields below, then save this section when you
                             are done.
                           </p>
                           <Button
                             type="button"
-                            className="w-full bg-[#8B0000] hover:bg-[#6B0000] sm:w-auto"
+                            className="w-full rounded-[8px] bg-[#8B0000] hover:bg-[#6B0000] sm:w-auto"
                             disabled={dirtyCount === 0 || saving}
                             onClick={() => void saveSettingsGroup(section.settings)}
                           >
